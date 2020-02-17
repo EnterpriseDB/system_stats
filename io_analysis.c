@@ -44,7 +44,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		char disk_file_name[MAXPGPATH];
 		snprintf(disk_file_name, MAXPGPATH, "%s", DISK_IO_STATS_FILE_NAME);
 
-		ereport(WARNING,
+		ereport(DEBUG1,
 				(errcode_for_file_access(),
 					errmsg("can not open file %s for reading disk stats information",
 						disk_file_name)));

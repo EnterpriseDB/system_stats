@@ -37,23 +37,13 @@ This interface allows user to get the operating system statistics. It gives belo
 -----------------------------------------
 This interface allows user to get the cpu information ( e.g. hardware ). It gives below information.
 
-    - CPU architecture
-    - CPU op mode
-    - Byte order of CPU
-    - Number of CPUs
-    - Number of threads per core
-    - number of cores per socket
-    - number of sockets
+    - Processor ID
     - CPU vendor ID
     - CPU family
     - CPU model
     - Model name
     - CPU frequency in MHz
-    - L1D cache size for CPU
-    - L1I cache size for CPU
-    - L2 cache size for CPU
-    - L3 cache size for CPU
-    - L4 cache size for CPU
+    - CPU cache size
 
 3. pg_sys_cpu_usage_info
 -----------------------------------------
@@ -153,10 +143,8 @@ This interface allows user to get the all network interfaces information. It giv
 10. pg_sys_cpu_memory_by_process
 -----------------------------------------
 This interface allows user to get the CPU and memory information by specific process ID or name.
-User need to provide process ID or name as argument to fetch the CPU and memory information.
 
     - pid of the process
-    - User name owned by the process
+    - process name
     - CPU usage ( In percentage )
     - Memory usage ( In percentage )
-    - process name

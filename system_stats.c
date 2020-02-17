@@ -110,10 +110,8 @@ pg_sys_os_info(PG_FUNCTION_ARGS)
  *
  * Below are the list of result sets retured by this function
  *
- * architecture       | cpu_op_mode       | byte_order        | no_of_cpu          |
- * threads_per_core   | core_per_socket   | no_of_sockets     |  vendor_id         |
- * cpu_family | model | model_name        | cpu_mhz           | cpu_l1d_cache_size |
- * cpu_l1i_cache_size | cpu_l2_cache_size | cpu_l3_cache_size | cpu_l4_cache_size  |
+ * processor |  vendor_id     | cpu_family | model | model_name |
+ * cpu_mhz   | cpu_cache_size |
  *
  */
 Datum
@@ -603,7 +601,6 @@ pg_sys_cpu_memory_by_process(PG_FUNCTION_ARGS)
 	Tuplestorestate *tupstore;
 	MemoryContext   per_query_ctx;
 	MemoryContext   oldcontext;
-	text            *process_val = PG_GETARG_TEXT_PP(0);
 
 	// check to see if caller supports us returning a tuplestore
 	if (rsinfo == NULL || !IsA(rsinfo, ReturnSetInfo))
@@ -633,9 +630,8 @@ pg_sys_cpu_memory_by_process(PG_FUNCTION_ARGS)
 
 	MemoryContextSwitchTo(oldcontext);
 
-	elog(WARNING, "calling function");
 	/* Fetch the system cpu and memory usage by process */
-	ReadCPUMemoryByProcess(tupstore, tupdesc, process_val);
+	ReadCPUMemoryByProcess(tupstore, tupdesc);
 
 	tuplestore_donestoring(tupstore);
 

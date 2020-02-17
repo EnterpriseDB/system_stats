@@ -16,8 +16,10 @@
 
 /* read the the output of command in chunk of 1024 bytes */
 #define READ_CHUNK_BYTES     1024
+#define MIN_BUFFER_SIZE      512
 #define MAX_BUFFER_SIZE      2048
 #define IS_EMPTY_STR(X) ((1 / (sizeof(X[0]) == 1)) && !(X[0]))
+#define PROC_FILE_SYSTEM_PATH    "/proc"
 
 /* prototypes for common string manipulations and command execution functions */
 bool stringIsNumber(char *str);
@@ -69,25 +71,15 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for system CPU information */
-#define Natts_cpu_info            17
-#define CPU_STATS_COMMAND         "lscpu"
-#define Anum_cpu_architecture     0
-#define Anum_cpu_op_mode          1
-#define Anum_cpu_byte_order       2
-#define Anum_no_of_cpu            3
-#define Anum_threads_per_core     4
-#define Anum_core_per_socket      5
-#define Anum_no_of_sockets        6
-#define Anum_vendor_id            7
-#define Anum_cpu_family           8
-#define Anum_model                9
-#define Anum_model_name           10
-#define Anum_cpu_mhz              11
-#define Anum_cpu_l1d_cache_size   12
-#define Anum_cpu_l1i_cache_size   13
-#define Anum_cpu_l2_cache_size    14
-#define Anum_cpu_l3_cache_size    15
-#define Anum_cpu_l4_cache_size    16
+#define Natts_cpu_info            7
+#define CPU_INFO_FILE_NAME        "/proc/cpuinfo"
+#define Anum_processor            0
+#define Anum_vendor_id            1
+#define Anum_cpu_family           2
+#define Anum_model                3
+#define Anum_model_name           4
+#define Anum_cpu_mhz              5
+#define Anum_cpu_cache_size       6
 
 /* prototypes for system CPU information functions */
 void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
@@ -119,18 +111,18 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for operating system information */
-#define Natts_os_info                8
-#define OS_INFO_COMMAND_1            "hostnamectl"
-#define OS_INFO_COMMAND_2            "lsb_release -a"
-#define OS_INFO_COMMAND_3            "cat /etc/*-release"
-#define Anum_host_name                0
-#define Anum_domain_name              1
+#define Natts_os_info                7
+#define OS_INFO_FILE_NAME            "/etc/os-release"
+#define OS_DESC_SEARCH_TEXT          "PRETTY_NAME="
+#define OS_VERSION_SEARCH_TEXT       "VERSION_ID="
+#define OS_CODE_NAME_SEARCH_TEXT     "CODENAME="
+#define Anum_host_name               0
+#define Anum_domain_name             1
 #define Anum_kernel_info             2
 #define Anum_architecture            3
-#define Anum_os_distribution_id      4
-#define Anum_os_description          5
-#define Anum_os_release_version      6
-#define Anum_os_codename             7
+#define Anum_os_description          4
+#define Anum_os_release_version      5
+#define Anum_os_codename             6
 
 /* prototypes for operating system information functions */
 void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
@@ -138,7 +130,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 /* Macros for system CPU usage information */
 #define Natts_cpu_usage_stats             8
 #define CPU_USAGE_STATS_FILENAME          "/proc/stat"
-#define GET_HZ_CONFIGURED_COMMAND         "getconf CLK_TCK"
 #define Anum_cpu_name                     0
 #define Anum_usermode_normal_process      1
 #define Anum_usermode_niced_process       2
@@ -151,8 +142,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 /* prototypes for system CPU usage information functions */
 void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
-/* Macros for system rocesses information */
-#define PROCESS_INFO_COMMAND       "top -b -n2 -d 0.1 | awk \"/^top/{i++}i==2\" | grep -Ei \"Tasks\""
+/* Macros for system processes information */
 #define Natts_process_info         5
 #define Anum_active_processes      0
 #define Anum_running_processes     1
@@ -164,7 +154,6 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc);
 void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for network information */
-#define NETWORK_STATS_FILE_NAME     "/proc/net/dev"
 #define Natts_network_info          12
 #define Anum_net_interface_name     0
 #define Anum_net_ipv4_address       1
@@ -183,14 +172,13 @@ void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for cpu and memory information by process*/
-#define Natts_cpu_memory_info_by_process     5
+#define Natts_cpu_memory_info_by_process     4
 #define Anum_process_pid                     0
-#define Anum_process_user_name               1
+#define Anum_process_command                 1
 #define Anum_process_cpu_usage               2
 #define Anum_process_memory_usage            3
-#define Anum_process_command                 4
 
 /* prototypes for system network information functions */
-void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc, text *process_val);
+void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 #endif // SYSTEM_STATS_H

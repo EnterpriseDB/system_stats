@@ -10,9 +10,10 @@
 #include "postgres.h"
 #include "system_stats.h"
 
+#include <unistd.h>
+
 void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
-	char       *output;
 	FILE       *cpu_stats_file;
 	char       *line_buf = NULL;
 	size_t     line_buf_size = 0;
@@ -29,22 +30,16 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	uint64     servicing_softirq = 0;
 	const char *scan_fmt = "%s %llu %llu %llu %llu %llu %llu %llu";
 	int        HZ = 100;
+	long       tlk = -1;
 
 	memset(nulls, 0, sizeof(nulls));
 	memset(cpu_name, 0, MAXPGPATH);
 
 	/* First get the HZ value from system as it may vary from system to system */
-	output = runCommand(GET_HZ_CONFIGURED_COMMAND);
+	tlk = sysconf(_SC_CLK_TCK);
 
-	if (output)
-		HZ = atoi(output);
-
-	/* Free the allocated buffer) */
-	if (output != NULL)
-	{
-		pfree(output);
-		output = NULL;
-	}
+	if (tlk != -1 && tlk > 0)
+		HZ = (int)tlk;
 
 	cpu_stats_file = fopen(CPU_USAGE_STATS_FILENAME, "r");
 

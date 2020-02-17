@@ -25,7 +25,7 @@ bool ignoreFileSystemTypes(char *fs_mnt)
 	reg_return = regcomp(&regex, IGNORE_FILE_SYSTEM_TYPE_REGEX, REG_EXTENDED);
 	if (reg_return)
 	{
-		ereport(ERROR,
+		ereport(DEBUG1,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				errmsg("Could not compile regex")));
 		return ret_value;
@@ -40,7 +40,7 @@ bool ignoreFileSystemTypes(char *fs_mnt)
 	else
 	{
 		ret_value = false;
-		ereport(ERROR,
+		ereport(DEBUG1,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				errmsg("regex match failed")));
 	}
@@ -61,7 +61,7 @@ bool ignoreMountPoints(char *fs_mnt)
 	reg_return = regcomp(&regex, IGNORE_MOUNT_POINTS_REGEX, REG_EXTENDED);
 	if (reg_return)
 	{
-		ereport(ERROR,
+		ereport(DEBUG1,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				errmsg("Could not compile regex")));
 		return ret_value;
@@ -76,7 +76,7 @@ bool ignoreMountPoints(char *fs_mnt)
 	else
 	{
 		ret_value = false;
-		ereport(ERROR,
+		ereport(DEBUG1,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				errmsg("regex match failed")));
 	}
@@ -116,7 +116,7 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		char file_name[MAXPGPATH];
 		snprintf(file_name, MAXPGPATH, "%s", FILE_SYSTEM_MOUNT_FILE_NAME);
 
-		ereport(WARNING,
+		ereport(DEBUG1,
 				(errcode_for_file_access(),
 					errmsg("can not open file %s for reading file system information",
 						file_name)));
@@ -146,6 +146,11 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				continue;
 
 			total_space = (uint64_t)(buf.f_blocks  * buf.f_bsize);
+
+			/* If total space of file system is zero, ignore that from list */
+			if (total_space == 0)
+				continue;
+
 			used_space = (uint64_t)((buf.f_blocks - buf.f_bfree) * buf.f_bsize);
 			available_space = (uint64_t)(buf.f_bavail * buf.f_bsize);
 			reserved_space  = (uint64_t)((buf.f_bfree - buf.f_bavail) * buf.f_bsize);

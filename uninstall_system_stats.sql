@@ -7,4 +7,4 @@ DROP FUNCTION pg_sys_load_avg_info();
 DROP FUNCTION pg_sys_os_info();
 DROP FUNCTION pg_sys_process_info();
 DROP FUNCTION pg_sys_network_info();
-DROP FUNCTION pg_sys_cpu_memory_by_process(text);
+DROP FUNCTION pg_sys_cpu_memory_by_process();

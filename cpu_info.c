@@ -12,134 +12,127 @@
 
 void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
-	char       *output;
-	char       *new_line_token;
+	char       *found;
+	FILE       *cpu_info_file;
 	Datum      values[Natts_cpu_info];
 	bool       nulls[Natts_cpu_info];
-	char       architecture[MAXPGPATH];
-	char       cpu_op_mode[MAXPGPATH];
-	char       cpu_byte_order[MAXPGPATH];
+	int        pro_val = 0;
 	char       vendor_id[MAXPGPATH];
 	char       cpu_family[MAXPGPATH];
 	char       model[MAXPGPATH];
 	char       model_name[MAXPGPATH];
 	char       cpu_mhz[MAXPGPATH];
-	char       cpu_l1d_cache_size[MAXPGPATH];
-	char       cpu_l1i_cache_size[MAXPGPATH];
-	char       cpu_l2_cache_size[MAXPGPATH];
-	char       cpu_l3_cache_size[MAXPGPATH];
-	char       cpu_l4_cache_size[MAXPGPATH];
-	int        no_of_cpu = 0;
-	int        threads_per_core = 0;
-	int        core_per_socket = 0;
-	int        no_of_sockets = 0;
+	char       cpu_cache_size[MAXPGPATH];
+	char       *line_buf = NULL;
+	size_t     line_buf_size = 0;
+	ssize_t    line_size;
+	bool       model_found = false;
 
 	memset(nulls, 0, sizeof(nulls));
-	memset(architecture, 0, MAXPGPATH);
-	memset(cpu_op_mode, 0, MAXPGPATH);
-	memset(cpu_byte_order, 0, MAXPGPATH);
 	memset(vendor_id, 0, MAXPGPATH);
 	memset(cpu_family, 0, MAXPGPATH);
 	memset(model, 0, MAXPGPATH);
 	memset(model_name, 0, MAXPGPATH);
 	memset(cpu_mhz, 0, MAXPGPATH);
-	memset(cpu_l1d_cache_size, 0, MAXPGPATH);
-	memset(cpu_l1i_cache_size, 0, MAXPGPATH);
-	memset(cpu_l2_cache_size, 0, MAXPGPATH);
-	memset(cpu_l3_cache_size, 0, MAXPGPATH);
-	memset(cpu_l4_cache_size, 0, MAXPGPATH);
+	memset(cpu_cache_size, 0, MAXPGPATH);
 
-	/* Run the command and read the output */
-	output = runCommand(CPU_STATS_COMMAND);
+	cpu_info_file = fopen(CPU_INFO_FILE_NAME, "r");
 
-	if (!output)
+	if (!cpu_info_file)
+	{
+		char cpu_info_file_name[MAXPGPATH];
+		snprintf(cpu_info_file_name, MAXPGPATH, "%s", CPU_INFO_FILE_NAME);
+
+		ereport(DEBUG1,
+				(errcode_for_file_access(),
+				errmsg("can not open file %s for reading cpu information",
+					cpu_info_file_name)));
 		return;
+	}
 	else
 	{
-		/* Parse the command output and find CPU informations */
-		for (new_line_token = strtok(output,"\n"); new_line_token != NULL; new_line_token = strtok(NULL, "\n"))
+		/* Get the first line of the file. */
+		line_size = getline(&line_buf, &line_buf_size, cpu_info_file);
+
+		/* Loop through until we are done with the file. */
+		while (line_size >= 0)
 		{
-			char *found = strstr(new_line_token, ":");
-			found = trimStr((found+1));
+			if (strlen(line_buf) > 0)
+				line_buf = trimStr(line_buf);
 
-			if (strstr(new_line_token, "Architecture") != NULL)
-				memcpy(architecture, found, strlen(found));
+			if (!IS_EMPTY_STR(line_buf) && (strlen(line_buf) > 0))
+			{
+				if (strlen(line_buf) > 0)
+				{
+					found = strstr(line_buf, ":");
+					if (strlen(found) > 0)
+					{
+						found = trimStr((found+1));
 
-				if (strstr(new_line_token, "CPU op-mode") != NULL)
-				memcpy(cpu_op_mode, found, strlen(found));
+						if (strstr(line_buf, "processor") != NULL)
+							pro_val = atoi(found);
+						if (strstr(line_buf, "vendor_id") != NULL)
+							memcpy(vendor_id, found, strlen(found));
+						if (strstr(line_buf, "cpu family") != NULL)
+							memcpy(cpu_family, found, strlen(found));
+						if (strstr(line_buf, "model") != NULL && !model_found)
+						{
+							memcpy(model, found, strlen(found));
+							model_found = true;
+						}
+						if (strstr(line_buf, "model name") != NULL)
+							memcpy(model_name, found, strlen(found));
+						if (strstr(line_buf, "cpu MHz") != NULL)
+							memcpy(cpu_mhz, found, strlen(found));
+						if (strstr(line_buf, "cache size") != NULL)
+							memcpy(cpu_cache_size, found, strlen(found));
+					}
+				}
 
-			if (strstr(new_line_token, "Byte Order") != NULL)
-				memcpy(cpu_byte_order, found, strlen(found));
+				/* Free the allocated line buffer */
+				if (line_buf != NULL)
+				{
+					free(line_buf);
+					line_buf = NULL;
+				}
+			}
+			else
+			{
+				if (strlen(cpu_mhz) > 0)
+				{
+					values[Anum_processor] = Int32GetDatum(pro_val);
+					values[Anum_vendor_id] = CStringGetTextDatum(vendor_id);
+					values[Anum_cpu_family] = CStringGetTextDatum(cpu_family);
+					values[Anum_model] = CStringGetTextDatum(model);
+					values[Anum_model_name] = CStringGetTextDatum(model_name);
+					values[Anum_cpu_mhz] = CStringGetTextDatum(cpu_mhz);
+					values[Anum_cpu_cache_size] = CStringGetTextDatum(cpu_cache_size);
 
-			if (strstr(new_line_token, "CPU(s):") != NULL &&
-				(found-new_line_token) == strlen("CPU(s):"))
-				no_of_cpu = atoi(found);
+					tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
-			if (strstr(new_line_token, "Thread(s) per core") != NULL)
-				threads_per_core = atoi(found);
+					/* Reset the value again */
+					pro_val = 0;
+					memset(vendor_id, 0, MAXPGPATH);
+					memset(cpu_family, 0, MAXPGPATH);
+					memset(model, 0, MAXPGPATH);
+					memset(model_name, 0, MAXPGPATH);
+					memset(cpu_mhz, 0, MAXPGPATH);
+					memset(cpu_cache_size, 0, MAXPGPATH);
+					model_found = false;
+				}
+			}
 
-			if (strstr(new_line_token, "Core(s) per socket") != NULL)
-				core_per_socket = atoi(found);
-
-			if (strstr(new_line_token, "Socket(s)") != NULL)
-				no_of_sockets = atoi(found);
-
-			if (strstr(new_line_token, "Vendor ID") != NULL)
-				memcpy(vendor_id, found, strlen(found));
-
-			if (strstr(new_line_token, "CPU family") != NULL)
-				memcpy(cpu_family, found, strlen(found));
-
-			if (strstr(new_line_token, "Model:") != NULL)
-				memcpy(model, found, strlen(found));
-
-			if (strstr(new_line_token, "Model name") != NULL)
-				memcpy(model_name, found, strlen(found));
-
-			if (strstr(new_line_token, "CPU MHz") != NULL)
-				memcpy(cpu_mhz, found, strlen(found));
-
-			if (strstr(new_line_token, "L1d cache") != NULL)
-				memcpy(cpu_l1d_cache_size, found, strlen(found));
-
-			if (strstr(new_line_token, "L1i cache") != NULL)
-				memcpy(cpu_l1i_cache_size, found, strlen(found));
-
-			if (strstr(new_line_token, "L2 cache") != NULL)
-				memcpy(cpu_l2_cache_size, found, strlen(found));
-
-			if (strstr(new_line_token, "L3 cache") != NULL)
-				memcpy(cpu_l3_cache_size, found, strlen(found));
-
-			if (strstr(new_line_token, "L4 cache") != NULL)
-				memcpy(cpu_l4_cache_size, found, strlen(found));
+			/* Get the next line */
+			line_size = getline(&line_buf, &line_buf_size, cpu_info_file);
 		}
-	}
 
-	values[Anum_cpu_architecture] = CStringGetTextDatum(architecture);
-	values[Anum_cpu_op_mode] = CStringGetTextDatum(cpu_op_mode);
-	values[Anum_cpu_byte_order] = CStringGetTextDatum(cpu_byte_order);
-	values[Anum_no_of_cpu] = Int32GetDatum(no_of_cpu);
-	values[Anum_threads_per_core] = Int32GetDatum(threads_per_core);
-	values[Anum_core_per_socket] = Int32GetDatum(core_per_socket);
-	values[Anum_no_of_sockets] = Int32GetDatum(no_of_sockets);
-	values[Anum_vendor_id] = CStringGetTextDatum(vendor_id);
-	values[Anum_cpu_family] = CStringGetTextDatum(cpu_family);
-	values[Anum_model] = CStringGetTextDatum(model);
-	values[Anum_model_name] = CStringGetTextDatum(model_name);
-	values[Anum_cpu_mhz] = CStringGetTextDatum(cpu_mhz);
-	values[Anum_cpu_l1d_cache_size] = CStringGetTextDatum(cpu_l1d_cache_size);
-	values[Anum_cpu_l1i_cache_size] = CStringGetTextDatum(cpu_l1i_cache_size);
-	values[Anum_cpu_l2_cache_size] = CStringGetTextDatum(cpu_l2_cache_size);
-	values[Anum_cpu_l3_cache_size] = CStringGetTextDatum(cpu_l3_cache_size);
-	values[Anum_cpu_l4_cache_size] = CStringGetTextDatum(cpu_l4_cache_size);
+		/* Free the allocated line buffer */
+		if (line_buf != NULL)
+		{
+			free(line_buf);
+			line_buf = NULL;
+		}
 
-	tuplestore_putvalues(tupstore, tupdesc, values, nulls);
-
-	/* Free the allocated buffer) */
-	if (output != NULL)
-	{
-		pfree(output);
-		output = NULL;
+		fclose(cpu_info_file);
 	}
 }

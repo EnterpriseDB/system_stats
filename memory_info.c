@@ -37,7 +37,7 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		char memory_file_name[MAXPGPATH];
 		snprintf(memory_file_name, MAXPGPATH, "%s", MEMORY_FILE_NAME);
 
-		ereport(WARNING,
+		ereport(DEBUG1,
 				(errcode_for_file_access(),
 					errmsg("can not open file %s for reading memory information",
 						memory_file_name)));

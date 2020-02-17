@@ -32,7 +32,7 @@ void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		char loadavg_file_name[MAXPGPATH];
 		snprintf(loadavg_file_name, MAXPGPATH, "%s", CPU_IO_LOAD_AVG_FILE);
 
-		ereport(WARNING,
+		ereport(DEBUG1,
 				(errcode_for_file_access(),
 					errmsg("can not open file %s for reading load avg information",
 						loadavg_file_name)));

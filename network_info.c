@@ -41,7 +41,7 @@ void ReadFileContent(const char *file_name, uint64 *data)
 		char net_file_name[MAXPGPATH];
 		snprintf(net_file_name, MAXPGPATH, "%s", file_name);
 
-		ereport(WARNING,
+		ereport(DEBUG1,
 				(errcode_for_file_access(),
 					errmsg("can not open file %s for reading network statistics",
 					net_file_name)));
@@ -199,7 +199,7 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	 */
 	if (getifaddrs(&ifaddr) == -1)
 	{
-		ereport(ERROR,
+		ereport(DEBUG1,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 					errmsg("Failed to get network interface")));
 		return;
