@@ -31,7 +31,7 @@ char* runCommand(char *);
 /* Macros for system disk information */
 #define Natts_disk_info                10
 #define FILE_SYSTEM_MOUNT_FILE_NAME    "/etc/mtab"
-#define IGNORE_MOUNT_POINTS_REGEX      "^/(dev|proc|sys|var/lib/docker/.+)($|/)"
+#define IGNORE_MOUNT_POINTS_REGEX      "^/(dev|proc|sys|run|snap|var/lib/docker/.+)($|/)"
 #define IGNORE_FILE_SYSTEM_TYPE_REGEX  "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
 #define Anum_file_system               0
 #define Anum_file_system_type          1

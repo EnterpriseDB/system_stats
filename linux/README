@@ -6,24 +6,6 @@ used to get the system level statistics.
 
 Copyright (c) 2020, EnterpriseDB Corporation. All Rights Reserved.
 
-Building in Linux
------------------
-
-The module built using the PGXS framework on most operating systems:
-
-- Unpack the extensions files in $PGSRC/contrib/system_stats
-- Run "make USE_PGXS=1" in the $PGSRC/contrib/system_stats/linux directory.
-- Run "make USE_PGXS=1 install" to install.
-
-Building in Mac OSX
--------------------
-
-The module built using the PGXS framework on most operating systems:
-
-- Unpack the extensions files in $PGSRC/contrib/system_stats
-- Run "make USE_PGXS=1" in the $PGSRC/contrib/system_stats/darwin directory.
-- Run "make USE_PGXS=1 install" to install.
-
 Functions
 ---------
 
@@ -151,7 +133,7 @@ This interface allows user to get the all network interfaces information. It giv
 
 10. pg_sys_cpu_memory_by_process
 -----------------------------------------
-This interface allows user to get the CPU and memory information by specific process ID or name.
+This interface allows user to get the CPU and memory information by process.
 
     - pid of the process
     - process name

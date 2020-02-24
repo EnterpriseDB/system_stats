@@ -8,15 +8,6 @@
  */
 
 #include "postgres.h"
-
-#include <dirent.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <mntent.h>
-#include <sys/vfs.h>
-#include <regex.h>
-
 #include"system_stats.h"
 
 #include "catalog/pg_type.h"

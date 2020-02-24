@@ -1,6 +1,6 @@
 MODULE_big = system_stats
 OBJS = \
-        system_stats.o \
+        ../system_stats.o \
         system_stats_utils.o \
         disk_info.o \
         io_analysis.o \
