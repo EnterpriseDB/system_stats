@@ -1,0 +1,131 @@
+System statistics
+=================
+
+system_stats is a Postgres extension that provides the functions which is
+used to get the system level statistics.
+
+Copyright (c) 2020, EnterpriseDB Corporation. All Rights Reserved.
+
+Functions
+---------
+
+The following functions are provided for the Mac OS X Platform.
+
+1. pg_sys_os_info
+-----------------------------------------
+This interface allows user to get the operating system statistics. It gives below information.
+
+    - host name
+    - domain name
+    - os_name
+    - os_release_level
+    - os_version_level
+    - os_architecture
+
+2. pg_sys_cpu_info
+-----------------------------------------
+This interface allows user to get the cpu information ( e.g. hardware ). It gives below information.
+
+    - Active CPU
+    - Byte order
+    - CPU family
+    - CPU type
+    - Logical CPU
+    - Physical CPU
+    - CPU frequency in MHz
+    - CPU model
+    - CPU machine
+    - CPU L1d cache size
+    - CPU L1i cache size
+    - CPU L2 cache size
+    - CPU L3 cache size
+
+3. pg_sys_cpu_usage_info
+-----------------------------------------
+This interface allows user to get the cpu usage information of all CPUs. Values are in percentage spent by CPUs for all below operations.
+
+    - Time spent during usermode normal process in percentage
+    - Time spent during usermode niced process in percentage
+    - Time spent during kernelmode process in percentage
+    - Time spent during idle mode in percentage
+
+4. pg_sys_memory_info
+-----------------------------------------
+This interface allows user to get the memory usage informations. All the values are in bytes. It gives below information.
+
+    - Total number of memory
+    - Free memory
+    - Available memory
+    - Cached swap memory
+    - Total swap memory
+    - Free swap memory
+
+5. pg_sys_io_analysis_info
+-----------------------------------------
+This interface allows user to get the IO analysis of the block device. It gives below information.
+
+    - Block device name
+    - total number of reads by block device
+    - total number of writes by block device
+    - read bytes by block device
+    - write bytes by block device
+    - Time spent in milliseconds for reading
+    - Time spent in milliseconds for writing
+
+6. pg_sys_disk_info
+-----------------------------------------
+This interface allows user to get the disk information. It gives below information.
+
+    - file system of the disk
+    - file system type
+    - mount point for that file system
+    - Total space ( In Bytes )
+    - Used spaced ( In Bytes )
+    - Available space ( In Bytes )
+    - Reserved space ( In Bytes )
+    - No of total inodes
+    - No of used inodes
+    - No of free inodes
+
+7. pg_sys_load_avg_info
+-----------------------------------------
+This interface allows user to get the average load of the system by 1, 5 and 15 minutes.
+
+    - Average load by 1 minute
+    - Average load by 5 minutes
+    - Average load by 15 minutes
+
+8. pg_sys_process_info
+-----------------------------------------
+This interface allows user to get the processes information. It gives below information.
+
+    - No. of active_processes
+    - No. of running_processes
+    - No. of sleeping_processes
+    - No. of stopped_processes
+    - No. of zombie_processes
+
+9. pg_sys_network_info
+-----------------------------------------
+This interface allows user to get the all network interfaces information. It gives below information.
+
+    - Name of the interface_name
+    - ipv4 address of the interface
+    - interface speed in mbps
+    - Number of total bytes transmitted
+    - Number of total packets transmitted
+    - Number of transmit errors by this network device
+    - Number of packets dropped during transmission
+    - Number of total bytes received
+    - Number of total packets received
+    - Number of receive errors by this network device
+    - Number of packets dropped by this network device
+
+10. pg_sys_cpu_memory_by_process
+-----------------------------------------
+This interface allows user to get the CPU and memory information by process.
+
+    - pid of the process
+    - process name
+    - CPU usage ( In percentage )
+    - Memory usage ( In percentage )

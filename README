@@ -27,133 +27,44 @@ The module built using the PGXS framework on most operating systems:
 Functions
 ---------
 
-The following functions are provided:
+The following functions are provided. For the detailed output, check individual platform specific README file.
 
 1. pg_sys_os_info
 -----------------------------------------
 This interface allows user to get the operating system statistics. It gives below information.
 
-    - host name
-    - domain name
-    - kernel version
-    - architecture
-    - operating system dist id
-    - Operating system description
-    - Operating system version
-    - Operating system code name
-
 2. pg_sys_cpu_info
 -----------------------------------------
 This interface allows user to get the cpu information ( e.g. hardware ). It gives below information.
-
-    - Processor ID
-    - CPU vendor ID
-    - CPU family
-    - CPU model
-    - Model name
-    - CPU frequency in MHz
-    - CPU cache size
 
 3. pg_sys_cpu_usage_info
 -----------------------------------------
 This interface allows user to get the cpu usage information of all CPUs. Values are in milliseconds spent by CPUs for all below operations.
 
-    - CPU name
-    - Time spent ( in milliseconds ) to process usermode normal process
-    - Time spent ( in milliseconds ) to process usermode niced process
-    - Time spent ( in milliseconds ) to process kernelmode process
-    - Time spent ( in milliseconds ) in idle mode
-    - Time spent ( in milliseconds ) for IO completion
-    - Time spent ( in milliseconds ) for servicing hardware interrupt
-    - Time spent ( in milliseconds ) for servicing software interrupt
-
 4. pg_sys_memory_info
 -----------------------------------------
 This interface allows user to get the memory usage informations. All the values are in bytes. It gives below information.
-
-    - Total number of memory
-    - Free memory
-    - Available memory
-    - buffers memory
-    - cached memory
-    - Cached swap memory
-    - Total swap memory
-    - Free swap memory
 
 5. pg_sys_io_analysis_info
 -----------------------------------------
 This interface allows user to get the IO analysis of the block device. It gives below information.
 
-    - Major no
-    - Minor no
-    - Block device name
-    - read completed by block device
-    - read merged by block device
-    - sector read by block device
-    - Time spent in milliseconds for reading
-    - write completed by block device
-    - write merged by block device
-    - sector written by block device
-    - Time spent in milliseconds for writing
-    - No of IO in progress
-    - Time spent in milliseconds for IO
-    - Time spent in milliseconds for weighted IO
-
 6. pg_sys_disk_info
 -----------------------------------------
 This interface allows user to get the disk information. It gives below information.
-
-    - file system of the disk
-    - file system type
-    - mount point for that file system
-    - Total space ( In Bytes )
-    - Used spaced ( In Bytes )
-    - Available space ( In Bytes )
-    - Reserved space ( In Bytes )
-    - No of total inodes
-    - No of used inodes
-    - No of free inodes
 
 7. pg_sys_load_avg_info
 -----------------------------------------
 This interface allows user to get the average load of the system by 1, 5 and 10 minutes.
 
-    - Average load by 1 minute
-    - Average load by 5 minutes
-    - Average load by 10 minutes
-
 8. pg_sys_process_info
 -----------------------------------------
 This interface allows user to get the processes information. It gives below information.
-
-    - No. of active_processes
-    - No. of running_processes
-    - No. of sleeping_processes
-    - No. of stopped_processes
-    - No. of zombie_processes
 
 9. pg_sys_network_info
 -----------------------------------------
 This interface allows user to get the all network interfaces information. It gives below information.
 
-    - Name of the interface_name
-    - ipv4 address of the interface
-    - ipv6 address of the interface
-    - interface speed in mbps
-    - Number of total bytes transmitted
-    - Number of total packets transmitted
-    - Number of transmit errors by this network device
-    - Number of packets dropped during transmission
-    - Number of total bytes received
-    - Number of total packets received
-    - Number of receive errors by this network device
-    - Number of packets dropped by this network device
-
 10. pg_sys_cpu_memory_by_process
 -----------------------------------------
 This interface allows user to get the CPU and memory information by specific process ID or name.
-
-    - pid of the process
-    - process name
-    - CPU usage ( In percentage )
-    - Memory usage ( In percentage )
