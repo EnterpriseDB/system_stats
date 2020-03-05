@@ -99,9 +99,6 @@ int get_process_list(struct kinfo_proc **proc_list, size_t *proc_count)
             return 1;
         }
 
-        if (proc_list_ptr)
-            free(proc_list_ptr);
-
         /* return with success as it got process information */
         return 0;
     }
