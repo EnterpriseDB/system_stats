@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "system_stats.h"
+#include "stats.h"
 
 #include <unistd.h>
 #include <mach/mach_host.h>

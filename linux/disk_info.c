@@ -13,7 +13,7 @@
 #include <regex.h>
 #include <sys/statvfs.h>
 
-#include "system_stats.h"
+#include "stats.h"
 
 /* This function is used to ignore the file system types */
 bool ignoreFileSystemTypes(char *fs_mnt)

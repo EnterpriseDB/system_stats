@@ -2,56 +2,54 @@ System statistics
 =================
 
 system_stats is a Postgres extension that provides the functions which is
-used to get the system level statistics.
+used to get the system level statistics. It supports Linux, Mac and Windows
+platform.
 
 Copyright (c) 2020, EnterpriseDB Corporation. All Rights Reserved.
 
-Building in Linux
------------------
+Building in Linux and Mac OSX
+-----------------------------
 
 The module built using the PGXS framework on most operating systems:
 
 - Unpack the extensions files in $PGSRC/contrib/system_stats
-- Run "make USE_PGXS=1" in the $PGSRC/contrib/system_stats/linux directory.
+- Run "make USE_PGXS=1" in the $PGSRC/contrib/system_stats directory.
 - Run "make USE_PGXS=1 install" to install.
 
-Building in Mac OSX
--------------------
+Building in Windows
+-----------------------------
 
-The module built using the PGXS framework on most operating systems:
+// TODO
 
-- Unpack the extensions files in $PGSRC/contrib/system_stats
-- Run "make USE_PGXS=1" in the $PGSRC/contrib/system_stats/darwin directory.
-- Run "make USE_PGXS=1 install" to install.
 
 Functions
 ---------
 
-The following functions are provided. For the detailed output, check individual platform specific README file.
+The following functions are provided to fetch the system level statistics for all the platforms.
 
 1. pg_sys_os_info
 -----------------------------------------
-This interface allows user to get the operating system statistics. It gives below information.
+This interface allows user to get the operating system statistics.
 
 2. pg_sys_cpu_info
 -----------------------------------------
-This interface allows user to get the cpu information ( e.g. hardware ). It gives below information.
+This interface allows user to get the cpu information ( e.g. hardware ). 
 
 3. pg_sys_cpu_usage_info
 -----------------------------------------
-This interface allows user to get the cpu usage information of all CPUs. Values are in milliseconds spent by CPUs for all below operations.
+This interface allows user to get the cpu usage information of all CPUs. Values are in milliseconds spent by CPUs for all operations.
 
 4. pg_sys_memory_info
 -----------------------------------------
-This interface allows user to get the memory usage informations. All the values are in bytes. It gives below information.
+This interface allows user to get the memory usage informations. All the values are in bytes.
 
 5. pg_sys_io_analysis_info
 -----------------------------------------
-This interface allows user to get the IO analysis of the block device. It gives below information.
+This interface allows user to get the IO analysis of the block device.
 
 6. pg_sys_disk_info
 -----------------------------------------
-This interface allows user to get the disk information. It gives below information.
+This interface allows user to get the disk information.
 
 7. pg_sys_load_avg_info
 -----------------------------------------
@@ -59,12 +57,247 @@ This interface allows user to get the average load of the system by 1, 5 and 10 
 
 8. pg_sys_process_info
 -----------------------------------------
-This interface allows user to get the processes information. It gives below information.
+This interface allows user to get the processes information.
 
 9. pg_sys_network_info
 -----------------------------------------
-This interface allows user to get the all network interfaces information. It gives below information.
+This interface allows user to get the all network interfaces information.
 
 10. pg_sys_cpu_memory_by_process
 -----------------------------------------
-This interface allows user to get the CPU and memory information by specific process ID or name.
+This interface allows user to get the CPU and memory information of each process ID.
+
+
+
+Detailed output of functions in linux platform as below
+-------------------------------------------------------
+
+    pg_sys_os_info
+
+    - host name
+    - domain name
+    - kernel version
+    - architecture
+    - operating system dist id
+    - Operating system description
+    - Operating system version
+    - Operating system code name
+
+
+    pg_sys_cpu_info
+
+    - Processor ID
+    - CPU vendor ID
+    - CPU family
+    - CPU model
+    - Model name
+    - CPU frequency in MHz
+    - CPU cache size
+
+
+    pg_sys_cpu_usage_info
+
+    - CPU name
+    - Time spent ( in milliseconds ) to process usermode normal process
+    - Time spent ( in milliseconds ) to process usermode niced process
+    - Time spent ( in milliseconds ) to process kernelmode process
+    - Time spent ( in milliseconds ) in idle mode
+    - Time spent ( in milliseconds ) for IO completion
+    - Time spent ( in milliseconds ) for servicing hardware interrupt
+    - Time spent ( in milliseconds ) for servicing software interrupt
+
+
+    pg_sys_memory_info
+
+    - Total number of memory
+    - Free memory
+    - Available memory
+    - buffers memory
+    - cached memory
+    - Cached swap memory
+    - Total swap memory
+    - Free swap memory
+
+
+    pg_sys_io_analysis_info
+
+    - Major no
+    - Minor no
+    - Block device name
+    - read completed by block device
+    - read merged by block device
+    - sector read by block device
+    - Time spent in milliseconds for reading
+    - write completed by block device
+    - write merged by block device
+    - sector written by block device
+    - Time spent in milliseconds for writing
+    - No of IO in progress
+    - Time spent in milliseconds for IO
+    - Time spent in milliseconds for weighted IO
+
+
+    pg_sys_disk_info
+
+    - file system of the disk
+    - file system type
+    - mount point for that file system
+    - Total space ( In Bytes )
+    - Used spaced ( In Bytes )
+    - Available space ( In Bytes )
+    - Reserved space ( In Bytes )
+    - No of total inodes
+    - No of used inodes
+    - No of free inodes
+
+
+    pg_sys_load_avg_info
+
+    - Average load by 1 minute
+    - Average load by 5 minutes
+    - Average load by 10 minutes
+
+
+    pg_sys_process_info
+
+    - No. of active_processes
+    - No. of running_processes
+    - No. of sleeping_processes
+    - No. of stopped_processes
+    - No. of zombie_processes
+
+
+    pg_sys_network_info
+
+    - Name of the interface_name
+    - ipv4 address of the interface
+    - ipv6 address of the interface
+    - interface speed in mbps
+    - Number of total bytes transmitted
+    - Number of total packets transmitted
+    - Number of transmit errors by this network device
+    - Number of packets dropped during transmission
+    - Number of total bytes received
+    - Number of total packets received
+    - Number of receive errors by this network device
+    - Number of packets dropped by this network device
+
+
+    pg_sys_cpu_memory_by_process
+
+    - pid of the process
+    - process name
+    - CPU usage ( In percentage )
+    - Memory usage ( In percentage )
+
+
+Detailed output of functions in Mac OSX platform as below
+-------------------------------------------------------
+
+    pg_sys_os_info
+
+    - host name
+    - domain name
+    - os_name
+    - os_release_level
+    - os_version_level
+    - os_architecture
+
+
+    pg_sys_cpu_info
+
+    - Active CPU
+    - Byte order
+    - CPU family
+    - CPU type
+    - Logical CPU
+    - Physical CPU
+    - CPU frequency in MHz
+    - CPU model
+    - CPU machine
+    - CPU L1d cache size
+    - CPU L1i cache size
+    - CPU L2 cache size
+    - CPU L3 cache size
+
+
+    pg_sys_cpu_usage_info
+
+    - Time spent during usermode normal process in percentage
+    - Time spent during usermode niced process in percentage
+    - Time spent during kernelmode process in percentage
+    - Time spent during idle mode in percentage
+
+
+    pg_sys_memory_info
+
+    - Total number of memory
+    - Free memory
+    - Available memory
+    - Cached swap memory
+    - Total swap memory
+    - Free swap memory
+
+
+    pg_sys_io_analysis_info
+
+    - Block device name
+    - total number of reads by block device
+    - total number of writes by block device
+    - read bytes by block device
+    - write bytes by block device
+    - Time spent in milliseconds for reading
+    - Time spent in milliseconds for writing
+
+
+    pg_sys_disk_info
+
+    - file system of the disk
+    - file system type
+    - mount point for that file system
+    - Total space ( In Bytes )
+    - Used spaced ( In Bytes )
+    - Available space ( In Bytes )
+    - Reserved space ( In Bytes )
+    - No of total inodes
+    - No of used inodes
+    - No of free inodes
+
+
+    pg_sys_load_avg_info
+
+    - Average load by 1 minute
+    - Average load by 5 minutes
+    - Average load by 15 minutes
+
+
+    pg_sys_process_info
+
+    - No. of active_processes
+    - No. of running_processes
+    - No. of sleeping_processes
+    - No. of stopped_processes
+    - No. of zombie_processes
+
+
+    pg_sys_network_info
+
+    - Name of the interface_name
+    - ipv4 address of the interface
+    - interface speed in mbps
+    - Number of total bytes transmitted
+    - Number of total packets transmitted
+    - Number of transmit errors by this network device
+    - Number of packets dropped during transmission
+    - Number of total bytes received
+    - Number of total packets received
+    - Number of receive errors by this network device
+    - Number of packets dropped by this network device
+
+    
+    pg_sys_cpu_memory_by_process
+
+    - pid of the process
+    - process name
+    - CPU usage ( In percentage )
+    - Memory usage ( In percentage )

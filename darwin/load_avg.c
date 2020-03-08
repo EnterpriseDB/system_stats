@@ -11,7 +11,7 @@
 #include <sys/sysctl.h>
 
 #include "postgres.h"
-#include "system_stats.h"
+#include "stats.h"
 
 void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {

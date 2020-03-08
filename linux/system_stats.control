@@ -1,5 +1,0 @@
-# system_stats extension
-comment = 'System statistic functions for PostgreSQL'
-default_version = '1.0'
-module_pathname = '$libdir/system_stats'
-relocatable = true

@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 #include "postgres.h"
-#include"system_stats.h"
+#include "system_stats.h"
 
 #include "catalog/pg_type.h"
 #include "datatype/timestamp.h"

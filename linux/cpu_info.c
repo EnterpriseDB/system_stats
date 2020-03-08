@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "system_stats.h"
+#include "stats.h"
 
 void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {

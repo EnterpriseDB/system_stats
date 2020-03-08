@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "system_stats.h"
+#include "stats.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -44,6 +44,46 @@ typedef struct node
 node_t *head = NULL;
 node_t *prev = NULL;
 node_t *iter = NULL;
+
+void findProcess()
+{
+    pid_t * pids = calloc(0x1000, 1);
+    int count = proc_listallpids(pids, 0x1000);
+
+    elog(WARNING, "count=%u\n", count) ;
+
+    for( int index=0; index < count; ++index)
+    {
+        pid_t pid = pids[ index ] ;
+
+        struct proc_taskinfo taskInfo ;
+        int result = proc_pidinfo( pid, PROC_PIDTASKINFO, 0,  & taskInfo, sizeof( taskInfo ) ) ;
+        if (result <= 0)
+            elog(WARNING, "Error reading proc info");
+
+        // fields of taskInfo:
+//          uint64_t        pti_virtual_size;   /* virtual memory size (bytes) */
+//          uint64_t        pti_resident_size;  /* resident memory size (bytes) */
+//          uint64_t        pti_total_user;     /* total time */
+//          uint64_t        pti_total_system;
+//          uint64_t        pti_threads_user;   /* existing threads only */
+//          uint64_t        pti_threads_system;
+//          int32_t         pti_policy;     /* default policy for new threads */
+//          int32_t         pti_faults;     /* number of page faults */
+//          int32_t         pti_pageins;        /* number of actual pageins */
+//          int32_t         pti_cow_faults;     /* number of copy-on-write faults */
+//          int32_t         pti_messages_sent;  /* number of messages sent */
+//          int32_t         pti_messages_received;  /* number of messages received */
+//          int32_t         pti_syscalls_mach;  /* number of mach system calls */
+//          int32_t         pti_syscalls_unix;  /* number of unix system calls */
+//          int32_t         pti_csw;            /* number of context switches */
+//          int32_t         pti_threadnum;      /* number of threads in the task */
+//          int32_t         pti_numrunning;     /* number of running threads */
+//          int32_t         pti_priority;       /* task priority*/
+
+        elog(WARNING, "PID %u: -->total_user: [%lld] --> total_system: [%lld] --> rss [%lld]\n", pid, taskInfo.pti_total_user, taskInfo.pti_total_system, taskInfo.pti_resident_size);
+    }
+}
 
 /* Function used to create the data structure for each process CPU and memory usage information */
 void CreateCPUMemoryList(int sample)
@@ -136,6 +176,8 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
     desc[0] = CTL_HW;
     desc[1] = HW_MEMSIZE;
+
+    findProcess();
 
     /* Find the total physical memory available with the system */
     if (sysctl(desc, 2, &total_memory, &p_size, NULL, 0))

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------
- * system_stats.h
+ * stats.h
  *              Defined macros and function prototypes for system
  *              statistics information
  *
@@ -7,8 +7,8 @@
  *
  *------------------------------------------------------------------------
  */
-#ifndef SYSTEM_STATS_H
-#define SYSTEM_STATS_H
+#ifndef STATS_H
+#define STATS_H
 
 #include "access/tupdesc.h"
 #include "utils/tuplestore.h"
@@ -32,7 +32,6 @@
 /* prototypes for system disk information functions */
 bool ignoreFileSystemTypes(char *fs_mnt);
 bool ignoreMountPoints(char *fs_mnt);
-void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for system IO Analysis */
 #define Natts_io_analysis_info            7
@@ -43,9 +42,6 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 #define Anum_write_bytes                  4
 #define Anum_read_time_ms                 5
 #define Anum_write_time_ms                6
-
-/* prototypes for system IO analysis functions */
-void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for system CPU information */
 #define Natts_cpu_info            13
@@ -63,9 +59,6 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 #define Anum_l2cache_size         11
 #define Anum_l3cache_size         12
 
-/* prototypes for system CPU information functions */
-void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
-
 /* Macros for Memory information */
 #define Natts_memory_info       6
 #define Anum_total_memory       0
@@ -75,18 +68,13 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 #define Anum_swap_used          4
 #define Anum_swap_free          5
 
-/* prototypes for system memory information functions */
 uint64_t ConvertToBytes(char *line_buf);
-void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for load average information */
 #define Natts_load_avg_info                    3
 #define Anum_cpu_io_load_avg_one_minute        0
 #define Anum_cpu_io_load_avg_five_minutes      1
 #define Anum_cpu_io_load_avg_fifteen_minutes   2
-
-/* prototypes for system load average information functions */
-void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for operating system information */
 #define Natts_os_info                6
@@ -97,9 +85,6 @@ void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 #define Anum_os_version_level        4
 #define Anum_architecture            5
 
-/* prototypes for operating system information functions */
-void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
-
 /* Macros for system CPU usage information */
 #define Natts_cpu_usage_stats                            5
 #define Anum_usermode_normal_process_cpu_percentage      0
@@ -108,9 +93,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 #define Anum_idle_mode_cpu_percentage                    3
 #define Anum_total_percentage_cpu                        4
 
-/* prototypes for system CPU usage information functions */
-void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc);
-
 /* Macros for system processes information */
 #define Natts_process_info                    5
 #define Anum_total_processes                  0
@@ -118,9 +100,6 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc);
 #define Anum_sleeping_processes               2
 #define Anum_stopped_processes                3
 #define Anum_zombie_processes                 4
-
-/* prototypes for system process information functions */
-void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* Macros for network information */
 #define Natts_network_info          11
@@ -136,9 +115,6 @@ void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 #define Anum_net_rx_errors          9
 #define Anum_net_rx_dropped         10
 
-/* prototypes for system network information functions */
-void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
-
 /* Macros for cpu and memory information by process*/
 #define Natts_cpu_memory_info_by_process     4
 #define Anum_process_pid                     0
@@ -146,7 +122,4 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 #define Anum_process_cpu_usage               2
 #define Anum_process_memory_usage            3
 
-/* prototypes for system network information functions */
-void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc);
-
-#endif // SYSTEM_STATS_H
+#endif // STATS_H
