@@ -10,20 +10,17 @@ DECLARE
 BEGIN
     -- First find the operating system and according to install the functions
     SELECT CASE
-            WHEN version.platform LIKE '%w64%' THEN 'windows'
-            WHEN version.platform LIKE '%w32%' THEN 'windows'
-            WHEN version.platform LIKE '%mingw%' THEN 'windows'
-            WHEN version.platform LIKE '%visual studio%' THEN 'windows'
-            WHEN version.platform LIKE '%linux%' THEN 'linux'
-            WHEN version.platform LIKE '%mac%' THEN 'mac'
-            WHEN version.platform LIKE '%darwin%' THEN 'mac'
+            WHEN version.platform ILIKE '%w64%' THEN 'windows'
+            WHEN version.platform ILIKE '%w32%' THEN 'windows'
+            WHEN version.platform ILIKE '%mingw%' THEN 'windows'
+            WHEN version.platform ILIKE '%visual%' THEN 'windows'
+            WHEN version.platform ILIKE '%linux%' THEN 'linux'
+            WHEN version.platform ILIKE '%mac%' THEN 'mac'
+            WHEN version.platform ILIKE '%darwin%' THEN 'mac'
             ELSE
             'UNKNOWN'
          END INTO os_platform
-    FROM (SELECT
-            substr(substr(version(), strpos(version(), ' on ')+3), 1,
-            strpos(substr(version(), strpos(version(), ' on ')+3),
-            ', compiled by')-1) as platform)
+    FROM (SELECT version() as platform)
     as version;
 
     IF os_platform IS NULL OR os_platform = '' OR os_platform = 'UNKNOWN' THEN
@@ -395,10 +392,33 @@ BEGIN
         AS 'MODULE_PATHNAME'
         LANGUAGE C;
 
-        REVOKE ALL ON FUNCTION pg_sys_cpu_memory_by_process() FROM PUBLIC;
-        GRANT EXECUTE ON FUNCTION pg_sys_cpu_memory_by_process() TO monitor_system_stats;
+		REVOKE ALL ON FUNCTION pg_sys_cpu_memory_by_process() FROM PUBLIC;
+		GRANT EXECUTE ON FUNCTION pg_sys_cpu_memory_by_process() TO monitor_system_stats;
 
     END IF;
+
+    -- If platform is linux, installed its respective functions
+    IF os_platform = 'windows' THEN
+
+        -- Memory information function
+        CREATE FUNCTION pg_sys_memory_info(
+            OUT total_physical_memory int8,
+            OUT avail_physical_memory int8,
+            OUT memory_load_percentage int8,
+            OUT total_page_file int8,
+            OUT avail_page_file int8,
+            OUT total_virtual_memory int8,
+		    OUT avail_virtual_memory int8,
+		    OUT avail_ext_virtual_memory int8
+        )
+        RETURNS SETOF record
+        AS 'MODULE_PATHNAME'
+        LANGUAGE C;
+
+        REVOKE ALL ON FUNCTION pg_sys_memory_info() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION pg_sys_memory_info() TO monitor_system_stats;
+
+	END IF;
 
 END
 $$ language 'plpgsql';

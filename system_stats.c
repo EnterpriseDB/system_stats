@@ -27,6 +27,20 @@
 
 PG_MODULE_MAGIC;
 
+#ifdef WIN32
+/* Add a prototype marked PGDLLEXPORT */
+PGDLLEXPORT Datum pg_sys_os_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_cpu_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_memory_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_cpu_usage_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_load_avg_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_io_analysis_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_disk_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_process_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_network_info(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum pg_sys_cpu_memory_by_process(PG_FUNCTION_ARGS);
+#endif
+
 PG_FUNCTION_INFO_V1(pg_sys_os_info);
 PG_FUNCTION_INFO_V1(pg_sys_cpu_info);
 PG_FUNCTION_INFO_V1(pg_sys_memory_info);
