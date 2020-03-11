@@ -397,7 +397,7 @@ BEGIN
 
     END IF;
 
-    -- If platform is linux, installed its respective functions
+    -- If platform is windows, installed its respective functions
     IF os_platform = 'windows' THEN
 
         -- Memory information function
@@ -417,6 +417,27 @@ BEGIN
 
         REVOKE ALL ON FUNCTION pg_sys_memory_info() FROM PUBLIC;
         GRANT EXECUTE ON FUNCTION pg_sys_memory_info() TO monitor_system_stats;
+
+        -- Operating system information function
+        CREATE FUNCTION pg_sys_os_info(
+            OUT name text,
+            OUT version text,
+            OUT build_version text,
+            OUT servicepack_major_version text,
+            OUT servicepack_minor_version text,
+            OUT host_name text,
+            OUT num_of_users int,
+            OUT num_of_licensed_users int,
+            OUT architecture text,
+            OUT installed_time text,
+            OUT last_bootup_time text
+        )
+        RETURNS SETOF record
+        AS 'MODULE_PATHNAME'
+        LANGUAGE C;
+
+        REVOKE ALL ON FUNCTION pg_sys_os_info() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION pg_sys_os_info() TO monitor_system_stats;
 
 	END IF;
 

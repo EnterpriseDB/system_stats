@@ -14,7 +14,7 @@
 #include "utils/tuplestore.h"
 #include "utils/builtins.h"
 
- /* Macros for Memory information */
+/* Macros for Memory information */
 #define Natts_memory_info                  8
 #define Anum_total_physical_memory         0
 #define Anum_avail_physical_memory         1
@@ -24,5 +24,19 @@
 #define Anum_total_virtual_memory          5
 #define Anum_avail_virtual_memory          6
 #define Anum_avail_ext_virtual_memory      7
+
+/* Macros for OS information */
+#define Natts_os_info                         11
+#define Anum_os_name                          0
+#define Anum_os_version                       1
+#define Anum_os_build_version                 2
+#define Anum_os_servicepack_major_version     3
+#define Anum_os_servicepack_minor_version     4
+#define Anum_host_name                        5
+#define Anum_number_of_users                  6
+#define Anum_number_of_licensed_users         7
+#define Anum_os_architecture                  8
+#define Anum_os_install_time                  9
+#define Anum_os_boot_time                     10
 
 #endif // STATS_H
