@@ -439,6 +439,35 @@ BEGIN
         REVOKE ALL ON FUNCTION pg_sys_os_info() FROM PUBLIC;
         GRANT EXECUTE ON FUNCTION pg_sys_os_info() TO monitor_system_stats;
 
+		-- System CPU information function
+        CREATE FUNCTION pg_sys_cpu_info(
+            OUT device_id text,
+            OUT description text,
+            OUT manufacturer text,
+            OUT name text,
+            OUT processor_type int,
+            OUT architecture int,
+            OUT max_clock_speed int,
+            OUT current_clock_speed int,
+            OUT address_width int,
+            OUT cpu_status int,
+            OUT l2cache_size int,
+            OUT l3cache_size int,
+            OUT no_of_cores int,
+            OUT no_of_enabled_cores int,
+            OUT no_of_logical_processor int,
+            OUT status text,
+            OUT status_info int,
+            OUT thread_count int,
+            OUT last_error_code int
+        )
+        RETURNS SETOF record
+        AS 'MODULE_PATHNAME'
+        LANGUAGE C;
+
+        REVOKE ALL ON FUNCTION pg_sys_cpu_info() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION pg_sys_cpu_info() TO monitor_system_stats;
+
 	END IF;
 
 END
