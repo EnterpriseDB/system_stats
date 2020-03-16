@@ -468,6 +468,87 @@ BEGIN
         REVOKE ALL ON FUNCTION pg_sys_cpu_info() FROM PUBLIC;
         GRANT EXECUTE ON FUNCTION pg_sys_cpu_info() TO monitor_system_stats;
 
+        -- Disk information function
+        CREATE FUNCTION pg_sys_disk_info(
+            OUT device_id text,
+            OUT caption text,
+            OUT description text,
+            OUT name text,
+            OUT max_file_name_length int,
+            OUT block_size int8,
+            OUT no_of_blocks int8,
+            OUT drive_type int,
+            OUT file_system text,
+            OUT free_space int8,
+            OUT total_space int8,
+            OUT used_space int8,
+            OUT drive_letter text,
+            OUT last_error_code int
+        )
+        RETURNS SETOF record
+        AS 'MODULE_PATHNAME'
+        LANGUAGE C;
+
+        REVOKE ALL ON FUNCTION pg_sys_disk_info() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION pg_sys_disk_info() TO monitor_system_stats;
+
+        -- Disk IO analysis information function
+        CREATE FUNCTION pg_sys_io_analysis_info(
+            OUT caption text,
+            OUT name text,
+            OUT description text,
+            OUT avg_disk_bytes_per_read int8,
+            OUT avg_disk_bytes_per_transfer int8,
+            OUT avg_disk_bytes_per_write int8,
+            OUT avg_disk_queue_length int8,
+            OUT avg_disk_read_queue_length int8,
+            OUT avg_disk_sec_per_read int,
+            OUT avg_disk_sec_per_transfer int,
+            OUT avg_disk_sec_per_write int,
+            OUT avg_disk_write_queue_length int8,
+            OUT current_disk_queue_length int,
+            OUT disk_bytes_per_sec int8,
+            OUT disk_read_bytes_per_sec int8,
+            OUT disk_reads_per_sec int,
+            OUT disk_transfers_per_sec int,
+            OUT disk_write_bytes_per_sec int8,
+            OUT disk_writes_per_sec int,
+            OUT disk_freq_perf_time int8,
+            OUT disk_freq_sys_100_ns int8,
+            OUT percent_disk_read_time int8,
+            OUT percent_disk_time int8,
+            OUT percent_disk_write_time int8,
+            OUT percent_disk_idle_time int8,
+            OUT disk_split_io_per_sec int,
+            OUT disk_timestamp_obj int8,
+            OUT disk_timestamp_perf_time int8,
+            OUT disk_timestamp_sys_100_ns int8
+        )
+        RETURNS SETOF record
+        AS 'MODULE_PATHNAME'
+        LANGUAGE C;
+
+        REVOKE ALL ON FUNCTION pg_sys_io_analysis_info() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION pg_sys_io_analysis_info() TO monitor_system_stats;
+
+        -- CPU usage information function
+        CREATE FUNCTION pg_sys_cpu_usage_info(
+            OUT name text,
+            OUT caption text,
+            OUT description text,
+            OUT percent_idle_time int8,
+            OUT percent_interrupt_time int8,
+            OUT percent_privileged_time int8,
+            OUT percent_processor_time int8,
+            OUT percent_user_time int8
+        )
+        RETURNS SETOF record
+        AS 'MODULE_PATHNAME'
+        LANGUAGE C;
+
+        REVOKE ALL ON FUNCTION pg_sys_cpu_usage_info() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION pg_sys_cpu_usage_info() TO monitor_system_stats;
+
 	END IF;
 
 END

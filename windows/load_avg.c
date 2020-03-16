@@ -13,4 +13,7 @@
 void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
 	//TODO
+	// Win32_PerfFormattedData_PerfOS_System
+	// SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor
+	// SELECT LoadPercentage FROM Win32_Processor
 }
