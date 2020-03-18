@@ -121,4 +121,18 @@
 #define Anum_cpu_percent_processor_time     6
 #define Anum_cpu_percent_user_time          7
 
+/* Macros for network information */
+#define Natts_network_info                     11
+#define Anum_network_interface_name            0
+#define Anum_network_ip_address                1
+#define Anum_network_packets_sent              2
+#define Anum_network_packets_received          3
+#define Anum_network_sent_bytes                4
+#define Anum_network_receive_bytes             5
+#define Anum_network_out_packets_discard       6
+#define Anum_network_in_packets_discard        7
+#define Anum_network_out_packets_error         8
+#define Anum_network_in_packets_error          9
+#define Anum_network_link_speed_mbps           10
+
 #endif // STATS_H

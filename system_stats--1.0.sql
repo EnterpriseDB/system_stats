@@ -549,6 +549,27 @@ BEGIN
         REVOKE ALL ON FUNCTION pg_sys_cpu_usage_info() FROM PUBLIC;
         GRANT EXECUTE ON FUNCTION pg_sys_cpu_usage_info() TO monitor_system_stats;
 
+        -- network information function
+        CREATE FUNCTION pg_sys_network_info(
+            OUT interface_name text,
+            OUT ip_address text,
+            OUT packets_sent int,
+            OUT packets_received int,
+            OUT sent_bytes int,
+            OUT receive_bytes int,
+            OUT out_packets_discard int,
+            OUT in_packets_discard int,
+            OUT out_packets_error int,
+            OUT in_packets_error int,
+            OUT link_speed_mbps int
+        )
+        RETURNS SETOF record
+        AS 'MODULE_PATHNAME'
+        LANGUAGE C;
+
+        REVOKE ALL ON FUNCTION pg_sys_network_info() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION pg_sys_network_info() TO monitor_system_stats;
+
 	END IF;
 
 END
