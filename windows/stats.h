@@ -135,4 +135,15 @@
 #define Anum_network_in_packets_error          9
 #define Anum_network_link_speed_mbps           10
 
+/* Macros for cpu and memory information by process*/
+#define Natts_cpu_memory_info_by_process     8
+#define Anum_process_pid                     0
+#define Anum_process_name                    1
+#define Anum_process_running_since           2
+#define Anum_process_thread_count            3
+#define Anum_process_handle_count            4
+#define Anum_percent_processor_time          5
+#define Anum_percent_user_time               6
+#define Anum_memory_usage_bytes              7
+
 #endif // STATS_H

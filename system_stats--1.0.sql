@@ -570,6 +570,24 @@ BEGIN
         REVOKE ALL ON FUNCTION pg_sys_network_info() FROM PUBLIC;
         GRANT EXECUTE ON FUNCTION pg_sys_network_info() TO monitor_system_stats;
 
+        -- CPU and memory information by process id or name
+        CREATE FUNCTION pg_sys_cpu_memory_by_process(
+            OUT pid int,
+            OUT name text,
+            OUT process_running_since int8,
+            OUT thread_count int,
+            OUT handle_count int,
+            OUT percent_processor_time int8,
+            OUT percent_user_time int8,
+            OUT memory_usage_bytes int8
+        )
+        RETURNS SETOF record
+        AS 'MODULE_PATHNAME'
+        LANGUAGE C;
+
+        REVOKE ALL ON FUNCTION pg_sys_cpu_memory_by_process() FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION pg_sys_cpu_memory_by_process() TO monitor_system_stats;
+
 	END IF;
 
 END
