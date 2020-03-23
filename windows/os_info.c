@@ -87,150 +87,200 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		// enumerate the retrieved objects
 		while ((hres = results->lpVtbl->Next(results, WBEM_INFINITE, 1, &result, &returnedCount)) == S_OK)
 		{
-			VARIANT os_name, build_number, os_version, host_name, number_of_users, number_of_licensed_users,
-					os_architecture, os_installed_date, last_bootup_time, servicepack_major_ver, servicepack_minor_ver;
+			VARIANT query_result;
 			int     wstr_length = 0;
 			char    *dst = NULL;
 			size_t  charsConverted = 0;
 
 			/* Get the value from query output */
-			hres = result->lpVtbl->Get(result, L"Caption", 0, &os_name, 0, 0);
-			hres = result->lpVtbl->Get(result, L"Version", 0, &os_version, 0, 0);
-			hres = result->lpVtbl->Get(result, L"BuildNumber", 0, &build_number, 0, 0);
-			hres = result->lpVtbl->Get(result, L"ServicePackMajorVersion", 0, &servicepack_major_ver, 0, 0);
-			hres = result->lpVtbl->Get(result, L"ServicePackMinorVersion", 0, &servicepack_minor_ver, 0, 0);
-			hres = result->lpVtbl->Get(result, L"CSName", 0, &host_name, 0, 0);
-			hres = result->lpVtbl->Get(result, L"NumberOfUsers", 0, &number_of_users, 0, 0);
-			hres = result->lpVtbl->Get(result, L"NumberOfLicensedUsers", 0, &number_of_licensed_users, 0, 0);
-			hres = result->lpVtbl->Get(result, L"OSArchitecture", 0, &os_architecture, 0, 0);
-			hres = result->lpVtbl->Get(result, L"InstallDate", 0, &os_installed_date, 0, 0);
-			hres = result->lpVtbl->Get(result, L"LastBootUpTime", 0, &last_bootup_time, 0, 0);
-
-			wstr_length = SysStringLen(os_name.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"Caption", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_os_name] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, os_name.bstrVal, wstr_length);
-				values[Anum_os_name] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_os_name] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_os_name] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(os_version.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"Version", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_os_version] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, os_version.bstrVal, wstr_length);
-				values[Anum_os_version] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_os_version] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_os_version] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(build_number.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"BuildNumber", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_os_build_version] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, build_number.bstrVal, wstr_length);
-				values[Anum_os_build_version] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_os_build_version] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_os_build_version] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(servicepack_major_ver.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"ServicePackMajorVersion", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_os_servicepack_major_version] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, servicepack_major_ver.bstrVal, wstr_length);
-				values[Anum_os_servicepack_major_version] = CStringGetTextDatum(dst);				
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_os_servicepack_major_version] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_os_servicepack_major_version] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(servicepack_minor_ver.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"ServicePackMinorVersion", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_os_servicepack_minor_version] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, servicepack_minor_ver.bstrVal, wstr_length);
-				values[Anum_os_servicepack_minor_version] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_os_servicepack_minor_version] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_os_servicepack_minor_version] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(host_name.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"CSName", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_host_name] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, host_name.bstrVal, wstr_length);
-				values[Anum_host_name] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_host_name] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_host_name] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			values[Anum_number_of_users] = Int32GetDatum(number_of_users.intVal);
-			values[Anum_number_of_licensed_users] = Int32GetDatum(number_of_licensed_users.intVal);
+			hres = result->lpVtbl->Get(result, L"NumberOfUsers", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_number_of_users] = true;
+			else
+				values[Anum_number_of_users] = Int32GetDatum(query_result.intVal);
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(os_architecture.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"NumberOfLicensedUsers", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_number_of_licensed_users] = true;
+			else
+				values[Anum_number_of_licensed_users] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"OSArchitecture", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_os_architecture] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, os_architecture.bstrVal, wstr_length);
-				values[Anum_os_architecture] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_os_architecture] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_os_architecture] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(os_installed_date.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"InstallDate", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_os_install_time] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, os_installed_date.bstrVal, wstr_length);
-				values[Anum_os_install_time] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_os_install_time] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_os_install_time] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(last_bootup_time.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"LastBootUpTime", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_os_boot_time] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, last_bootup_time.bstrVal, wstr_length);
-				values[Anum_os_boot_time] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_os_boot_time] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_os_boot_time] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);

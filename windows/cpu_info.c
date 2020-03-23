@@ -87,117 +87,193 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		// enumerate the retrieved objects
 		while ((hres = results->lpVtbl->Next(results, WBEM_INFINITE, 1, &result, &returnedCount)) == S_OK)
 		{
-			VARIANT device_id, caption, manufacturer, name, processor_type, architecture,
-				max_clock_speed, current_clock_speed, address_width, cpu_status, l2cache_size,
-				l3cache_size, no_of_cores, no_of_enabled_cores, no_of_logical_processor,
-				status, status_info, thread_count, last_error_code;
+			VARIANT query_result;
 			int     wstr_length = 0;
 			char    *dst = NULL;
 			size_t  charsConverted = 0;
 
 			/* Get the value from query output */
-			hres = result->lpVtbl->Get(result, L"DeviceID", 0, &device_id, 0, 0);
-			hres = result->lpVtbl->Get(result, L"Caption", 0, &caption, 0, 0);
-			hres = result->lpVtbl->Get(result, L"Manufacturer", 0, &manufacturer, 0, 0);
-			hres = result->lpVtbl->Get(result, L"Name", 0, &name, 0, 0);
-			hres = result->lpVtbl->Get(result, L"ProcessorType", 0, &processor_type, 0, 0);
-			hres = result->lpVtbl->Get(result, L"Architecture", 0, &architecture, 0, 0);
-			hres = result->lpVtbl->Get(result, L"MaxClockSpeed", 0, &max_clock_speed, 0, 0);
-			hres = result->lpVtbl->Get(result, L"CurrentClockSpeed", 0, &current_clock_speed, 0, 0);
-			hres = result->lpVtbl->Get(result, L"AddressWidth", 0, &address_width, 0, 0);
-			hres = result->lpVtbl->Get(result, L"CpuStatus", 0, &cpu_status, 0, 0);
-			hres = result->lpVtbl->Get(result, L"L2CacheSize", 0, &l2cache_size, 0, 0);
-			hres = result->lpVtbl->Get(result, L"L3CacheSize", 0, &l3cache_size, 0, 0);
-			hres = result->lpVtbl->Get(result, L"NumberOfCores", 0, &no_of_cores, 0, 0);
-			hres = result->lpVtbl->Get(result, L"NumberOfEnabledCore", 0, &no_of_enabled_cores, 0, 0);
-			hres = result->lpVtbl->Get(result, L"NumberOfLogicalProcessors", 0, &no_of_logical_processor, 0, 0);
-			hres = result->lpVtbl->Get(result, L"Status", 0, &status, 0, 0);
-			hres = result->lpVtbl->Get(result, L"StatusInfo", 0, &status_info, 0, 0);
-			hres = result->lpVtbl->Get(result, L"ThreadCount", 0, &thread_count, 0, 0);
-			hres = result->lpVtbl->Get(result, L"LastErrorCode", 0, &last_error_code, 0, 0);
-
-			wstr_length = SysStringLen(device_id.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"DeviceID", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_device_id] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, device_id.bstrVal, wstr_length);
-				values[Anum_device_id] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_device_id] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_device_id] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(caption.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"Caption", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_description] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, caption.bstrVal, wstr_length);
-				values[Anum_description] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_description] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_description] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(manufacturer.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"Manufacturer", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_manufacturer] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, manufacturer.bstrVal, wstr_length);
-				values[Anum_manufacturer] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_manufacturer] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_manufacturer] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(name.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"Name", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_name] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, name.bstrVal, wstr_length);
-				values[Anum_name] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_name] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_name] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			wstr_length = 0;
-			charsConverted = 0;
-			wstr_length = SysStringLen(status.bstrVal);
-			if (wstr_length == 0)
+			hres = result->lpVtbl->Get(result, L"ProcessorType", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_processor_type] = true;
+			else
+				values[Anum_processor_type] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"Architecture", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_architecture] = true;
+			else
+				values[Anum_architecture] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"MaxClockSpeed", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_max_clock_speed] = true;
+			else
+				values[Anum_max_clock_speed] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"CurrentClockSpeed", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_current_clock_speed] = true;
+			else
+				values[Anum_current_clock_speed] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"AddressWidth", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_address_width] = true;
+			else
+				values[Anum_address_width] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"CpuStatus", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_cpu_status] = true;
+			else
+				values[Anum_cpu_status] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"L2CacheSize", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_l2cache_size] = true;
+			else
+				values[Anum_l2cache_size] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"L3CacheSize", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_l3cache_size] = true;
+			else
+				values[Anum_l3cache_size] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"NumberOfCores", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_number_of_cores] = true;
+			else
+				values[Anum_number_of_cores] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"NumberOfEnabledCore", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_number_of_enabled_cores] = true;
+			else
+				values[Anum_number_of_enabled_cores] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"NumberOfLogicalProcessors", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_number_of_logical_processor] = true;
+			else
+				values[Anum_number_of_logical_processor] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"Status", 0, &query_result, 0, 0);
+			if (FAILED(hres))
 				nulls[Anum_status] = true;
 			else
 			{
-				dst = (char *)malloc(wstr_length + 10);
-				memset(dst, 0x00, (wstr_length + 10));
-				wcstombs_s(&charsConverted, dst, wstr_length + 10, status.bstrVal, wstr_length);
-				values[Anum_status] = CStringGetTextDatum(dst);
-				free(dst);
+				wstr_length = 0;
+				charsConverted = 0;
+				wstr_length = SysStringLen(query_result.bstrVal);
+				if (wstr_length == 0)
+					nulls[Anum_status] = true;
+				else
+				{
+					dst = (char *)malloc(wstr_length + 10);
+					memset(dst, 0x00, (wstr_length + 10));
+					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+					values[Anum_status] = CStringGetTextDatum(dst);
+					free(dst);
+				}
 			}
 
-			values[Anum_processor_type] = Int32GetDatum(processor_type.intVal);
-			values[Anum_architecture] = Int32GetDatum(architecture.intVal);
-			values[Anum_max_clock_speed] = Int32GetDatum(max_clock_speed.intVal);
-			values[Anum_current_clock_speed] = Int32GetDatum(current_clock_speed.intVal);
-			values[Anum_address_width] = Int32GetDatum(address_width.intVal);
-			values[Anum_cpu_status] = Int32GetDatum(cpu_status.intVal);
-			values[Anum_l2cache_size] = Int32GetDatum(l2cache_size.intVal);
-			values[Anum_l3cache_size] = Int32GetDatum(l3cache_size.intVal);
-			values[Anum_number_of_cores] = Int32GetDatum(no_of_cores.intVal);
-			values[Anum_number_of_enabled_cores] = Int32GetDatum(no_of_enabled_cores.intVal);
-			values[Anum_number_of_logical_processor] = Int32GetDatum(no_of_logical_processor.intVal);
-			values[Anum_status_info] = Int32GetDatum(status_info.intVal);
-			values[Anum_thread_count] = Int32GetDatum(thread_count.intVal);
-			values[Anum_last_error_code] = Int32GetDatum(last_error_code.intVal);
+			hres = result->lpVtbl->Get(result, L"StatusInfo", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_status_info] = true;
+			else
+				values[Anum_status_info] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"ThreadCount", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_thread_count] = true;
+			else
+				values[Anum_thread_count] = Int32GetDatum(query_result.intVal);
+
+			hres = result->lpVtbl->Get(result, L"LastErrorCode", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_last_error_code] = true;
+			else
+				values[Anum_last_error_code] = Int32GetDatum(query_result.intVal);
 
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 

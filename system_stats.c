@@ -27,6 +27,12 @@
 
 PG_MODULE_MAGIC;
 
+/* called when extension is loaded */
+void _PG_init(void);
+
+/* called when extension is unloaded */
+void _PG_fini(void);
+
 #ifdef WIN32
 /* Add a prototype marked PGDLLEXPORT */
 PGDLLEXPORT Datum pg_sys_os_info(PG_FUNCTION_ARGS);
@@ -52,15 +58,22 @@ PG_FUNCTION_INFO_V1(pg_sys_process_info);
 PG_FUNCTION_INFO_V1(pg_sys_network_info);
 PG_FUNCTION_INFO_V1(pg_sys_cpu_memory_by_process);
 
+void _PG_init(void)
+{
+	/* loading system stats extension */
+	elog(DEBUG1, "System stats extension loaded...");
+}
+
+void _PG_fini(void)
+{
+	/* unloading system stats extension */
+	elog(DEBUG1, "System stats extension unloaded...");
+}
+
 /*
  * pg_sys_os_info
  *
  * This function will give operating system and kernel information
- *
- * Below are the list of result set returned by this function
- *
- * host_name          | domain_name    | kernel_version     | architecture |
- * os_distribution_id | os_description | os_release_version | os_code_name |
  *
  */
 Datum
@@ -115,11 +128,6 @@ pg_sys_os_info(PG_FUNCTION_ARGS)
  * pg_sys_cpu_info
  *
  * This function will give system CPU information
- *
- * Below are the list of result sets retured by this function
- *
- * processor |  vendor_id     | cpu_family | model | model_name |
- * cpu_mhz   | cpu_cache_size |
  *
  */
 Datum
@@ -176,11 +184,6 @@ pg_sys_cpu_info(PG_FUNCTION_ARGS)
  *
  * This function will give system memory information
  *
- * Below are the list of result sets retured by this function
- *
- * total_memory | free_memory | available_memory | buffers   |
- * cached       | swap_cached | swap_total       | swap_free |
- *
  */
 Datum
 pg_sys_memory_info(PG_FUNCTION_ARGS)
@@ -234,13 +237,6 @@ pg_sys_memory_info(PG_FUNCTION_ARGS)
  * pg_sys_io_analysis_info
  *
  * This function will give system IO analysis information
- *
- * Below are the list of result sets retured by this function
- *
- * major_no          | minor_no                  | device_name           | read_completed   |
- * read_merged       | sector_read               | time_spent_reading_ms | write_completed  |
- * write_merged      | sector_written            | time_spent_writing_ms | io_in_progress   |
- * time_spent_io_ms  | weighted_time_spent_io_ms
  *
  */
 Datum
@@ -296,11 +292,6 @@ pg_sys_io_analysis_info(PG_FUNCTION_ARGS)
  *
  * This function will give system disk information
  *
- * Below are the list of result sets retured by this function
- *
- * file_system     | file_system_type | mount_point  | total_space  | used_space  |
- * available_space | reserved_space   | total_inodes | used_inodes  | free_inodes |
- *
  */
 Datum
 pg_sys_disk_info(PG_FUNCTION_ARGS)
@@ -354,10 +345,6 @@ pg_sys_disk_info(PG_FUNCTION_ARGS)
  * pg_sys_load_avg_info
  *
  * This function will give system load average information
- *
- * Below are the list of result sets retured by this function
- *
- * load_avg_one_minute | load_avg_five_minutes | load_avg_ten_minutes
  *
  */
 Datum
@@ -414,13 +401,6 @@ pg_sys_load_avg_info(PG_FUNCTION_ARGS)
  *
  * This function will give system CPU usage information
  *
- * Below are the list of result sets retured by this function.
- * This information is, time spent by each CPU in miliseconds
- *
- * cpu_name           | usermode_normal_process | usermode_niced_process |
- * kernelmode_process | idle_mode               | io_completion          |
- * servicing_irq      | servicing_softirq
- *
  */
 Datum
 pg_sys_cpu_usage_info(PG_FUNCTION_ARGS)
@@ -474,10 +454,6 @@ pg_sys_cpu_usage_info(PG_FUNCTION_ARGS)
  * pg_sys_process_info
  *
  * This function will give system process information
- *
- * Below are the list of result sets retured by this function
- *
- * active_processes | running_processes | sleeping_processes | stopped_processes | zombie_processes
  *
  */
 Datum
@@ -533,12 +509,6 @@ pg_sys_process_info(PG_FUNCTION_ARGS)
  *
  * This function will give system network information
  *
- * Below are the list of result sets retured by this function
- *
- * interface_name | ipv4_address  | ipv6_address | speed_mbps |
- * tx_bytes       | tx_packets    | tx_errors    | tx_dropped |
- * rx_bytes       | rx_packets    | rx_errors    | rx_dropped |
- *
  */
 Datum
 pg_sys_network_info(PG_FUNCTION_ARGS)
@@ -591,11 +561,7 @@ pg_sys_network_info(PG_FUNCTION_ARGS)
 /*
  * pg_sys_cpu_memory_by_process
  *
- * This function will give cpu and memory usage by process ID/Name specified in argument
- *
- * Below are the list of result sets retured by this function
- *
- * pid  | user_name | cpu_usage | memory_usage | command
+ * This function will give cpu and memory usage by process ID
  *
  */
 Datum

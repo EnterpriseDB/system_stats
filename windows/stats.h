@@ -14,6 +14,11 @@
 #include "utils/tuplestore.h"
 #include "utils/builtins.h"
 
+#include <windows.h>
+#include <wbemidl.h>
+
+int is_process_running(IWbemServices *services, int pid);
+
 /* Macros for Memory information */
 #define Natts_memory_info                  8
 #define Anum_total_physical_memory         0
@@ -134,6 +139,12 @@
 #define Anum_network_out_packets_error         8
 #define Anum_network_in_packets_error          9
 #define Anum_network_link_speed_mbps           10
+
+/* Macros for cpu and memory information by process*/
+#define Natts_process_info                   3
+#define Anum_no_of_total_processes           0
+#define Anum_no_of_running_processes         1
+#define Anum_no_of_stopped_processes         2
 
 /* Macros for cpu and memory information by process*/
 #define Natts_cpu_memory_info_by_process     8
