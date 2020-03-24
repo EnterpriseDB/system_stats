@@ -12,7 +12,7 @@ Building in Linux and Mac OSX
 
 The module built using the PGXS framework:
 
-- Unpack the extensions files in $PGSRC/contrib/system_stats
+- Unpack the extensions files in $PGSRC/contrib/system_stats.
 - Run "make USE_PGXS=1" in the $PGSRC/contrib/system_stats directory.
 - Run "make USE_PGXS=1 install" to install.
 
@@ -22,62 +22,69 @@ Building in Windows
 The module built using the PGXS framework:
 
 - Unpack the extensions files in $PGSRC/contrib/system_stats
-- Set PG_INCLUDE_DIR and PG_LIB_DIR environment variables to make sure POstgreSQL include and lib directory for compilation.
+- Set PG_INCLUDE_DIR and PG_LIB_DIR environment variables to make sure the
+  PostgreSQL include and lib directories can be found for compilation.
+
    e.g.
     PG_INCLUDE_DIR=C:\Program Files\PostgreSQL\12\include
-	PG_LIB_DIR=C:\Program Files\PostgreSQL\12\lib
-- Open the Visual studio project file "system_stats.vcxproj" and build the project
+	  PG_LIB_DIR=C:\Program Files\PostgreSQL\12\lib
+
+- Open the Visual studio project file "system_stats.vcxproj" and build the
+  project.
 
 
 Functions
 ---------
 
-The following functions are provided to fetch the system level statistics for all the platforms.
+The following functions are provided to fetch system level statistics for all
+platforms.
 
 1. pg_sys_os_info
------------------------------------------
-This interface allows user to get the operating system statistics.
+-----------------
+This interface allows users to get the operating system statistics.
 
 2. pg_sys_cpu_info
------------------------------------------
-This interface allows user to get the cpu information ( e.g. hardware ). 
+------------------
+This interface allows user to get the cpu information ( e.g. hardware ).
 
 3. pg_sys_cpu_usage_info
------------------------------------------
-This interface allows user to get the cpu usage information of all CPUs. Values are in milliseconds spent by CPUs for all operations.
+------------------------
+This interface allows user to get the cpu usage information of all CPUs. Values
+are in milliseconds spent by CPUs for all operations.
 
 4. pg_sys_memory_info
------------------------------------------
-This interface allows user to get the memory usage informations. All the values are in bytes.
+---------------------
+This interface allows users to get the memory usage information. All the values
+are in bytes.
 
 5. pg_sys_io_analysis_info
------------------------------------------
-This interface allows user to get the IO analysis of the block device.
+--------------------------
+This interface allows users to get an I/O analysis of block devices.
 
 6. pg_sys_disk_info
------------------------------------------
-This interface allows user to get the disk information.
+-------------------
+This interface allows users to get the disk information.
 
 7. pg_sys_load_avg_info
------------------------------------------
-This interface allows user to get the average load of the system by 1, 5 and 10 minutes.
+-----------------------
+This interface allows users to get the average load of the system by 1, 5 and
+10 minutes.
 
 8. pg_sys_process_info
------------------------------------------
-This interface allows user to get the processes information.
+----------------------
+This interface allows users to get process information.
 
 9. pg_sys_network_info
------------------------------------------
-This interface allows user to get the all network interfaces information.
+----------------------
+This interface allows users to get network interface information.
 
 10. pg_sys_cpu_memory_by_process
------------------------------------------
-This interface allows user to get the CPU and memory information of each process ID.
+--------------------------------
+This interface allows users to get the CPU and memory information for each
+process ID.
 
-
-
-Detailed output of functions in linux platform as below
--------------------------------------------------------
+Detailed output of functions in Linux
+-------------------------------------
 
     pg_sys_os_info
 
@@ -198,8 +205,8 @@ Detailed output of functions in linux platform as below
     - Memory usage ( In percentage )
 
 
-Detailed output of functions in Mac OSX platform as below
--------------------------------------------------------
+Detailed output of functions in Mac OSX
+---------------------------------------
 
     pg_sys_os_info
 
@@ -301,7 +308,7 @@ Detailed output of functions in Mac OSX platform as below
     - Number of receive errors by this network device
     - Number of packets dropped by this network device
 
-    
+
     pg_sys_cpu_memory_by_process
 
     - pid of the process
@@ -310,101 +317,101 @@ Detailed output of functions in Mac OSX platform as below
     - Memory usage ( In percentage )
 
 
-Detailed output of functions in Windows platform as below
----------------------------------------------------------
+Detailed output of functions in Windows
+---------------------------------------
 
     pg_sys_os_info
 
     - Operating system name
-	- version
-	- build version
-	- servicepack major version
-	- servicepack minor version
-	- host name
-	- number of users
-	- number of licensed users
-	- architecture
-	- installed_time
-	- last_bootup_time
+  	- version
+  	- build version
+  	- servicepack major version
+  	- servicepack minor version
+  	- host name
+  	- number of users
+  	- number of licensed users
+  	- architecture
+  	- installed_time
+  	- last_bootup_time
 
 
     pg_sys_cpu_info
 
-	- device_id
-	- description
-	- manufacturer
-	- name
-	- processor type
-	- architecture
-	- maximum clock speed
-	- current clock speed
-	- address width
-	- cpu status
-	- L2 cache size
-	- L3 cache size
-	- number of cores
-	- number of enabled cores
-	- number of logical processor
-	- status
-	- status information
-	- thread count
-	- last error code
+  	- device_id
+  	- description
+  	- manufacturer
+  	- name
+  	- processor type
+  	- architecture
+  	- maximum clock speed
+  	- current clock speed
+  	- address width
+  	- cpu status
+  	- L2 cache size
+  	- L3 cache size
+  	- number of cores
+  	- number of enabled cores
+  	- number of logical processor
+  	- status
+  	- status information
+  	- thread count
+  	- last error code
 
 
     pg_sys_cpu_usage_info
 
-	- name
-	- caption
-	- description
-	- percent idle time
-	- percent interrupt time
-	- percent privileged time
-	- percent processor time
-	- percent user time
+  	- name
+  	- caption
+  	- description
+  	- percent idle time
+  	- percent interrupt time
+  	- percent privileged time
+  	- percent processor time
+  	- percent user time
 
 
     pg_sys_memory_info
 
-	- Total physical memory
-	- Available physical memory
-	- Memory load percentage
-	- Total page file
-	- Available page file
-	- Avaliable virtual memory
-	- Available ext virtual memory
+  	- Total physical memory
+  	- Available physical memory
+  	- Memory load percentage
+  	- Total page file
+  	- Available page file
+  	- Avaliable virtual memory
+  	- Available ext virtual memory
 
 
     pg_sys_io_analysis_info
 
-	- caption
-	- name
-	- description
-	- avg disk bytes per read
-	- avg disk bytes per transfer
-	- avg disk bytes per_write
-	- avg disk queue length
-	- avg disk read queue length
-	- avg disk sec per read
-	- avg disk sec per transfer
-	- avg disk sec per write
-	- avg disk write queue length
-	- current disk queue length
-	- disk bytes per sec
-	- disk read bytes per sec
-	- disk reads per sec
-	- disk transfers per sec
-	- disk write bytes per sec
-	- disk writes per sec
-	- disk freq perf time
-	- disk freq sys 100 ns
-	- percent disk read time
-	- percent disk time
-	- percent disk write time
-	- percent disk idle time
-	- disk split io per sec
-	- disk timestamp obj
-	- disk timestamp perf time
-	- disk timestamp sys 100 ns
+  	- caption
+  	- name
+  	- description
+  	- avg disk bytes per read
+  	- avg disk bytes per transfer
+  	- avg disk bytes per_write
+  	- avg disk queue length
+  	- avg disk read queue length
+  	- avg disk sec per read
+  	- avg disk sec per transfer
+  	- avg disk sec per write
+  	- avg disk write queue length
+  	- current disk queue length
+  	- disk bytes per sec
+  	- disk read bytes per sec
+  	- disk reads per sec
+  	- disk transfers per sec
+  	- disk write bytes per sec
+  	- disk writes per sec
+  	- disk freq perf time
+  	- disk freq sys 100 ns
+  	- percent disk read time
+  	- percent disk time
+  	- percent disk write time
+  	- percent disk idle time
+  	- disk split io per sec
+  	- disk timestamp obj
+  	- disk timestamp perf time
+  	- disk timestamp sys 100 ns
 
 
     pg_sys_disk_info
