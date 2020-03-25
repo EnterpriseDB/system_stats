@@ -3,6 +3,28 @@ MODULE_big = system_stats
 #Detect OS type and accordingly include the source files for compilation
 UNAME := $(shell uname)
 
+OS_PLATFORM := $(shell echo $(UNAME) | tr '[:upper:]' '[:lower:]')
+
+$(info "Platform is: $(OS_PLATFORM)")
+
+# FreeBSD platform is not supported so do not build it
+ifneq (,$(findstring freebsd, $(OS_PLATFORM)))
+    $(error FreeBSD platform is not supported by this plugin)
+endif
+
+# Solaris platform is not supported so do not build it
+ifneq (,$(findstring solaris, $(OS_PLATFORM)))
+    $(error Solaris platform is not supported by this plugin)
+endif
+ifneq (,$(findstring sparc, $(OS_PLATFORM)))
+    $(error Solaris platform is not supported by this plugin)
+endif
+
+# HP Unix platform is not supported so do not build it
+ifneq (,$(findstring hp-ux, $(OS_PLATFORM)))
+    $(error HP Unix platform is not supported by this plugin)
+endif
+
 ifeq ($(UNAME), Linux)
 OBJS = \
         system_stats.o \
