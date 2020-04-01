@@ -12,71 +12,45 @@
 
 #include <windows.h>
 #include <wbemidl.h>
+#include <psapi.h>
+
+#pragma comment(lib, "psapi.lib")
 
 void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
 	Datum            values[Natts_os_info];
 	bool             nulls[Natts_os_info];
+	int              handle_count = 0;
+	int              process_count = 0;
+	int              thread_count = 0;
 
 	memset(nulls, 0, sizeof(nulls));
 
+	PERFORMANCE_INFORMATION per_statex;
+	per_statex.cb = sizeof(per_statex);
+	if (GetPerformanceInfo(&per_statex, per_statex.cb) == 0)
+	{
+		LPVOID lpMsgBuf;
+		DWORD dw = GetLastError();
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
+		ereport(DEBUG1, (errmsg("Error while getting memory peformance information: %s", (char *)lpMsgBuf)));
+		LocalFree(lpMsgBuf);
+	}
+	else
+	{
+		handle_count = (int)(per_statex.HandleCount);
+		process_count = (int)(per_statex.ProcessCount);
+		thread_count = (int)(per_statex.ThreadCount);
+	}
+
 	// result code from COM calls from program
 	HRESULT hres = 0;
-
-	// Initialize COM interface pointers
-	IWbemLocator         *locator = NULL;
-	IWbemServices        *services = NULL;
 	IEnumWbemClassObject *results = NULL;
-
-	BSTR resource = SysAllocString(L"ROOT\\CIMV2");
-	BSTR language = SysAllocString(L"WQL");
 	BSTR query = SysAllocString(L"SELECT * FROM Win32_Operatingsystem");
 
-	// initialize COM
-	hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadOSInformations]: Failed to initialize COM library")));
-		return;
-	}
-
-	hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadOSInformations]: Failed to initialize the security")));
-		CoUninitialize();
-		return;
-	}
-
-	/* Obtain the initial locator to Windows Management on a particular host computer */
-	hres = CoCreateInstance(&CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, &IID_IWbemLocator, (LPVOID *)&locator);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadOSInformations]: Failed to create IWbemLocator object")));
-		CoUninitialize();
-		return;
-	}
-
-	/* Connect to the root\cimv2 namespace with the current user and obtain pointer services to make IWbemServices calls */
-	hres = locator->lpVtbl->ConnectServer(locator, resource, NULL, NULL, NULL, 0, NULL, NULL, &services);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadOSInformations]: Failed to create IWbemLocator object")));
-		locator->lpVtbl->Release(locator);
-		CoUninitialize();
-		return;
-	}
-
 	// issue a WMI query
-	hres = services->lpVtbl->ExecQuery(services, language, query, WBEM_FLAG_BIDIRECTIONAL, NULL, &results);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadOSInformations]: Failed to execute WQL query")));
-		services->lpVtbl->Release(services);
-		locator->lpVtbl->Release(locator);
-		CoUninitialize();
-		return;
-	}
+	results = execute_query(query);
 
 	/* list the query results */
 	if (results != NULL)
@@ -127,66 +101,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					values[Anum_os_version] = CStringGetTextDatum(dst);
-					free(dst);
-				}
-			}
-
-			hres = result->lpVtbl->Get(result, L"BuildNumber", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_os_build_version] = true;
-			else
-			{
-				wstr_length = 0;
-				charsConverted = 0;
-				wstr_length = SysStringLen(query_result.bstrVal);
-				if (wstr_length == 0)
-					nulls[Anum_os_build_version] = true;
-				else
-				{
-					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					values[Anum_os_build_version] = CStringGetTextDatum(dst);
-					free(dst);
-				}
-			}
-
-			hres = result->lpVtbl->Get(result, L"ServicePackMajorVersion", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_os_servicepack_major_version] = true;
-			else
-			{
-				wstr_length = 0;
-				charsConverted = 0;
-				wstr_length = SysStringLen(query_result.bstrVal);
-				if (wstr_length == 0)
-					nulls[Anum_os_servicepack_major_version] = true;
-				else
-				{
-					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					values[Anum_os_servicepack_major_version] = CStringGetTextDatum(dst);
-					free(dst);
-				}
-			}
-
-			hres = result->lpVtbl->Get(result, L"ServicePackMinorVersion", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_os_servicepack_minor_version] = true;
-			else
-			{
-				wstr_length = 0;
-				charsConverted = 0;
-				wstr_length = SysStringLen(query_result.bstrVal);
-				if (wstr_length == 0)
-					nulls[Anum_os_servicepack_minor_version] = true;
-				else
-				{
-					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					values[Anum_os_servicepack_minor_version] = CStringGetTextDatum(dst);
 					free(dst);
 				}
 			}
@@ -243,26 +157,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				}
 			}
 
-			hres = result->lpVtbl->Get(result, L"InstallDate", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_os_install_time] = true;
-			else
-			{
-				wstr_length = 0;
-				charsConverted = 0;
-				wstr_length = SysStringLen(query_result.bstrVal);
-				if (wstr_length == 0)
-					nulls[Anum_os_install_time] = true;
-				else
-				{
-					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					values[Anum_os_install_time] = CStringGetTextDatum(dst);
-					free(dst);
-				}
-			}
-
 			hres = result->lpVtbl->Get(result, L"LastBootUpTime", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_os_boot_time] = true;
@@ -283,21 +177,24 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				}
 			}
 
+			values[Anum_os_handle_count] = handle_count;
+			values[Anum_os_process_count] = process_count;
+			values[Anum_os_thread_count] = thread_count;
+
+			/* set the NULL value for column which is not required by this platform */
+			nulls[Anum_domain_name] = true;
+			nulls[Anum_os_up_since_seconds] = true;
+
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
 			/* release the current result object */
 			result->lpVtbl->Release(result);
 		}
 	}
+	else
+		ereport(DEBUG1, (errmsg("[ReadOSInformations]: Failed to get query result")));
 
 	/* release WMI COM interfaces */
 	results->lpVtbl->Release(results);
-	services->lpVtbl->Release(services);
-	locator->lpVtbl->Release(locator);
-
-	CoUninitialize();
-
 	SysFreeString(query);
-	SysFreeString(language);
-	SysFreeString(resource);
 }

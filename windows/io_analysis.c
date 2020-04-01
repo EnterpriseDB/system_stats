@@ -23,61 +23,11 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 	// result code from COM calls from program
 	HRESULT hres = 0;
-
-	// Initialize COM interface pointers
-	IWbemLocator         *locator = NULL;
-	IWbemServices        *services = NULL;
 	IEnumWbemClassObject *results = NULL;
-
-	BSTR resource = SysAllocString(L"ROOT\\CIMV2");
-	BSTR language = SysAllocString(L"WQL");
 	BSTR query = SysAllocString(L"SELECT * FROM Win32_PerfRawData_PerfDisk_PhysicalDisk");
 
-	// initialize COM
-	hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadIOAnalysisInformation]: Failed to initialize COM library")));
-		return;
-	}
-
-	hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadIOAnalysisInformation]: Failed to initialize the security")));
-		CoUninitialize();
-		return;
-	}
-
-	/* Obtain the initial locator to Windows Management on a particular host computer */
-	hres = CoCreateInstance(&CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, &IID_IWbemLocator, (LPVOID *)&locator);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadIOAnalysisInformation]: Failed to create IWbemLocator object")));
-		CoUninitialize();
-		return;
-	}
-
-	/* Connect to the root\cimv2 namespace with the current user and obtain pointer services to make IWbemServices calls */
-	hres = locator->lpVtbl->ConnectServer(locator, resource, NULL, NULL, NULL, 0, NULL, NULL, &services);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadIOAnalysisInformation]: Failed to create IWbemLocator object")));
-		locator->lpVtbl->Release(locator);
-		CoUninitialize();
-		return;
-	}
-
 	// issue a WMI query
-	hres = services->lpVtbl->ExecQuery(services, language, query, WBEM_FLAG_BIDIRECTIONAL, NULL, &results);
-	if (FAILED(hres))
-	{
-		ereport(DEBUG1, (errmsg("[ReadIOAnalysisInformation]: Failed to execute WQL query")));
-		services->lpVtbl->Release(services);
-		locator->lpVtbl->Release(locator);
-		CoUninitialize();
-		return;
-	}
+	results = execute_query(query);
 
 	/* list the query results */
 	if (results != NULL)
@@ -585,15 +535,10 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			result->lpVtbl->Release(result);
 		}
 	}
+	else
+		ereport(DEBUG1, (errmsg("[ReadIOAnalysisInformation]: Failed to get query result")));
 
 	/* release WMI COM interfaces */
 	results->lpVtbl->Release(results);
-	services->lpVtbl->Release(services);
-	locator->lpVtbl->Release(locator);
-
-	CoUninitialize();
-
 	SysFreeString(query);
-	SysFreeString(language);
-	SysFreeString(resource);
 }

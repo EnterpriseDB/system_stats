@@ -168,26 +168,26 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 					wstr_length = (int)wcslen(if_row->wszName);
 					if (wstr_length == 0)
-						nulls[Anum_network_interface_name] = true;
+						nulls[Anum_net_interface_name] = true;
 					else
 					{
 						dst = (char *)malloc(wstr_length + 10);
 						memset(dst, 0x00, (wstr_length + 10));
 						wcstombs_s(&charsConverted, dst, wstr_length + 10, if_row->wszName, wstr_length);
-						values[Anum_network_interface_name] = CStringGetTextDatum(dst);
+						values[Anum_net_interface_name] = CStringGetTextDatum(dst);
 						free(dst);
 					}
 
-					values[Anum_network_ip_address] = CStringGetTextDatum((char *)(ip_rows + ip_index));
-					values[Anum_network_packets_sent] = Int32GetDatum((int)(if_row->dwOutUcastPkts + if_row->dwOutNUcastPkts));
-					values[Anum_network_packets_received] = Int32GetDatum((int)(if_row->dwInUcastPkts + if_row->dwInNUcastPkts));
-					values[Anum_network_sent_bytes] = Int32GetDatum((int)if_row->dwOutOctets);
-					values[Anum_network_receive_bytes] = Int32GetDatum((int)if_row->dwInOctets);
-					values[Anum_network_out_packets_discard] = Int32GetDatum((int)if_row->dwOutDiscards);
-					values[Anum_network_in_packets_discard] = Int32GetDatum((int)if_row->dwInDiscards);
-					values[Anum_network_out_packets_error] = Int32GetDatum((int)if_row->dwOutErrors);
-					values[Anum_network_in_packets_error] = Int32GetDatum((int)if_row->dwInErrors);
-					values[Anum_network_link_speed_mbps] = Int32GetDatum((int)(if_row->dwSpeed / 1000000));
+					values[Anum_net_ipv4_address] = CStringGetTextDatum((char *)(ip_rows + ip_index));
+					values[Anum_net_tx_packets] = Int64GetDatumFast((uint64)(if_row->dwOutUcastPkts + if_row->dwOutNUcastPkts));
+					values[Anum_net_rx_packets] = Int64GetDatumFast((uint64)(if_row->dwInUcastPkts + if_row->dwInNUcastPkts));
+					values[Anum_net_tx_bytes] = Int64GetDatumFast((uint64)if_row->dwOutOctets);
+					values[Anum_net_rx_bytes] = Int64GetDatumFast((uint64)if_row->dwInOctets);
+					values[Anum_net_tx_dropped] = Int64GetDatumFast((uint64)if_row->dwOutDiscards);
+					values[Anum_net_rx_dropped] = Int64GetDatumFast((uint64)if_row->dwInDiscards);
+					values[Anum_net_tx_errors] = Int64GetDatumFast((uint64)if_row->dwOutErrors);
+					values[Anum_net_rx_errors] = Int64GetDatumFast((uint64)if_row->dwInErrors);
+					values[Anum_net_speed_mbps] = Int32GetDatum((int)(if_row->dwSpeed / 1000000));
 
 					tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 				}
