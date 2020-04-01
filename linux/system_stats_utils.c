@@ -14,6 +14,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <sys/types.h>
+#include <dirent.h>
+
 char* leftTrimStr(char* s);
 char* rightTrimStr(char* s);
 
@@ -121,4 +124,69 @@ char* rightTrimStr(char* s)
 char*  trimStr( char* s)
 {
 	return rightTrimStr(leftTrimStr(s));
+}
+
+bool read_process_status(int *active_processes, int *running_processes,
+		int *sleeping_processes, int *stopped_processes, int *zombie_processes, int *total_threads)
+{
+	FILE          *fpstat;
+	DIR           *dirp;
+	struct dirent *ent, dbuf;
+	char          file_name[MIN_BUFFER_SIZE];
+	char          process_type;
+	unsigned int  running_threads;
+
+	dirp = opendir(PROC_FILE_SYSTEM_PATH);
+	if (!dirp)
+	{
+		ereport(DEBUG1, (errmsg("Error opening /proc directory")));
+		return false;
+	}
+
+	/* Read the proc directory for process status */
+	while (readdir_r(dirp, &dbuf, &ent) == 0)
+	{
+		memset(file_name, 0x00, MIN_BUFFER_SIZE);
+		process_type = '\0';
+
+		if (!ent)
+			break;
+
+		/* Iterate only digit as name because it is process id */
+		if (!isdigit(*ent->d_name))
+			continue;
+
+		*active_processes++;
+
+		sprintf(file_name,"/proc/%s/stat", ent->d_name);
+
+		fpstat = fopen(file_name, "r");
+		if (fpstat == NULL)
+			continue;
+
+		if (fscanf(fpstat, "%*d %*s %c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u"
+					"%*d %*d %*d %*d %d %*d %*u %*u %*d", &process_type, &running_threads) == EOF)
+			ereport(DEBUG1, (errmsg("Error in parsing file '%s'", file_name)));
+
+		if (process_type == 'R')
+			*running_processes++;
+		else if(process_type == 'S' || process_type == 'D')
+			*sleeping_processes++;
+		else if (process_type == 'T')
+			*stopped_processes++;
+		else if (process_type == 'Z')
+			*zombie_processes++;
+		else
+			ereport(DEBUG1, (errmsg("Invalid process type '%c'", process_type)));
+
+		*total_threads = *total_threads + running_threads;
+
+		fclose(fpstat);
+		fpstat = NULL;
+	}
+
+	closedir(dirp);
+	dirp = NULL;
+
+	return true;
 }

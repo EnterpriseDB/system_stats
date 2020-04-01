@@ -47,9 +47,11 @@ void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	{
 		sscanf(line_buf, scan_fmt, &load_avg_one_minute, &load_avg_five_minutes, &load_avg_ten_minutes);
 
-		values[Anum_cpu_io_load_avg_one_minute]   = Float4GetDatum(load_avg_one_minute);
-		values[Anum_cpu_io_load_avg_five_minutes] = Float4GetDatum(load_avg_five_minutes);
-		values[Anum_cpu_io_load_avg_ten_minutes]  = Float4GetDatum(load_avg_ten_minutes);
+		values[Anum_load_avg_one_minute]   = Float4GetDatum(load_avg_one_minute);
+		values[Anum_load_avg_five_minutes] = Float4GetDatum(load_avg_five_minutes);
+		values[Anum_load_avg_ten_minutes]  = Float4GetDatum(load_avg_ten_minutes);
+
+		nulls[Anum_load_avg_fifteen_minutes] = true;
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 

@@ -45,6 +45,9 @@ PGDLLEXPORT Datum pg_sys_disk_info(PG_FUNCTION_ARGS);
 PGDLLEXPORT Datum pg_sys_process_info(PG_FUNCTION_ARGS);
 PGDLLEXPORT Datum pg_sys_network_info(PG_FUNCTION_ARGS);
 PGDLLEXPORT Datum pg_sys_cpu_memory_by_process(PG_FUNCTION_ARGS);
+
+void initialize_wmi_connection();
+void uninitialize_wmi_connection();
 #endif
 
 PG_FUNCTION_INFO_V1(pg_sys_os_info);
@@ -61,13 +64,19 @@ PG_FUNCTION_INFO_V1(pg_sys_cpu_memory_by_process);
 void _PG_init(void)
 {
 	/* loading system stats extension */
-	elog(DEBUG1, "System stats extension loaded...");
+	ereport(DEBUG1, (errmsg("System stats extension loaded...")));
+#ifdef WIN32
+	initialize_wmi_connection();
+#endif
 }
 
 void _PG_fini(void)
 {
 	/* unloading system stats extension */
-	elog(DEBUG1, "System stats extension unloaded...");
+	ereport(DEBUG1, (errmsg("System stats extension unloaded...")));
+#ifdef WIN32
+	uninitialize_wmi_connection();
+#endif
 }
 
 /*

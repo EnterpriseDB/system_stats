@@ -26,22 +26,25 @@ bool stringIsNumber(char *str);
 char* lefttrimStr(char *);
 char* righttrimStr(char *);
 char*  trimStr(char *);
+bool read_process_status(int *active_processes, int *running_processes,
+		int *sleeping_processes, int *stopped_processes, int *zombie_processes, int *total_threads);
 
 /* Macros for system disk information */
-#define Natts_disk_info                10
-#define FILE_SYSTEM_MOUNT_FILE_NAME    "/etc/mtab"
-#define IGNORE_MOUNT_POINTS_REGEX      "^/(dev|proc|sys|run|snap|var/lib/docker/.+)($|/)"
-#define IGNORE_FILE_SYSTEM_TYPE_REGEX  "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
-#define Anum_file_system               0
-#define Anum_file_system_type          1
-#define Anum_mount_point               2
-#define Anum_total_space               3
-#define Anum_used_space                4
-#define Anum_available_space           5
-#define Anum_reserved_space            6
-#define Anum_total_inodes              7
-#define Anum_used_inodes               8
-#define Anum_free_inodes               9
+#define Natts_disk_info                         11
+#define FILE_SYSTEM_MOUNT_FILE_NAME             "/etc/mtab"
+#define IGNORE_MOUNT_POINTS_REGEX               "^/(dev|proc|sys|run|snap|var/lib/docker/.+)($|/)"
+#define IGNORE_FILE_SYSTEM_TYPE_REGEX           "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+#define Anum_disk_mount_point                   0
+#define Anum_disk_file_system                   1
+#define Anum_disk_drive_letter                  2
+#define Anum_disk_drive_type                    3
+#define Anum_disk_file_system_type              4
+#define Anum_disk_total_space                   5
+#define Anum_disk_used_space                    6
+#define Anum_disk_free_space                    7
+#define Anum_disk_total_inodes                  8
+#define Anum_disk_used_inodes                   9
+#define Anum_disk_free_inodes                   10
 
 /* prototypes for system disk information functions */
 bool ignoreFileSystemTypes(char *fs_mnt);
@@ -66,51 +69,69 @@ bool ignoreMountPoints(char *fs_mnt);
 #define Anum_weighted_time_spent_io_ms    13
 
 /* Macros for system CPU information */
-#define Natts_cpu_info            7
-#define CPU_INFO_FILE_NAME        "/proc/cpuinfo"
-#define Anum_processor            0
-#define Anum_vendor_id            1
-#define Anum_cpu_family           2
-#define Anum_model                3
-#define Anum_model_name           4
-#define Anum_cpu_mhz              5
-#define Anum_cpu_cache_size       6
+#define Natts_cpu_info               13
+#define CPU_INFO_FILE_NAME           "/proc/cpuinfo"
+#define Anum_cpu_vendor              0
+#define Anum_cpu_description         1
+#define Anum_model_name              2
+#define Anum_processor_type          3
+#define Anum_logical_processor       4
+#define Anum_physical_processor      5
+#define Anum_no_of_cores             6
+#define Anum_architecture            7
+#define Anum_cpu_clock_speed         8
+#define Anum_l1dcache_size           9
+#define Anum_l1icache_size           10
+#define Anum_l2cache_size            11
+#define Anum_l3cache_size            12
 
 /* Macros for Memory information */
-#define Natts_memory_info       8
-#define MEMORY_FILE_NAME        "/proc/meminfo"
-#define Anum_total_memory       0
-#define Anum_free_memory        1
-#define Anum_available_memory   2
-#define Anum_buffers            3
-#define Anum_cached             4
-#define Anum_swap_cached        5
-#define Anum_swap_total         6
-#define Anum_swap_free          7
+#define MEMORY_READ_COUNT             5
+#define Natts_memory_info             12
+#define MEMORY_FILE_NAME              "/proc/meminfo"
+#define Anum_total_memory             0
+#define Anum_used_memory              1
+#define Anum_free_memory              2
+#define Anum_swap_total_memory        3
+#define Anum_swap_used_memory         4
+#define Anum_swap_free_memory         5
+#define Anum_total_cache_memory       6
+#define Anum_kernel_total_memory      7
+#define Anum_kernel_paged_memory      8
+#define Anum_kernel_nonpaged_memory   9
+#define Anum_total_page_file          10
+#define Anum_avail_page_file          11
 
 /* prototypes for system memory information functions */
 uint64_t ConvertToBytes(char *line_buf);
 
 /* Macros for load average information */
-#define Natts_load_avg_info                    3
 #define CPU_IO_LOAD_AVG_FILE                   "/proc/loadavg"
-#define Anum_cpu_io_load_avg_one_minute        0
-#define Anum_cpu_io_load_avg_five_minutes      1
-#define Anum_cpu_io_load_avg_ten_minutes       2
+#define Natts_load_avg_info                    4
+#define Anum_load_avg_one_minute               0
+#define Anum_load_avg_five_minutes             1
+#define Anum_load_avg_ten_minutes              2
+#define Anum_load_avg_fifteen_minutes          3
+
 
 /* Macros for operating system information */
-#define Natts_os_info                7
-#define OS_INFO_FILE_NAME            "/etc/os-release"
-#define OS_DESC_SEARCH_TEXT          "PRETTY_NAME="
-#define OS_VERSION_SEARCH_TEXT       "VERSION_ID="
-#define OS_CODE_NAME_SEARCH_TEXT     "CODENAME="
-#define Anum_host_name               0
-#define Anum_domain_name             1
-#define Anum_kernel_info             2
-#define Anum_architecture            3
-#define Anum_os_description          4
-#define Anum_os_release_version      5
-#define Anum_os_codename             6
+#define Natts_os_info                         12
+#define OS_INFO_FILE_NAME                     "/etc/os-release"
+#define OS_DESC_SEARCH_TEXT                   "PRETTY_NAME="
+#define OS_HANDLE_READ_FILE_PATH              "/proc/sys/fs/file-nr"
+#define OS_BOOT_UP_SINCE_FILE_PATH            "/proc/uptime"
+#define Anum_os_name                          0
+#define Anum_os_version                       1
+#define Anum_host_name                        2
+#define Anum_domain_name                      3
+#define Anum_number_of_users                  4
+#define Anum_number_of_licensed_users         5
+#define Anum_os_handle_count                  6
+#define Anum_os_process_count                 7
+#define Anum_os_thread_count                  8
+#define Anum_os_architecture                  9
+#define Anum_os_boot_time                     10
+#define Anum_os_up_since_seconds              11
 
 /* Macros for system CPU usage information */
 #define Natts_cpu_usage_stats             8
@@ -125,33 +146,34 @@ uint64_t ConvertToBytes(char *line_buf);
 #define Anum_servicing_softirq            7
 
 /* Macros for system processes information */
-#define Natts_process_info         5
-#define Anum_active_processes      0
-#define Anum_running_processes     1
-#define Anum_sleeping_processes    2
-#define Anum_stopped_processes     3
-#define Anum_zombie_processes      4
+#define Natts_process_info                   5
+#define Anum_no_of_total_processes           0
+#define Anum_no_of_running_processes         1
+#define Anum_no_of_stopped_processes         2
+#define Anum_no_of_sleeping_processes        3
+#define Anum_no_of_zombie_processes          4
 
 /* Macros for network information */
-#define Natts_network_info          12
+#define Natts_network_info          11
 #define Anum_net_interface_name     0
 #define Anum_net_ipv4_address       1
-#define Anum_net_ipv6_address       2
-#define Anum_net_speed_mbps         3
-#define Anum_net_tx_bytes           4
-#define Anum_net_tx_packets         5
-#define Anum_net_tx_errors          6
-#define Anum_net_tx_dropped         7
-#define Anum_net_rx_bytes           8
-#define Anum_net_rx_packets         9
-#define Anum_net_rx_errors          10
-#define Anum_net_rx_dropped         11
+#define Anum_net_tx_bytes           2
+#define Anum_net_tx_packets         3
+#define Anum_net_tx_errors          4
+#define Anum_net_tx_dropped         5
+#define Anum_net_rx_bytes           6
+#define Anum_net_rx_packets         7
+#define Anum_net_rx_errors          8
+#define Anum_net_rx_dropped         9
+#define Anum_net_speed_mbps         10
 
 /* Macros for cpu and memory information by process*/
-#define Natts_cpu_memory_info_by_process     4
+#define Natts_cpu_memory_info_by_process     6
 #define Anum_process_pid                     0
-#define Anum_process_command                 1
-#define Anum_process_cpu_usage               2
-#define Anum_process_memory_usage            3
+#define Anum_process_name                    1
+#define Anum_process_running_since           2
+#define Anum_percent_cpu_usage               3
+#define Anum_percent_memory_usage            4
+#define Anum_process_memory_bytes            5
 
 #endif // STATS_H

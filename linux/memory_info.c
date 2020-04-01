@@ -20,12 +20,11 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	ssize_t    line_size;
 	uint64     total_memory = 0;
 	uint64     free_memory = 0;
-	uint64     available_memory = 0;
-	uint64     buffers = 0;
+	uint64     used_memory = 0;
 	uint64     cached = 0;
-	uint64     swap_cached = 0;
 	uint64     swap_total = 0;
 	uint64     swap_free = 0;
+	uint64     swap_used = 0;
 
 	memset(nulls, 0, sizeof(nulls));
 
@@ -64,32 +63,11 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			free_memory = ConvertToBytes(line_buf);
 		}
 
-		/* Read the available memory of the system */
-		if (strstr(line_buf, "MemAvailable") != NULL)
-		{
-			line_count++;
-			available_memory = ConvertToBytes(line_buf);
-		}
-
-		/* Read the buffer memory of the system */
-		if (strstr(line_buf, "Buffers") != NULL)
-		{
-			line_count++;
-			buffers = ConvertToBytes(line_buf);
-		}
-
 		/* Read the cached memory of the system */
 		if (strstr(line_buf, "Cached") != NULL)
 		{
 			line_count++;
 			cached = ConvertToBytes(line_buf);
-		}
-
-		/* Read the cached swap memory of the system */
-		if (strstr(line_buf, "SwapCached") != NULL)
-		{
-			line_count++;
-			swap_cached = ConvertToBytes(line_buf);
 		}
 
 		/* Read the total swap memory of the system */
@@ -106,17 +84,26 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			swap_free = ConvertToBytes(line_buf);
 		}
 
+		used_memory = total_memory - free_memory;
+		swap_used = swap_total - swap_free;
+
 		// Check if we get all lines, add as row
-		if (line_count == Natts_memory_info)
+		if (line_count == MEMORY_READ_COUNT)
 		{
 			values[Anum_total_memory] = Int64GetDatumFast(total_memory);
 			values[Anum_free_memory] = Int64GetDatumFast(free_memory);
-			values[Anum_available_memory] = Int64GetDatumFast(available_memory);
-			values[Anum_buffers] = Int64GetDatumFast(buffers);
-			values[Anum_cached] = Int64GetDatumFast(cached);
-			values[Anum_swap_cached] = Int64GetDatumFast(swap_cached);
-			values[Anum_swap_total] = Int64GetDatumFast(swap_total);
-			values[Anum_swap_free] = Int64GetDatumFast(swap_free);
+			values[Anum_used_memory] = Int64GetDatumFast(used_memory);
+			values[Anum_total_cache_memory] = Int64GetDatumFast(cached);
+			values[Anum_swap_total_memory] = Int64GetDatumFast(swap_total);
+			values[Anum_swap_free_memory] = Int64GetDatumFast(swap_free);
+			values[Anum_swap_used_memory] = Int64GetDatumFast(swap_used);
+
+			/* set the NULL value as it is not for this platform */
+			nulls[Anum_kernel_total_memory] = true;
+			nulls[Anum_kernel_paged_memory] = true;
+			nulls[Anum_kernel_nonpaged_memory] = true;
+			nulls[Anum_total_page_file] = true;
+			nulls[Anum_avail_page_file] = true;
 
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 

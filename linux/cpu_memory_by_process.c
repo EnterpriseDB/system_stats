@@ -29,6 +29,7 @@ typedef struct node
 	long long unsigned int process_cpu_sample_1;
 	long long unsigned int process_cpu_sample_2;
 	long long unsigned int rss_memory;
+	long long unsigned int process_up_since_seconds;
 	char name[MAXPGPATH];
 	struct node * next;
 } node_t;
@@ -198,6 +199,7 @@ void ReadCPUMemoryUsage(int sample)
 	char process_name[MAXPGPATH] = {0};
 	int pid = 0;
 	long unsigned int mem_rss = 0;
+	unsigned int process_up_since = 0;
 
 	DIR *dirp = opendir(PROC_FILE_SYSTEM_PATH);
 
@@ -224,8 +226,8 @@ void ReadCPUMemoryUsage(int sample)
 			continue;
 
 		if (fscanf(fpstat, "%d %s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
-					"%lu %*d %*d %*d %*d %*d %*d %*u %*u %ld",
-					&pid, process_name, &utime_ticks, &stime_ticks, &mem_rss) == EOF)
+					"%lu %*d %*d %*d %*d %*d %*d %u %*u %ld",
+					&pid, process_name, &utime_ticks, &stime_ticks, &process_up_since, &mem_rss) == EOF)
 		{
 			ereport(DEBUG1,
 				(errmsg("Error in parsing file '/proc/%d/stat'", pid)));
@@ -246,6 +248,7 @@ void ReadCPUMemoryUsage(int sample)
 			memcpy(iter->name, process_name, MAXPGPATH);
 			iter->process_cpu_sample_1 = utime_ticks + stime_ticks;
 			iter->rss_memory = mem_rss;
+			iter->process_up_since_seconds = process_up_since;
 			iter->next = NULL;
 			if (head == NULL)
 				head = iter;
@@ -287,6 +290,9 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	long page_size_bytes = 0;
 	long long unsigned int     total_memory;
 	long long unsigned int     rss_memory;
+	long long unsigned int     running_since;
+	int        HZ = 100;
+	long       tlk = -1;
 	node_t *del_iter = NULL;
 	node_t *current  = NULL;
 
@@ -305,6 +311,12 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 	page_size_bytes = sysconf(_SC_PAGESIZE);
 
+	/* First get the HZ value from system as it may vary from system to system */
+	tlk = sysconf(_SC_CLK_TCK);
+
+	if (tlk != -1 && tlk > 0)
+		HZ = (int)tlk;
+
 	// Iterate through head and read all the informations */
 	current = head;
 
@@ -316,11 +328,14 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		cpu_usage = (no_processor) * (current->process_cpu_sample_2 - current->process_cpu_sample_1) * 100 / (float) (total_cpu_usage_2 - total_cpu_usage_1);
 		rss_memory = current->rss_memory * page_size_bytes;
 		memory_usage = (rss_memory/(float)total_memory)*100;
+		running_since = current->process_up_since_seconds;
 
 		values[Anum_process_pid] = Int32GetDatum(process_pid);
-		values[Anum_process_command] = CStringGetTextDatum(command);
-		values[Anum_process_cpu_usage] = Float4GetDatum(cpu_usage);
-		values[Anum_process_memory_usage] = Float4GetDatum(memory_usage);
+		values[Anum_process_name] = CStringGetTextDatum(command);
+		values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage);
+		values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage);
+		values[Anum_process_memory_bytes] = Int64GetDatumFast((uint64)rss_memory);
+		values[Anum_process_running_since] = Int64GetDatumFast((uint64)(running_since/HZ));
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
@@ -329,6 +344,8 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		process_pid = 0;
 		cpu_usage = 0.0;
 		memory_usage = 0.0;
+		running_since = 0;
+		rss_memory = 0;
 
 		del_iter = current;
 		current = current->next;

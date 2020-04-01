@@ -170,7 +170,6 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	bool       nulls[Natts_network_info];
 	char       interface_name[MAXPGPATH];
 	char       ipv4_address[MAXPGPATH];
-	char       ipv6_address[MAXPGPATH];
 	uint64     speed_mbps = 0;
 	uint64     tx_bytes = 0;
 	uint64     tx_packets = 0;
@@ -190,8 +189,6 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	memset(nulls, 0, sizeof(nulls));
 	memset(interface_name, 0, MAXPGPATH);
 	memset(ipv4_address, 0, MAXPGPATH);
-	memset(ipv6_address, 0, MAXPGPATH);
-
 	memset(host, 0, MAXPGPATH);
 
 	/* Below function is used to creates a linked list of structures describing
@@ -240,7 +237,6 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 			values[Anum_net_interface_name] = CStringGetTextDatum(interface_name);
 			values[Anum_net_ipv4_address] = CStringGetTextDatum(ipv4_address);
-			values[Anum_net_ipv6_address] = CStringGetTextDatum(ipv6_address);
 			values[Anum_net_speed_mbps] = Int64GetDatumFast(speed_mbps);
 			values[Anum_net_tx_bytes] = Int64GetDatumFast(tx_bytes);
 			values[Anum_net_tx_packets] = Int64GetDatumFast(tx_packets);
@@ -256,7 +252,6 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			//reset the value again
 			memset(interface_name, 0, MAXPGPATH);
 			memset(ipv4_address, 0, MAXPGPATH);
-			memset(ipv6_address, 0, MAXPGPATH);
 			speed_mbps = 0;
 			tx_bytes = 0;
 			tx_packets = 0;
