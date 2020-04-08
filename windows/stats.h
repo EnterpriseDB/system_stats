@@ -85,36 +85,14 @@ int is_process_running(int pid);
 #define Anum_disk_free_inodes                   10
 
 /* Macros for disk IO information */
-#define Natts_disk_io_info                   29
-#define Anum_disk_io_caption                 0
-#define Anum_disk_io_name                    1
-#define Anum_disk_io_description             2
-#define Anum_avg_disk_bytes_per_read         3
-#define Anum_avg_disk_bytes_per_transfer     4
-#define Anum_avg_disk_bytes_per_write        5
-#define Anum_avg_disk_queue_length           6
-#define Anum_avg_disk_read_queue_length      7
-#define Anum_avg_disk_sec_per_read           8
-#define Anum_avg_disk_sec_per_transfer       9
-#define Anum_avg_disk_sec_per_write          10
-#define Anum_avg_disk_write_queue_length     11
-#define Anum_current_disk_queue_length       12
-#define Anum_disk_bytes_per_sec              13
-#define Anum_disk_read_bytes_per_sec         14
-#define Anum_disk_reads_per_sec              15
-#define Anum_disk_transfers_per_sec          16
-#define Anum_disk_write_bytes_per_sec        17
-#define Anum_disk_writes_per_sec             18
-#define Anum_disk_freq_perf_time             19
-#define Anum_disk_freq_sys_100_ns            20
-#define Anum_percent_disk_read_time          21
-#define Anum_percent_disk_time               22
-#define Anum_percent_disk_write_time         23
-#define Anum_percent_disk_idle_time          24
-#define Anum_disk_split_io_per_sec           25
-#define Anum_disk_timestamp_obj              26
-#define Anum_disk_timestamp_perf_time        27
-#define Anum_disk_timestamp_sys_100_ns       28
+#define Natts_io_analysis_info              7
+#define Anum_device_name                    0
+#define Anum_total_read                     1
+#define Anum_total_write                    2
+#define Anum_read_bytes                     3
+#define Anum_write_bytes                    4
+#define Anum_read_time_ms                   5
+#define Anum_write_time_ms                  6
 
 /* Macros for CPU usage information */
 #define Natts_cpu_usage_info                8

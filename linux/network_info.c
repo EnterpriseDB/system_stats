@@ -26,45 +26,6 @@ void ReadReceiveDropped(const char *interface, uint64 *rx_dropped);
 void ReadTransmitDropped(const char *interface, uint64 *tx_dropped);
 void ReadSpeedMbps(const char *interface, uint64 *speed);
 
-void ReadFileContent(const char *file_name, uint64 *data)
-{
-	FILE       *fp = NULL;
-	char       *line_buf = NULL;
-	size_t     line_buf_size = 0;
-	ssize_t    line_size = 0;
-
-	/* Read the file for network traffics */
-	fp = fopen(file_name, "r");
-
-	if (!fp)
-	{
-		char net_file_name[MAXPGPATH];
-		snprintf(net_file_name, MAXPGPATH, "%s", file_name);
-
-		ereport(DEBUG1,
-				(errcode_for_file_access(),
-					errmsg("can not open file %s for reading network statistics",
-					net_file_name)));
-		return;
-	}
-
-	/* Get the first line of the file. */
-	line_size = getline(&line_buf, &line_buf_size, fp);
-
-	/* Read the content of the file and convert to int64 from string */
-	if (line_size > 0)
-		*data = atoll(line_buf);
-
-	/* Free the allocated line buffer */
-	if (line_buf != NULL)
-	{
-		free(line_buf);
-		line_buf = NULL;
-	}
-
-	fclose(fp);
-}
-
 /* This function is used to read the number of bytes received for specified network interface */
 void ReadReceiveBytes(const char *interface, uint64 *rx_bytes)
 {

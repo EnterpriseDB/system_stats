@@ -25,15 +25,15 @@
 #define LOAD_AVG_15F 0.994459
 
 bool load_avg_initialized = false;
-float4 load_avg_1m  = 0;
-float4 load_avg_5m  = 0;
-float4 load_avg_10m = 0;
-float4 load_avg_15m = 0;
+double load_avg_1m  = 0;
+double load_avg_5m  = 0;
+double load_avg_10m = 0;
+double load_avg_15m = 0;
 
 VOID CALLBACK LoadAvgCallback(PVOID hCounter)
 {
 	PDH_FMT_COUNTERVALUE displayValue;
-	float4 currentLoad;
+	double currentLoad;
 	PDH_STATUS err;
 
 	err = PdhGetFormattedCounterValue(
@@ -43,7 +43,7 @@ VOID CALLBACK LoadAvgCallback(PVOID hCounter)
 		return;
 	}
 
-	currentLoad = (float4)displayValue.doubleValue;
+	currentLoad = displayValue.doubleValue;
 
 	load_avg_1m = load_avg_1m * LOAD_AVG_1F + currentLoad * (1.0 - LOAD_AVG_1F);
 	load_avg_5m = load_avg_5m * LOAD_AVG_5F + currentLoad * (1.0 - LOAD_AVG_5F);
@@ -120,10 +120,10 @@ void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	else
 		ereport(DEBUG1, (errmsg("[ReadLoadAvgInformations]: Counter already initializing for load average")));
 
-	values[Anum_load_avg_one_minute]      = Float4GetDatum(load_avg_1m);
-	values[Anum_load_avg_five_minutes]    = Float4GetDatum(load_avg_5m);
-	values[Anum_load_avg_ten_minutes]     = Float4GetDatum(load_avg_10m);
-	values[Anum_load_avg_fifteen_minutes] = Float4GetDatum(load_avg_15m);
+	values[Anum_load_avg_one_minute]      = Float4GetDatum((float4)load_avg_1m);
+	values[Anum_load_avg_five_minutes]    = Float4GetDatum((float4)load_avg_5m);
+	values[Anum_load_avg_ten_minutes]     = Float4GetDatum((float4)load_avg_10m);
+	values[Anum_load_avg_fifteen_minutes] = Float4GetDatum((float4)load_avg_15m);
 
 	tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 }

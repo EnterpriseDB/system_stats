@@ -28,6 +28,7 @@ char* righttrimStr(char *);
 char*  trimStr(char *);
 bool read_process_status(int *active_processes, int *running_processes,
 		int *sleeping_processes, int *stopped_processes, int *zombie_processes, int *total_threads);
+void ReadFileContent(const char *file_name, uint64 *data);
 
 /* Macros for system disk information */
 #define Natts_disk_info                         11
@@ -51,22 +52,15 @@ bool ignoreFileSystemTypes(char *fs_mnt);
 bool ignoreMountPoints(char *fs_mnt);
 
 /* Macros for system IO Analysis */
-#define Natts_io_analysis_info            14
+#define Natts_io_analysis_info            7
 #define DISK_IO_STATS_FILE_NAME           "/proc/diskstats"
-#define Anum_major_no                     0
-#define Anum_minor_no                     1
-#define Anum_device_name                  2
-#define Anum_read_completed               3
-#define Anum_read_merged                  4
-#define Anum_sector_read                  5
-#define Anum_time_spent_reading_ms        6
-#define Anum_write_completed              7
-#define Anum_write_merged                 8
-#define Anum_sector_written               9
-#define Anum_time_spent_writing_ms        10
-#define Anum_io_in_progress               11
-#define Anum_time_spent_io_ms             12
-#define Anum_weighted_time_spent_io_ms    13
+#define Anum_device_name                  0
+#define Anum_total_read                   1
+#define Anum_total_write                  2
+#define Anum_read_bytes                   3
+#define Anum_write_bytes                  4
+#define Anum_read_time_ms                 5
+#define Anum_write_time_ms                6
 
 /* Macros for system CPU information */
 #define Natts_cpu_info               13
