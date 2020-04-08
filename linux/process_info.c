@@ -10,6 +10,8 @@
 #include "postgres.h"
 #include "stats.h"
 
+void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
 	int           active_processes = 0;

@@ -25,6 +25,7 @@ void ReadTransmitErrors(const char *interface, uint64 *tx_errors);
 void ReadReceiveDropped(const char *interface, uint64 *rx_dropped);
 void ReadTransmitDropped(const char *interface, uint64 *tx_dropped);
 void ReadSpeedMbps(const char *interface, uint64 *speed);
+void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 /* This function is used to read the number of bytes received for specified network interface */
 void ReadReceiveBytes(const char *interface, uint64 *rx_bytes)

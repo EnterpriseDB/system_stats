@@ -9,6 +9,8 @@
 #include "postgres.h"
 #include "stats.h"
 
+void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
 	FILE       *memory_file;

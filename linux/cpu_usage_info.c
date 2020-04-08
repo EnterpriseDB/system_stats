@@ -12,6 +12,8 @@
 
 #include <unistd.h>
 
+void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
 	FILE       *cpu_stats_file;

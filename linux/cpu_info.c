@@ -16,13 +16,15 @@
 #define L2_CACHE_FILE_PATH   "/sys/devices/system/cpu/cpu0/cache/index2/size"
 #define L3_CACHE_FILE_PATH   "/sys/devices/system/cpu/cpu0/cache/index3/size"
 
+int read_cpu_cache_size(const char *path);
+void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 int read_cpu_cache_size(const char *path)
 {
 	FILE          *fp;
 	char          *line_buf = NULL;
 	size_t        line_buf_size = 0;
 	ssize_t       line_size;
-	const char    *scan_fmt = "%s";
 	int           cache_size = 0;
 
 	fp = fopen(L1D_CACHE_FILE_PATH, "r");

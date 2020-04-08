@@ -47,6 +47,8 @@ uint64 ReadTotalCPUUsage(void);
 /* Function used to read total memory usage for each process */
 void ReadCPUMemoryUsage(int sample);
 
+void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 /* Read the total number of processors of the system */
 int ReadTotalProcessors()
 {

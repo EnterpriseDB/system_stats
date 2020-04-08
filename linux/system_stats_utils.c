@@ -135,6 +135,11 @@ bool read_process_status(int *active_processes, int *running_processes,
 	char          file_name[MIN_BUFFER_SIZE];
 	char          process_type;
 	unsigned int  running_threads;
+	int           active_pro = 0;
+	int           running_pro = 0;
+	int           sleeping_pro = 0;
+	int           stopped_pro = 0;
+	int           zombie_pro = 0;
 
 	dirp = opendir(PROC_FILE_SYSTEM_PATH);
 	if (!dirp)
@@ -156,7 +161,7 @@ bool read_process_status(int *active_processes, int *running_processes,
 		if (!isdigit(*ent->d_name))
 			continue;
 
-		*active_processes++;
+		active_pro++;
 
 		sprintf(file_name,"/proc/%s/stat", ent->d_name);
 
@@ -169,13 +174,13 @@ bool read_process_status(int *active_processes, int *running_processes,
 			ereport(DEBUG1, (errmsg("Error in parsing file '%s'", file_name)));
 
 		if (process_type == 'R')
-			*running_processes++;
+			running_pro++;
 		else if(process_type == 'S' || process_type == 'D')
-			*sleeping_processes++;
+			sleeping_pro++;
 		else if (process_type == 'T')
-			*stopped_processes++;
+			stopped_pro++;
 		else if (process_type == 'Z')
-			*zombie_processes++;
+			zombie_pro++;
 		else
 			ereport(DEBUG1, (errmsg("Invalid process type '%c'", process_type)));
 
@@ -184,6 +189,12 @@ bool read_process_status(int *active_processes, int *running_processes,
 		fclose(fpstat);
 		fpstat = NULL;
 	}
+
+	*active_processes = active_pro;
+	*running_processes = running_pro;
+	*sleeping_processes = sleeping_pro;
+	*stopped_processes = stopped_pro;
+	*zombie_processes = zombie_pro;
 
 	closedir(dirp);
 	dirp = NULL;

@@ -15,6 +15,11 @@
 
 #define USER_INFO_FILE "/etc/passwd"
 
+bool total_opened_handle(int *total_handles);
+bool os_boot_up_since_seconds(float4 *boot_up_seconds);
+int get_total_users(void);
+void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 bool total_opened_handle(int *total_handles)
 {
 	FILE          *fp;
@@ -91,7 +96,7 @@ bool os_boot_up_since_seconds(float4 *boot_up_seconds)
 	return true;
 }
 
-int get_total_users()
+int get_total_users(void)
 {
 	FILE     *fp = NULL;
 	int      number_of_users = 0;
@@ -161,6 +166,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	int        zombie_processes = 0;
 	int        total_threads = 0;
 	int        handle_count = 0;
+	int        total_users = 0;
 	float4     os_up_since_seconds = 0;
 
 	memset(nulls, 0, sizeof(nulls));
@@ -184,7 +190,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	}
 
 	/* Get total number of OS users */
-	int total_users = get_total_users();
+	total_users = get_total_users();
 
 	/* Function used to get the host name of the system */
 	if (gethostname(host_name, sizeof(host_name)) != 0)

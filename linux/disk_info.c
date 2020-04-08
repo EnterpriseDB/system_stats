@@ -15,6 +15,8 @@
 
 #include "stats.h"
 
+void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 /* This function is used to ignore the file system types */
 bool ignoreFileSystemTypes(char *fs_mnt)
 {

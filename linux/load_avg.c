@@ -10,6 +10,8 @@
 #include "postgres.h"
 #include "stats.h"
 
+void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
 	FILE       *loadavg_file;

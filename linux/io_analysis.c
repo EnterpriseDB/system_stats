@@ -10,6 +10,8 @@
 #include "postgres.h"
 #include "stats.h"
 
+void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
+
 /* Function used to get IO statistics of block devices */
 void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
