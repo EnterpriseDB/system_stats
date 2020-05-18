@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <ctype.h>
+#include <sys/sysinfo.h>
 
 #define READ_PROCESS_CPU_USAGE_FIRST_SAMPLE     1
 #define READ_PROCESS_CPU_USAGE_SECOND_SAMPLE    2
@@ -29,7 +30,7 @@ typedef struct node
 	long long unsigned int process_cpu_sample_1;
 	long long unsigned int process_cpu_sample_2;
 	long long unsigned int rss_memory;
-	long long unsigned int process_up_since_seconds;
+	unsigned long long process_up_since_seconds;
 	char name[MAXPGPATH];
 	struct node * next;
 } node_t;
@@ -55,6 +56,13 @@ int ReadTotalProcessors()
 	int num_processors;
 	num_processors = sysconf(_SC_NPROCESSORS_ONLN);
 	return num_processors;
+}
+
+/* Round the decimal points to 2 in float value */
+float fl_round(float val)
+{
+    float value = (int)(val * 100 + .5);
+    return (float)value / 100;
 }
 
 /* Read the total physical memory available in the system */
@@ -201,9 +209,23 @@ void ReadCPUMemoryUsage(int sample)
 	char process_name[MAXPGPATH] = {0};
 	int pid = 0;
 	long unsigned int mem_rss = 0;
-	unsigned int process_up_since = 0;
+	unsigned  long long  process_up_since = 0;
+	int        HZ = 100;
+	long       tlk = -1;
+	struct     sysinfo s_info;
+	long       sys_uptime = 0;
+	DIR 	   *dirp = NULL;
 
-	DIR *dirp = opendir(PROC_FILE_SYSTEM_PATH);
+	/* First get the HZ value from system as it may vary from system to system */
+	tlk = sysconf(_SC_CLK_TCK);
+
+	if (tlk != -1 && tlk > 0)
+	    HZ = (int)tlk;
+
+	if (sysinfo(&s_info) == 0)
+		sys_uptime = s_info.uptime;
+
+	dirp = opendir(PROC_FILE_SYSTEM_PATH);
 
 	if (!dirp)
 	{
@@ -228,7 +250,7 @@ void ReadCPUMemoryUsage(int sample)
 			continue;
 
 		if (fscanf(fpstat, "%d %s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
-					"%lu %*d %*d %*d %*d %*d %*d %u %*u %ld",
+					"%lu %*d %*d %*d %*d %*d %*d %llu %*u %ld",
 					&pid, process_name, &utime_ticks, &stime_ticks, &process_up_since, &mem_rss) == EOF)
 		{
 			ereport(DEBUG1,
@@ -250,6 +272,7 @@ void ReadCPUMemoryUsage(int sample)
 			memcpy(iter->name, process_name, MAXPGPATH);
 			iter->process_cpu_sample_1 = utime_ticks + stime_ticks;
 			iter->rss_memory = mem_rss;
+			process_up_since = (unsigned long long)((unsigned long long)sys_uptime - (process_up_since/HZ));
 			iter->process_up_since_seconds = process_up_since;
 			iter->next = NULL;
 			if (head == NULL)
@@ -293,8 +316,6 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	long long unsigned int     total_memory;
 	long long unsigned int     rss_memory;
 	long long unsigned int     running_since;
-	int        HZ = 100;
-	long       tlk = -1;
 	node_t *del_iter = NULL;
 	node_t *current  = NULL;
 
@@ -313,12 +334,6 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 	page_size_bytes = sysconf(_SC_PAGESIZE);
 
-	/* First get the HZ value from system as it may vary from system to system */
-	tlk = sysconf(_SC_CLK_TCK);
-
-	if (tlk != -1 && tlk > 0)
-		HZ = (int)tlk;
-
 	// Iterate through head and read all the informations */
 	current = head;
 
@@ -331,13 +346,15 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		rss_memory = current->rss_memory * page_size_bytes;
 		memory_usage = (rss_memory/(float)total_memory)*100;
 		running_since = current->process_up_since_seconds;
+		memory_usage = fl_round(memory_usage);
+		cpu_usage = fl_round(cpu_usage);
 
 		values[Anum_process_pid] = Int32GetDatum(process_pid);
 		values[Anum_process_name] = CStringGetTextDatum(command);
 		values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage);
 		values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage);
 		values[Anum_process_memory_bytes] = Int64GetDatumFast((uint64)rss_memory);
-		values[Anum_process_running_since] = Int64GetDatumFast((uint64)(running_since/HZ));
+		values[Anum_process_running_since] = Int64GetDatumFast((uint64)(running_since));
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
