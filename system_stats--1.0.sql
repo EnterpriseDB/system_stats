@@ -26,7 +26,7 @@ CREATE FUNCTION pg_sys_os_info(
     OUT thread_count int,
     OUT architecture text,
     OUT last_bootup_time text,
-    OUT os_up_since_seconds int8
+    OUT os_up_since_seconds int
 )
 RETURNS SETOF record
 AS 'MODULE_PATHNAME'
@@ -44,7 +44,7 @@ CREATE FUNCTION pg_sys_cpu_info(
     OUT logical_processor int,
     OUT physical_processor int,
     OUT no_of_cores int,
-    OUT architecture int,
+    OUT architecture text,
     OUT clock_speed int,
     OUT l1dache_size_kb int,
     OUT l1iache_size_kb int,

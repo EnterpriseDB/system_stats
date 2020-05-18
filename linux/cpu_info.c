@@ -27,7 +27,7 @@ int read_cpu_cache_size(const char *path)
 	ssize_t       line_size;
 	int           cache_size = 0;
 
-	fp = fopen(L1D_CACHE_FILE_PATH, "r");
+	fp = fopen(path, "r");
 	if (!fp)
 	{
 		ereport(DEBUG1, (errmsg("can not open file{%s) for reading", L1D_CACHE_FILE_PATH)));
@@ -101,6 +101,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	memset(model, 0, MAXPGPATH);
 	memset(model_name, 0, MAXPGPATH);
 	memset(cpu_mhz, 0, MAXPGPATH);
+	memset(architecture, 0, MAXPGPATH);
 	memset(cpu_desc, 0, MAXPGPATH);
 
 	l1dcache_size = read_cpu_cache_size(L1D_CACHE_FILE_PATH);

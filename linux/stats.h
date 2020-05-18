@@ -30,6 +30,10 @@ bool read_process_status(int *active_processes, int *running_processes,
 		int *sleeping_processes, int *stopped_processes, int *zombie_processes, int *total_threads);
 void ReadFileContent(const char *file_name, uint64 *data);
 
+/* prototypes for system disk information functions */
+bool ignoreFileSystemTypes(char *fs_mnt);
+bool ignoreMountPoints(char *fs_mnt);
+
 /* Macros for system disk information */
 #define Natts_disk_info                         11
 #define FILE_SYSTEM_MOUNT_FILE_NAME             "/etc/mtab"
@@ -46,10 +50,6 @@ void ReadFileContent(const char *file_name, uint64 *data);
 #define Anum_disk_total_inodes                  8
 #define Anum_disk_used_inodes                   9
 #define Anum_disk_free_inodes                   10
-
-/* prototypes for system disk information functions */
-bool ignoreFileSystemTypes(char *fs_mnt);
-bool ignoreMountPoints(char *fs_mnt);
 
 /* Macros for system IO Analysis */
 #define Natts_io_analysis_info            7
@@ -143,8 +143,8 @@ uint64_t ConvertToBytes(char *line_buf);
 #define Natts_process_info                   5
 #define Anum_no_of_total_processes           0
 #define Anum_no_of_running_processes         1
-#define Anum_no_of_stopped_processes         2
-#define Anum_no_of_sleeping_processes        3
+#define Anum_no_of_sleeping_processes        2
+#define Anum_no_of_stopped_processes         3
 #define Anum_no_of_zombie_processes          4
 
 /* Macros for network information */

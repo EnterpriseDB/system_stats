@@ -52,35 +52,44 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	while (line_size >= 0)
 	{
 		/* Read the total memory of the system */
-		if (strstr(line_buf, "MemTotal") != NULL)
+		char *mem_total = strstr(line_buf, "MemTotal:");
+		char *mem_free = NULL;
+		char *cached_mem = NULL;
+		char *c_swap_total = NULL;
+		char *c_swap_free = NULL;
+		if (mem_total != NULL && mem_total == line_buf)
 		{
 			line_count++;
 			total_memory = ConvertToBytes(line_buf);
 		}
 
 		/* Read the free memory of the system */
-		if (strstr(line_buf, "MemFree") != NULL)
+		mem_free = strstr(line_buf, "MemFree:");
+		if (mem_free != NULL && mem_free == line_buf)
 		{
 			line_count++;
 			free_memory = ConvertToBytes(line_buf);
 		}
 
 		/* Read the cached memory of the system */
-		if (strstr(line_buf, "Cached") != NULL)
+		cached_mem = strstr(line_buf, "Cached:");
+		if (cached_mem != NULL && cached_mem == line_buf)
 		{
 			line_count++;
 			cached = ConvertToBytes(line_buf);
 		}
 
 		/* Read the total swap memory of the system */
-		if (strstr(line_buf, "SwapTotal") != NULL)
+		c_swap_total = strstr(line_buf, "SwapTotal:");
+		if (c_swap_total != NULL && c_swap_total == line_buf)
 		{
 			line_count++;
 			swap_total = ConvertToBytes(line_buf);
 		}
 
 		/* Read the free swap memory of the system */
-		if (strstr(line_buf, "SwapFree") != NULL)
+		c_swap_free = strstr(line_buf, "SwapFree:");
+		if (c_swap_free != NULL && c_swap_free == line_buf)
 		{
 			line_count++;
 			swap_free = ConvertToBytes(line_buf);
