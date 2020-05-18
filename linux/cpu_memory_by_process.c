@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <sys/types.h>
 #include <string.h>
@@ -47,6 +47,8 @@ uint64 ReadTotalPhysicalMemory(void);
 uint64 ReadTotalCPUUsage(void);
 /* Function used to read total memory usage for each process */
 void ReadCPUMemoryUsage(int sample);
+/* Function used to round the decimal points to 2 */
+float fl_round(float val);
 
 void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc);
 

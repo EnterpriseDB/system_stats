@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 #include <sys/utsname.h>
 
 #define L1D_CACHE_FILE_PATH  "/sys/devices/system/cpu/cpu0/cache/index0/size"

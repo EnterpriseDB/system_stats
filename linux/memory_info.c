@@ -7,7 +7,7 @@
  *------------------------------------------------------------------------
  */
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 

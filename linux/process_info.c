@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 

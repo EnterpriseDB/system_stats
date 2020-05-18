@@ -13,7 +13,7 @@
 #include <regex.h>
 #include <sys/statvfs.h>
 
-#include "stats.h"
+#include "system_stats.h"
 
 void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
