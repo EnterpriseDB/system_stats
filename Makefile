@@ -59,8 +59,7 @@ OBJS = \
         darwin/network_info.o \
         darwin/cpu_memory_by_process.o
 
-HEADERS = system_stats.h \
-        darwin/stats.h
+HEADERS = system_stats.h
 
 PG_LDFLAGS= -framework IOKit -framework CoreFoundation
 endif

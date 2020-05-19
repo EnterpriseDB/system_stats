@@ -8,7 +8,7 @@
  *------------------------------------------------------------------------
  */
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>

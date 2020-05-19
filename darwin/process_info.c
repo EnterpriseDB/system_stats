@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -17,19 +17,19 @@ extern int get_process_list(struct kinfo_proc **proc_list, size_t *proc_count);
 
 void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
-	size_t        num_processes = 0;
-	int           total_processes = 0;
-	int           running_processes = 0;
-	int           sleeping_processes = 0;
-	int           stopped_processes = 0;
-	int           zombie_processes = 0;
+    size_t        num_processes = 0;
+    int           total_processes = 0;
+    int           running_processes = 0;
+    int           sleeping_processes = 0;
+    int           stopped_processes = 0;
+    int           zombie_processes = 0;
     struct        kinfo_proc *proc_list = NULL;
     struct        kinfo_proc *proc_list_addr = NULL;
     size_t        index;
-	Datum         values[Natts_process_info];
-	bool          nulls[Natts_process_info];
+    Datum         values[Natts_process_info];
+    bool          nulls[Natts_process_info];
 
-	memset(nulls, 0, sizeof(nulls));
+    memset(nulls, 0, sizeof(nulls));
 
     if (get_process_list(&proc_list, &num_processes) != 0)
     {
@@ -59,11 +59,11 @@ void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
     free(proc_list_addr);
 
-	values[Anum_total_processes]      = Int32GetDatum(total_processes);
-	values[Anum_running_processes]    = Int32GetDatum(running_processes);
-	values[Anum_sleeping_processes]   = Int32GetDatum(sleeping_processes);
-	values[Anum_stopped_processes]    = Int32GetDatum(stopped_processes);
-	values[Anum_zombie_processes]     = Int32GetDatum(zombie_processes);
+    values[Anum_no_of_total_processes]      = Int32GetDatum(total_processes);
+    values[Anum_no_of_running_processes]    = Int32GetDatum(running_processes);
+    values[Anum_no_of_sleeping_processes]   = Int32GetDatum(sleeping_processes);
+    values[Anum_no_of_stopped_processes]    = Int32GetDatum(stopped_processes);
+    values[Anum_no_of_zombie_processes]     = Int32GetDatum(zombie_processes);
 
-	tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+    tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 }

@@ -109,7 +109,7 @@ int is_process_running(int pid);
 #define Anum_write_time_ms                       6
 
 /* Macros for system CPU information */
-#define Natts_cpu_info                           13
+#define Natts_cpu_info                           16
 #define CPU_INFO_FILE_NAME                       "/proc/cpuinfo"
 #define Anum_cpu_vendor                          0
 #define Anum_cpu_description                     1
@@ -120,10 +120,13 @@ int is_process_running(int pid);
 #define Anum_no_of_cores                         6
 #define Anum_architecture                        7
 #define Anum_cpu_clock_speed                     8
-#define Anum_l1dcache_size                       9
-#define Anum_l1icache_size                       10
-#define Anum_l2cache_size                        11
-#define Anum_l3cache_size                        12
+#define Anum_cpu_type                            9
+#define Anum_cpu_family                          10
+#define Anum_cpu_byte_order                      11
+#define Anum_l1dcache_size                       12
+#define Anum_l1icache_size                       13
+#define Anum_l2cache_size                        14
+#define Anum_l3cache_size                        15
 
 /* Macros for Memory information */
 #define MEMORY_READ_COUNT                        5
@@ -170,16 +173,15 @@ int is_process_running(int pid);
 #define Anum_os_up_since_seconds                 11
 
 /* Macros for system CPU usage information */
-#define Natts_cpu_usage_stats                    8
+#define Natts_cpu_usage_stats                    7
 #define CPU_USAGE_STATS_FILENAME                 "/proc/stat"
-#define Anum_cpu_name                            0
-#define Anum_usermode_normal_process             1
-#define Anum_usermode_niced_process              2
-#define Anum_kernelmode_process                  3
-#define Anum_idle_mode                           4
-#define Anum_io_completion                       5
-#define Anum_servicing_irq                       6
-#define Anum_servicing_softirq                   7
+#define Anum_usermode_normal_process             0
+#define Anum_usermode_niced_process              1
+#define Anum_kernelmode_process                  2
+#define Anum_idle_mode                           3
+#define Anum_io_completion                       4
+#define Anum_servicing_irq                       5
+#define Anum_servicing_softirq                   6
 
 /* Macros for system processes information */
 #define Natts_process_info                       5

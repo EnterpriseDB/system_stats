@@ -8,10 +8,17 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <unistd.h>
 #include <sys/utsname.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+
+#include <libproc.h>
+#include <sys/proc_info.h>
+
+extern int get_process_list(struct kinfo_proc **proc_list, size_t *proc_count);
 
 void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
@@ -21,32 +28,44 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	char       host_name[MAXPGPATH];
 	char       domain_name[MAXPGPATH];
 	char       os_name[MAXPGPATH];
-	char       os_release_level[MAXPGPATH];
 	char       os_version_level[MAXPGPATH];
 	char       architecture[MAXPGPATH];
-	int        ret_val;
+        int        ret_val;
+	size_t     num_processes = 0;
+	struct     kinfo_proc *proc_list = NULL;
+	int        os_process_count = 0;
+	struct     timeval time_val;
+	size_t     size_time = sizeof(time_val);
 
 	memset(nulls, 0, sizeof(nulls));
 	memset(host_name, 0, MAXPGPATH);
 	memset(domain_name, 0, MAXPGPATH);
 	memset(os_name, 0, MAXPGPATH);
 	memset(architecture, 0, MAXPGPATH);
-	memset(os_release_level, 0, MAXPGPATH);
 	memset(os_version_level, 0, MAXPGPATH);
+
+	if (sysctlbyname("kern.boottime", &time_val, &size_time, 0, 0) == -1)
+		nulls[Anum_cpu_byte_order] = true;
+
+	if (get_process_list(&proc_list, &num_processes) != 0)
+	{
+		ereport(DEBUG1, (errmsg("Error while getting process information list from proc")));
+		return;
+	}
+
+	os_process_count = (int)num_processes;
 
 	ret_val = uname(&uts);
 	/* if it returns not zero means it fails so set null values */
 	if (ret_val != 0)
 	{
 		nulls[Anum_os_name]  = true;
-		nulls[Anum_os_release_level]  = true;
-		nulls[Anum_os_version_level]  = true;
-		nulls[Anum_architecture] = true;
+		nulls[Anum_os_version]  = true;
+		nulls[Anum_os_architecture] = true;
 	}
 	else
 	{
 		memcpy(os_name, uts.sysname, strlen(uts.sysname));
-		memcpy(os_release_level, uts.release, strlen(uts.release));
 		memcpy(os_version_level, uts.version, strlen(uts.version));
 		memcpy(architecture, uts.machine, strlen(uts.machine));
 	}
@@ -72,9 +91,16 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	values[Anum_host_name]           = CStringGetTextDatum(host_name);
 	values[Anum_domain_name]         = CStringGetTextDatum(domain_name);
 	values[Anum_os_name]             = CStringGetTextDatum(os_name);
-	values[Anum_os_release_level]    = CStringGetTextDatum(os_release_level);
-	values[Anum_os_version_level]    = CStringGetTextDatum(os_version_level);
-	values[Anum_architecture]        = CStringGetTextDatum(architecture);
+	values[Anum_os_version]          = CStringGetTextDatum(os_version_level);
+	values[Anum_os_architecture]     = CStringGetTextDatum(architecture);
+	values[Anum_os_process_count]    = Int32GetDatum(os_process_count);
+	values[Anum_os_up_since_seconds] = Int32GetDatum((int)time_val.tv_sec);
+
+	nulls[Anum_number_of_users] = true;
+	nulls[Anum_number_of_licensed_users] = true;
+	nulls[Anum_os_handle_count] = true;
+	nulls[Anum_os_thread_count] = true;
+	nulls[Anum_os_boot_time] = true;
 
 	tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 }

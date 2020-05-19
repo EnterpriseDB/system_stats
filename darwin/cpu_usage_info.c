@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <unistd.h>
 #include <sys/sysctl.h>
@@ -49,8 +49,8 @@ int cpu_stat_information(struct cpu_stat* cpu_stat)
 
 void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
-	Datum      values[Natts_cpu_usage_stats];
-	bool       nulls[Natts_cpu_usage_stats];
+    Datum      values[Natts_cpu_usage_stats];
+    bool       nulls[Natts_cpu_usage_stats];
     struct     cpu_stat first_sample, second_sample;
 
 	memset(nulls, 0, sizeof(nulls));
@@ -76,10 +76,14 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
     float4 idle = (float4)(second_sample.idle - first_sample.idle) / total * 100;
     float4 nice = (float4)(second_sample.nice - first_sample.nice) / total * 100;
 
-	values[Anum_usermode_normal_process_cpu_percentage] = Float4GetDatum(user);
-	values[Anum_usermode_niced_process_cpu_percentage] = Float4GetDatum(nice);
-	values[Anum_kernelmode_process_cpu_percentage] = Float4GetDatum(system);
-	values[Anum_idle_mode_cpu_percentage] = Float4GetDatum(idle);
+    values[Anum_usermode_normal_process] = Float4GetDatum(user);
+    values[Anum_usermode_niced_process] = Float4GetDatum(nice);
+    values[Anum_kernelmode_process] = Float4GetDatum(system);
+    values[Anum_idle_mode] = Float4GetDatum(idle);
 
-	tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+    nulls[Anum_io_completion] = true;
+    nulls[Anum_servicing_irq] = true;
+    nulls[Anum_servicing_softirq] = true;
+
+    tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 }

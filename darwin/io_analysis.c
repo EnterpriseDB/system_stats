@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 /* Here Size is defined in both postgres and Mac Foundation class
    so defined it here to avoid compilation error */

@@ -7,7 +7,7 @@
  *------------------------------------------------------------------------
  */
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -64,16 +64,23 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
     size = sizeof(swap_mem);
 
     /* Read the swap memory usage */
-    if (sysctl(desc, 2, &swap_mem, &size, NULL, 0) == -1) {
+    if (sysctl(desc, 2, &swap_mem, &size, NULL, 0) == -1)
+    {
         ereport(DEBUG1, (errmsg("Error while getting swap memory information")));
     }
-     
-	values[Anum_total_memory] = Int64GetDatumFast(total_memory);
-	values[Anum_used_memory] = Int64GetDatumFast(used_memory);
-	values[Anum_free_memory] = Int64GetDatumFast(free_memory);
-	values[Anum_swap_total] = Int64GetDatumFast(swap_mem.xsu_total);
-	values[Anum_swap_used] = Int64GetDatumFast(swap_mem.xsu_used);
-	values[Anum_swap_free] = Int64GetDatumFast(swap_mem.xsu_avail);
 
-	tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+    values[Anum_total_memory] = Int64GetDatumFast(total_memory);
+    values[Anum_used_memory] = Int64GetDatumFast(used_memory);
+    values[Anum_free_memory] = Int64GetDatumFast(free_memory);
+    values[Anum_swap_total_memory] = Int64GetDatumFast(swap_mem.xsu_total);
+    values[Anum_swap_used_memory] = Int64GetDatumFast(swap_mem.xsu_used);
+    values[Anum_swap_free_memory] = Int64GetDatumFast(swap_mem.xsu_avail);
+    nulls[Anum_total_cache_memory] = true;
+    nulls[Anum_kernel_total_memory] = true;
+    nulls[Anum_kernel_paged_memory] = true;
+    nulls[Anum_kernel_nonpaged_memory] = true;
+    nulls[Anum_total_page_file] = true;
+    nulls[Anum_avail_page_file] = true;
+
+    tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 }

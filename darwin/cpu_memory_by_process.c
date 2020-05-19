@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -23,6 +23,7 @@
 extern int get_process_list(struct kinfo_proc **proc_list, size_t *proc_count);
 extern uint64 find_cpu_times(void);
 void CreateCPUMemoryList(int sample);
+void findProcess(void);
 
 #define READ_PROCESS_CPU_USAGE_FIRST_SAMPLE     1
 #define READ_PROCESS_CPU_USAGE_SECOND_SAMPLE    2
@@ -212,9 +213,12 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
         memory_usage = (rss_memory/(float)total_memory)*100;
 
         values[Anum_process_pid] = Int32GetDatum(process_pid);
-        values[Anum_process_command] = CStringGetTextDatum(command);
-        values[Anum_process_cpu_usage] = Float4GetDatum(cpu_usage);
-        values[Anum_process_memory_usage] = Float4GetDatum(memory_usage);
+        values[Anum_process_name] = CStringGetTextDatum(command);
+        values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage);
+        values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage);
+        values[Anum_process_memory_bytes] = Int64GetDatumFast((uint64)rss_memory);
+
+	nulls[Anum_process_running_since] = true;
 
         tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 

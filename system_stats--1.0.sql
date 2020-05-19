@@ -38,18 +38,21 @@ GRANT EXECUTE ON FUNCTION pg_sys_os_info() TO monitor_system_stats;
 -- System CPU information function
 CREATE FUNCTION pg_sys_cpu_info(            
     OUT vendor text,
-    OUT model_name text,
     OUT description text,
+    OUT model_name text,
     OUT processor_type int,
     OUT logical_processor int,
     OUT physical_processor int,
     OUT no_of_cores int,
     OUT architecture text,
-    OUT clock_speed int,
-    OUT l1dache_size_kb int,
-    OUT l1iache_size_kb int,
-    OUT l2cache_size_kb int,
-    OUT l3cache_size_kb int
+    OUT clock_speed int8,
+    OUT cpu_type text,
+    OUT cpu_family text,
+    OUT byte_order text,
+    OUT l1dache_size int,
+    OUT l1iache_size int,
+    OUT l2cache_size int,
+    OUT l3cache_size int
 )
 RETURNS SETOF record
 AS 'MODULE_PATHNAME'
@@ -168,17 +171,16 @@ REVOKE ALL ON FUNCTION pg_sys_process_info() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION pg_sys_process_info() TO monitor_system_stats;
 
 -- CPU usage information function
--- This function will fetch the time spent in milliseconds by CPU in each mode
+-- This function will fetch the time spent in percentage by CPU in each mode
 -- as described by arguments
 CREATE FUNCTION pg_sys_cpu_usage_info(
-    OUT cpu_name text,
-    OUT usermode_normal_process int8,
-    OUT usermode_niced_process int8,
-    OUT kernelmode_process int8,
-    OUT idle_mode int8,
-    OUT IO_completion int8,
-    OUT servicing_irq int8,
-    OUT servicing_softirq int8
+    OUT usermode_normal_process float4,
+    OUT usermode_niced_process float4,
+    OUT kernelmode_process float4,
+    OUT idle_mode float4,
+    OUT IO_completion float4,
+    OUT servicing_irq float4,
+    OUT servicing_softirq float4
 )
 RETURNS SETOF record
 AS 'MODULE_PATHNAME'

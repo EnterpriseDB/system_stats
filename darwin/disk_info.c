@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <regex.h>
 #include <sys/param.h>
@@ -96,7 +96,6 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	uint64     used_space = 0;
 	uint64     total_space = 0;
 	uint64     available_space = 0;
-	uint64     reserved_space = 0;
 	uint64     total_inodes = 0;
 	uint64     used_inodes = 0;
 	uint64     free_inodes = 0;
@@ -123,38 +122,39 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
         used_space = (uint64_t)((buf->f_blocks - buf->f_bfree) * buf->f_bsize);
         available_space = (uint64_t)(buf->f_bavail * buf->f_bsize);
-        reserved_space  = (uint64_t)((buf->f_bfree - buf->f_bavail) * buf->f_bsize);
         total_inodes = (uint64_t)buf->f_files;
         free_inodes = (uint64_t)buf->f_ffree;
         used_inodes = (uint64_t)(total_inodes - free_inodes);
 
-		memcpy(file_system, buf[i].f_fstypename, strlen(buf[i].f_fstypename));
-		memcpy(mount_point, buf[i].f_mntonname, strlen(buf[i].f_mntonname));
-		memcpy(file_system_type, buf[i].f_mntfromname, strlen(buf[i].f_mntfromname));
+	memcpy(file_system, buf[i].f_fstypename, strlen(buf[i].f_fstypename));
+	memcpy(mount_point, buf[i].f_mntonname, strlen(buf[i].f_mntonname));
+	memcpy(file_system_type, buf[i].f_mntfromname, strlen(buf[i].f_mntfromname));
 
-		values[Anum_file_system] = CStringGetTextDatum(file_system);
-		values[Anum_file_system_type] = CStringGetTextDatum(file_system_type);
-		values[Anum_mount_point] = CStringGetTextDatum(mount_point);
-		values[Anum_total_space] = Int64GetDatumFast(total_space);
-		values[Anum_used_space] = Int64GetDatumFast(used_space);
-		values[Anum_available_space] = Int64GetDatumFast(available_space);
-		values[Anum_reserved_space] = Int64GetDatumFast(reserved_space);
-		values[Anum_total_inodes] = Int64GetDatumFast(total_inodes);
-		values[Anum_used_inodes] = Int64GetDatumFast(used_inodes);
-		values[Anum_free_inodes] = Int64GetDatumFast(free_inodes);
+	/* not used for this platform so set to NULL */
+	nulls[Anum_disk_drive_letter] = true;
+	nulls[Anum_disk_drive_type] = true;
 
-		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+	values[Anum_disk_file_system] = CStringGetTextDatum(file_system);
+	values[Anum_disk_file_system_type] = CStringGetTextDatum(file_system_type);
+	values[Anum_disk_mount_point] = CStringGetTextDatum(mount_point);
+	values[Anum_disk_total_space] = Int64GetDatumFast(total_space);
+	values[Anum_disk_used_space] = Int64GetDatumFast(used_space);
+	values[Anum_disk_free_space] = Int64GetDatumFast(available_space);
+	values[Anum_disk_total_inodes] = Int64GetDatumFast(total_inodes);
+	values[Anum_disk_used_inodes] = Int64GetDatumFast(used_inodes);
+	values[Anum_disk_free_inodes] = Int64GetDatumFast(free_inodes);
 
-		//reset the value again
-		memset(file_system, 0, MAXPGPATH);
-		memset(mount_point, 0, MAXPGPATH);
-		memset(file_system_type, 0, MAXPGPATH);
-		used_space = 0;
-		total_space = 0;
-		available_space = 0;
-		reserved_space = 0;
-		total_inodes = 0;
-		used_inodes = 0;
-		free_inodes = 0;
+	tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+
+	//reset the value again
+	memset(file_system, 0, MAXPGPATH);
+	memset(mount_point, 0, MAXPGPATH);
+	memset(file_system_type, 0, MAXPGPATH);
+	used_space = 0;
+	total_space = 0;
+	available_space = 0;
+	total_inodes = 0;
+	used_inodes = 0;
+	free_inodes = 0;
     }
 }

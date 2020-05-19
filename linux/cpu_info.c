@@ -194,6 +194,9 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		if (physical_processor)
 		{
 			sprintf(cpu_desc, "%s model %s family %s", vendor_id, model, cpu_family);
+			/* convert CPU frequency from MHz to Hz */
+			cpu_mhz = (cpu_mhz * 1000000);
+
 			values[Anum_cpu_vendor] = CStringGetTextDatum(vendor_id);
 			values[Anum_cpu_description] = CStringGetTextDatum(cpu_desc);
 			values[Anum_model_name] = CStringGetTextDatum(model_name);
@@ -201,13 +204,16 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			values[Anum_physical_processor] = Int32GetDatum(physical_processor);
 			values[Anum_no_of_cores] = Int32GetDatum(cpu_cores);
 			values[Anum_architecture] = CStringGetTextDatum(architecture);
-			values[Anum_cpu_clock_speed] = CStringGetTextDatum(cpu_mhz);
+			values[Anum_cpu_clock_speed] = Int64GetDatumFast(cpu_mhz);
 			values[Anum_l1dcache_size] = Int32GetDatum(l1dcache_size);
 			values[Anum_l1icache_size] = Int32GetDatum(l1icache_size);
 			values[Anum_l2cache_size] = Int32GetDatum(l2cache_size);
 			values[Anum_l3cache_size] = Int32GetDatum(l3cache_size);
 
 			nulls[Anum_processor_type] = true;
+			nulls[Anum_cpu_type] = true;
+			nulls[Anum_cpu_family] = true;
+			nulls[Anum_cpu_byte_order] = true;
 
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 		}
