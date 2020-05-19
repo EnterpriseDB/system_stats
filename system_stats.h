@@ -55,6 +55,7 @@ bool stringIsNumber(char *str);
 char* lefttrimStr(char *);
 char* righttrimStr(char *);
 char*  trimStr(char *);
+float fl_round(float val);
 bool read_process_status(int *active_processes, int *running_processes,
 		int *sleeping_processes, int *stopped_processes, int *zombie_processes, int *total_threads);
 void ReadFileContent(const char *file_name, uint64 *data);
