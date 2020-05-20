@@ -10,14 +10,14 @@
 #ifndef SYSTEM_STATS_H
 #define SYSTEM_STATS_H
 
-#include "access/tupdesc.h"
-#include "utils/tuplestore.h"
-#include "utils/builtins.h"
-
 #ifdef WIN32
 #include <windows.h>
 #include <wbemidl.h>
 #endif
+
+#include "access/tupdesc.h"
+#include "utils/tuplestore.h"
+#include "utils/builtins.h"
 
 /* prototypes for system disk information functions */
 void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc);
@@ -174,7 +174,7 @@ int is_process_running(int pid);
 #define Anum_os_up_since_seconds                 11
 
 /* Macros for system CPU usage information */
-#define Natts_cpu_usage_stats                    7
+#define Natts_cpu_usage_stats                    11
 #define CPU_USAGE_STATS_FILENAME                 "/proc/stat"
 #define Anum_usermode_normal_process             0
 #define Anum_usermode_niced_process              1
@@ -183,6 +183,10 @@ int is_process_running(int pid);
 #define Anum_io_completion                       4
 #define Anum_servicing_irq                       5
 #define Anum_servicing_softirq                   6
+#define Anum_percent_user_time                   7
+#define Anum_percent_processor_time              8
+#define Anum_percent_privileged_time             9
+#define Anum_percent_interrupt_time              10
 
 /* Macros for system processes information */
 #define Natts_process_info                       5

@@ -8,15 +8,15 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <windows.h>
 #include <wbemidl.h>
 
 void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
-	Datum            values[Natts_cpu_usage_info];
-	bool             nulls[Natts_cpu_usage_info];
+	Datum            values[Natts_cpu_usage_stats];
+	bool             nulls[Natts_cpu_usage_stats];
 
 	memset(nulls, 0, sizeof(nulls));
 
@@ -43,175 +43,123 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			char    *dst = NULL;
 			size_t  charsConverted = 0;
 
-			hres = result->lpVtbl->Get(result, L"Name", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_cpu_usage_name] = true;
-			else
-			{
-				wstr_length = 0;
-				charsConverted = 0;
-				wstr_length = SysStringLen(query_result.bstrVal);
-				if (wstr_length == 0)
-					nulls[Anum_cpu_usage_name] = true;
-				else
-				{
-					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					values[Anum_cpu_usage_name] = CStringGetTextDatum(dst);
-					free(dst);
-				}
-			}
-
-			hres = result->lpVtbl->Get(result, L"Caption", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_cpu_usage_caption] = true;
-			else
-			{
-				wstr_length = 0;
-				charsConverted = 0;
-				wstr_length = SysStringLen(query_result.bstrVal);
-				if (wstr_length == 0)
-					nulls[Anum_cpu_usage_caption] = true;
-				else
-				{
-					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					values[Anum_cpu_usage_caption] = CStringGetTextDatum(dst);
-					free(dst);
-				}
-			}
-
-			hres = result->lpVtbl->Get(result, L"Description", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_cpu_usage_description] = true;
-			else
-			{
-				wstr_length = 0;
-				charsConverted = 0;
-				wstr_length = SysStringLen(query_result.bstrVal);
-				if (wstr_length == 0)
-					nulls[Anum_cpu_usage_description] = true;
-				else
-				{
-					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					values[Anum_cpu_usage_description] = CStringGetTextDatum(dst);
-					free(dst);
-				}
-			}
-
 			hres = result->lpVtbl->Get(result, L"PercentIdleTime", 0, &query_result, 0, 0);
 			if (FAILED(hres))
-				nulls[Anum_cpu_percent_idle_time] = true;
+				nulls[Anum_idle_mode] = true;
 			else
 			{
 				wstr_length = 0;
 				charsConverted = 0;
 				wstr_length = SysStringLen(query_result.bstrVal);
 				if (wstr_length == 0)
-					nulls[Anum_cpu_percent_idle_time] = true;
+					nulls[Anum_idle_mode] = true;
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					long long percent_time = strtoll(dst, NULL, 10);
-					values[Anum_cpu_percent_idle_time] = Int64GetDatumFast(percent_time);
+					values[Anum_idle_mode] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentInterruptTime", 0, &query_result, 0, 0);
 			if (FAILED(hres))
-				nulls[Anum_cpu_percent_interrupt_time] = true;
+				nulls[Anum_percent_interrupt_time] = true;
 			else
 			{
 				wstr_length = 0;
 				charsConverted = 0;
 				wstr_length = SysStringLen(query_result.bstrVal);
 				if (wstr_length == 0)
-					nulls[Anum_cpu_percent_interrupt_time] = true;
+					nulls[Anum_percent_interrupt_time] = true;
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					long long percent_time = strtoll(dst, NULL, 10);
-					values[Anum_cpu_percent_interrupt_time] = Int64GetDatumFast(percent_time);
+					values[Anum_percent_interrupt_time] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentPrivilegedTime", 0, &query_result, 0, 0);
 			if (FAILED(hres))
-				nulls[Anum_cpu_percent_privileged_time] = true;
+				nulls[Anum_percent_privileged_time] = true;
 			else
 			{
 				wstr_length = 0;
 				charsConverted = 0;
 				wstr_length = SysStringLen(query_result.bstrVal);
 				if (wstr_length == 0)
-					nulls[Anum_cpu_percent_privileged_time] = true;
+					nulls[Anum_percent_privileged_time] = true;
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					long long percent_time = strtoll(dst, NULL, 10);
-					values[Anum_cpu_percent_privileged_time] = Int64GetDatumFast(percent_time);
+					values[Anum_percent_privileged_time] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentProcessorTime", 0, &query_result, 0, 0);
 			if (FAILED(hres))
-				nulls[Anum_cpu_percent_processor_time] = true;
+				nulls[Anum_percent_processor_time] = true;
 			else
 			{
 				wstr_length = 0;
 				charsConverted = 0;
 				wstr_length = SysStringLen(query_result.bstrVal);
 				if (wstr_length == 0)
-					nulls[Anum_cpu_percent_processor_time] = true;
+					nulls[Anum_percent_processor_time] = true;
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					long long percent_time = strtoll(dst, NULL, 10);
-					values[Anum_cpu_percent_processor_time] = Int64GetDatumFast(percent_time);
+					values[Anum_percent_processor_time] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentUserTime", 0, &query_result, 0, 0);
 			if (FAILED(hres))
-				nulls[Anum_cpu_percent_user_time] = true;
+				nulls[Anum_percent_user_time] = true;
 			else
 			{
 				wstr_length = 0;
 				charsConverted = 0;
 				wstr_length = SysStringLen(query_result.bstrVal);
 				if (wstr_length == 0)
-					nulls[Anum_cpu_percent_user_time] = true;
+					nulls[Anum_percent_user_time] = true;
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					long long percent_time = strtoll(dst, NULL, 10);
-					values[Anum_cpu_percent_user_time] = Int64GetDatumFast(percent_time);
+					values[Anum_percent_user_time] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
 			}
+
+			nulls[Anum_usermode_normal_process] = true;
+			nulls[Anum_usermode_niced_process] = true;
+			nulls[Anum_kernelmode_process] = true;
+			nulls[Anum_io_completion] = true;
+			nulls[Anum_servicing_irq] = true;
+			nulls[Anum_servicing_softirq] = true;
 
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
 			/* release the current result object */
 			result->lpVtbl->Release(result);
+			break;
 		}
 	}
 	else

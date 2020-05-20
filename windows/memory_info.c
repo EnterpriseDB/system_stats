@@ -7,7 +7,7 @@
  *------------------------------------------------------------------------
  */
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <windows.h>
 #include <stdio.h>

@@ -8,7 +8,7 @@
  *------------------------------------------------------------------------
  */
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <windows.h>
 #include <wbemidl.h>
@@ -33,7 +33,7 @@ int is_process_running(int pid)
 	size_t outSize;
 	char pid_str[20] = { 0 };
 	sprintf(pid_str, "%d", pid);
-	sprintf(ptr, "SELECT * FROM Win32_Thread WHERE ProcessHandle = %s", pid_str);
+	sprintf(ptr, "SELECT ThreadState, ThreadWaitReason FROM Win32_Thread WHERE ProcessHandle = %s", pid_str);
 	mbstowcs_s(&outSize, w_query, sizeof(ptr), ptr, sizeof(ptr));
 
 	IEnumWbemClassObject *results = NULL;
@@ -195,7 +195,6 @@ IEnumWbemClassObject* execute_query(BSTR query)
 
 	if (services != NULL)
 	{
-		elog(WARNING, "Service is not NULL");
 		// issue a WMI query
 		hres = services->lpVtbl->ExecQuery(services, language, query, WBEM_FLAG_BIDIRECTIONAL, NULL, &results);
 		if (FAILED(hres))
@@ -208,7 +207,6 @@ IEnumWbemClassObject* execute_query(BSTR query)
 		initialize_wmi_connection();
 		if (services != NULL)
 		{
-			elog(WARNING, "Service is not NULL....");
 			// issue a WMI query
 			hres = services->lpVtbl->ExecQuery(services, language, query, WBEM_FLAG_BIDIRECTIONAL, NULL, &results);
 			if (FAILED(hres))

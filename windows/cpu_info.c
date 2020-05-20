@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <windows.h>
 #include <wbemidl.h>
@@ -111,17 +111,33 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			else
 				values[Anum_processor_type] = Int32GetDatum(query_result.intVal);
 
-			hres = result->lpVtbl->Get(result, L"Architecture", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_architecture] = true;
-			else
-				values[Anum_architecture] = Int32GetDatum(query_result.intVal);
-
 			hres = result->lpVtbl->Get(result, L"MaxClockSpeed", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_cpu_clock_speed] = true;
 			else
-				values[Anum_cpu_clock_speed] = Int32GetDatum(query_result.intVal);
+			{
+				/* convert MHz to Hz */
+				uint64 max_clock_speed = (uint64)((uint64)(query_result.intVal) * (uint64)1000000);
+				values[Anum_cpu_clock_speed] = Int64GetDatumFast(max_clock_speed);
+			}
+
+			hres = result->lpVtbl->Get(result, L"Architecture", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_architecture] = true;
+			else
+			{
+				int val = query_result.intVal;
+				char arch[MAXPGPATH];
+				memset(arch, 0x00, MAXPGPATH);
+				sprintf(arch, "%d", val);
+				values[Anum_architecture] = CStringGetTextDatum(arch);
+			}
+
+			hres = result->lpVtbl->Get(result, L"MaxClockSpeed", 0, &query_result, 0, 0);
+			if (FAILED(hres))
+				nulls[Anum_l2cache_size] = true;
+			else
+				values[Anum_l2cache_size] = Int32GetDatum(query_result.intVal);
 
 			hres = result->lpVtbl->Get(result, L"L2CacheSize", 0, &query_result, 0, 0);
 			if (FAILED(hres))
@@ -153,6 +169,9 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 		nulls[Anum_l1dcache_size] = true;
 		nulls[Anum_l1icache_size] = true;
+		nulls[Anum_cpu_type] = true;
+		nulls[Anum_cpu_family] = true;
+		nulls[Anum_cpu_byte_order] = true;
 		values[Anum_physical_processor] = Int32GetDatum(no_physical_cpus);
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 	}

@@ -53,9 +53,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="windows\stats.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="system_stats.h">
       <Filter>Header Files</Filter>
     </ClInclude>

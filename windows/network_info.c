@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <iphlpapi.h>
 #pragma comment(lib, "iphlpapi.lib")

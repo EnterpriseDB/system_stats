@@ -8,7 +8,7 @@
  */
 
 #include "postgres.h"
-#include "stats.h"
+#include "system_stats.h"
 
 #include <windows.h>
 #include <wbemidl.h>
@@ -134,6 +134,12 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 			used_space = (total_space - free_space);
 			values[Anum_disk_used_space] = Int64GetDatumFast(used_space);
+
+			nulls[Anum_disk_mount_point] = true;
+			nulls[Anum_disk_file_system_type] = true;
+			nulls[Anum_disk_total_inodes] = true;
+			nulls[Anum_disk_used_inodes] = true;
+			nulls[Anum_disk_free_inodes] = true;
 
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 

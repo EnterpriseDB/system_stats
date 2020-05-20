@@ -45,7 +45,7 @@ CREATE FUNCTION pg_sys_cpu_info(
     OUT physical_processor int,
     OUT no_of_cores int,
     OUT architecture text,
-    OUT clock_speed int8,
+    OUT clock_speed_hz int8,
     OUT cpu_type text,
     OUT cpu_family text,
     OUT byte_order text,
@@ -174,13 +174,17 @@ GRANT EXECUTE ON FUNCTION pg_sys_process_info() TO monitor_system_stats;
 -- This function will fetch the time spent in percentage by CPU in each mode
 -- as described by arguments
 CREATE FUNCTION pg_sys_cpu_usage_info(
-    OUT usermode_normal_process float4,
-    OUT usermode_niced_process float4,
-    OUT kernelmode_process float4,
-    OUT idle_mode float4,
-    OUT IO_completion float4,
-    OUT servicing_irq float4,
-    OUT servicing_softirq float4
+    OUT usermode_normal_process_percent float4,
+    OUT usermode_niced_process_percent float4,
+    OUT kernelmode_process_percent float4,
+    OUT idle_mode_percent float4,
+    OUT IO_completion_percent float4,
+    OUT servicing_irq_percent float4,
+    OUT servicing_softirq_percent float4,
+    OUT user_time_percent float4,
+    OUT processor_time_percent float4,
+    OUT privileged_time_percent float4,
+    OUT interrupt_time_percent float4
 )
 RETURNS SETOF record
 AS 'MODULE_PATHNAME'
