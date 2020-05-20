@@ -27,7 +27,7 @@ The module built using the PGXS framework:
 
    e.g.
     PG_INCLUDE_DIR=C:\Program Files\PostgreSQL\12\include
-	  PG_LIB_DIR=C:\Program Files\PostgreSQL\12\lib
+    PG_LIB_DIR=C:\Program Files\PostgreSQL\12\lib
 
 - Open the Visual studio project file "system_stats.vcxproj" and build the
   project.
@@ -83,72 +83,85 @@ This interface allows users to get network interface information.
 This interface allows users to get the CPU and memory information for each
 process ID.
 
-Detailed output of functions in Linux
--------------------------------------
+Detailed output of each functions in all platforms
+--------------------------------------------------
 
     pg_sys_os_info
 
+    - name
+    - version
     - host name
     - domain name
-    - kernel version
+    - number of users
+    - number of licensed_users
+    - handle count
+    - process count
+    - thread count
     - architecture
-    - operating system dist id
-    - Operating system description
-    - Operating system version
-    - Operating system code name
+    - last bootup time
+    - os up since seconds
 
 
     pg_sys_cpu_info
 
-    - Processor ID
-    - CPU vendor ID
-    - CPU family
-    - CPU model
-    - Model name
-    - CPU frequency in MHz
-    - CPU cache size
+    - vendor
+    - description
+    - model name
+    - processor type
+    - logical processor
+    - physical processor
+    - number of cores
+    - architecture
+    - clock speed in hz
+    - cpu type
+    - cpu family
+    - byte order
+    - l1d cache size
+    - l1i cache size
+    - l2 cache size
+    - l3 cache size
 
 
     pg_sys_cpu_usage_info
 
-    - CPU name
-    - Time spent ( in milliseconds ) to process usermode normal process
-    - Time spent ( in milliseconds ) to process usermode niced process
-    - Time spent ( in milliseconds ) to process kernelmode process
-    - Time spent ( in milliseconds ) in idle mode
-    - Time spent ( in milliseconds ) for IO completion
-    - Time spent ( in milliseconds ) for servicing hardware interrupt
-    - Time spent ( in milliseconds ) for servicing software interrupt
+    - Percent time spent in processing usermode normal process
+    - Percent time spent in processing usermode niced process
+    - Percent time spent in kernel mode process
+    - Percent time spent in idle mode
+    - Percent time spent in io completion
+    - Percent time spent in servicing interrupt
+    - Percent time spent in servicing software interrupt
+    - Percent user time spent
+    - Percent processor time spent
+    - Percent privileged time spent
+    - Percent interrupt time spent
 
 
     pg_sys_memory_info
 
-    - Total number of memory
-    - Free memory
-    - Available memory
-    - buffers memory
-    - cached memory
-    - Cached swap memory
-    - Total swap memory
-    - Free swap memory
+    - total memory
+    - used memory
+    - free memory
+    - total swap memory
+    - used swap memory
+    - free swap memory
+    - total cache memory
+    - total kernel memory
+    - kernel paged memory
+    - kernel non paged memory
+    - total page file
+    - avail page file
 
 
     pg_sys_io_analysis_info
 
-    - Major no
-    - Minor no
     - Block device name
-    - read completed by block device
-    - read merged by block device
-    - sector read by block device
+    - total no of reads
+    - total no of writes
+    - read bytes
+    - write bytes
     - Time spent in milliseconds for reading
-    - write completed by block device
-    - write merged by block device
-    - sector written by block device
     - Time spent in milliseconds for writing
-    - No of IO in progress
-    - Time spent in milliseconds for IO
-    - Time spent in milliseconds for weighted IO
 
 
     pg_sys_disk_info
@@ -156,10 +169,11 @@ Detailed output of functions in Linux
     - file system of the disk
     - file system type
     - mount point for that file system
+    - drive letter
+    - drive type
     - Total space ( In Bytes )
     - Used spaced ( In Bytes )
     - Available space ( In Bytes )
-    - Reserved space ( In Bytes )
     - No of total inodes
     - No of used inodes
     - No of free inodes
@@ -170,135 +184,22 @@ Detailed output of functions in Linux
     - Average load by 1 minute
     - Average load by 5 minutes
     - Average load by 10 minutes
-
-
-    pg_sys_process_info
-
-    - No. of active_processes
-    - No. of running_processes
-    - No. of sleeping_processes
-    - No. of stopped_processes
-    - No. of zombie_processes
-
-
-    pg_sys_network_info
-
-    - Name of the interface_name
-    - ipv4 address of the interface
-    - ipv6 address of the interface
-    - interface speed in mbps
-    - Number of total bytes transmitted
-    - Number of total packets transmitted
-    - Number of transmit errors by this network device
-    - Number of packets dropped during transmission
-    - Number of total bytes received
-    - Number of total packets received
-    - Number of receive errors by this network device
-    - Number of packets dropped by this network device
-
-
-    pg_sys_cpu_memory_by_process
-
-    - pid of the process
-    - process name
-    - CPU usage ( In percentage )
-    - Memory usage ( In percentage )
-
-
-Detailed output of functions in Mac OSX
----------------------------------------
-
-    pg_sys_os_info
-
-    - host name
-    - domain name
-    - os_name
-    - os_release_level
-    - os_version_level
-    - os_architecture
-
-
-    pg_sys_cpu_info
-
-    - Active CPU
-    - Byte order
-    - CPU family
-    - CPU type
-    - Logical CPU
-    - Physical CPU
-    - CPU frequency in MHz
-    - CPU model
-    - CPU machine
-    - CPU L1d cache size
-    - CPU L1i cache size
-    - CPU L2 cache size
-    - CPU L3 cache size
-
-
-    pg_sys_cpu_usage_info
-
-    - Time spent during usermode normal process in percentage
-    - Time spent during usermode niced process in percentage
-    - Time spent during kernelmode process in percentage
-    - Time spent during idle mode in percentage
-
-
-    pg_sys_memory_info
-
-    - Total number of memory
-    - Free memory
-    - Available memory
-    - Cached swap memory
-    - Total swap memory
-    - Free swap memory
-
-
-    pg_sys_io_analysis_info
-
-    - Block device name
-    - total number of reads by block device
-    - total number of writes by block device
-    - read bytes by block device
-    - write bytes by block device
-    - Time spent in milliseconds for reading
-    - Time spent in milliseconds for writing
-
-
-    pg_sys_disk_info
-
-    - file system of the disk
-    - file system type
-    - mount point for that file system
-    - Total space ( In Bytes )
-    - Used spaced ( In Bytes )
-    - Available space ( In Bytes )
-    - Reserved space ( In Bytes )
-    - No of total inodes
-    - No of used inodes
-    - No of free inodes
-
-
-    pg_sys_load_avg_info
-
-    - Average load by 1 minute
-    - Average load by 5 minutes
     - Average load by 15 minutes
 
 
     pg_sys_process_info
 
-    - No. of active_processes
-    - No. of running_processes
-    - No. of sleeping_processes
-    - No. of stopped_processes
-    - No. of zombie_processes
+    - No. of total processes
+    - No. of running processes
+    - No. of sleeping processes
+    - No. of stopped processes
+    - No. of zombie processes
 
 
     pg_sys_network_info
 
     - Name of the interface_name
     - ipv4 address of the interface
-    - interface speed in mbps
     - Number of total bytes transmitted
     - Number of total packets transmitted
     - Number of transmit errors by this network device
@@ -307,6 +208,7 @@ Detailed output of functions in Mac OSX
     - Number of total packets received
     - Number of receive errors by this network device
     - Number of packets dropped by this network device
+    - interface speed in mbps
 
 
     pg_sys_cpu_memory_by_process
@@ -315,151 +217,4 @@ Detailed output of functions in Mac OSX
     - process name
     - CPU usage ( In percentage )
     - Memory usage ( In percentage )
-
-
-Detailed output of functions in Windows
----------------------------------------
-
-    pg_sys_os_info
-
-    - Operating system name
-  	- version
-  	- build version
-  	- servicepack major version
-  	- servicepack minor version
-  	- host name
-  	- number of users
-  	- number of licensed users
-  	- architecture
-  	- installed_time
-  	- last_bootup_time
-
-
-    pg_sys_cpu_info
-
-  	- device_id
-  	- description
-  	- manufacturer
-  	- name
-  	- processor type
-  	- architecture
-  	- maximum clock speed
-  	- current clock speed
-  	- address width
-  	- cpu status
-  	- L2 cache size
-  	- L3 cache size
-  	- number of cores
-  	- number of enabled cores
-  	- number of logical processor
-  	- status
-  	- status information
-  	- thread count
-  	- last error code
-
-
-    pg_sys_cpu_usage_info
-
-  	- name
-  	- caption
-  	- description
-  	- percent idle time
-  	- percent interrupt time
-  	- percent privileged time
-  	- percent processor time
-  	- percent user time
-
-
-    pg_sys_memory_info
-
-  	- Total physical memory
-  	- Available physical memory
-  	- Memory load percentage
-  	- Total page file
-  	- Available page file
-  	- Avaliable virtual memory
-  	- Available ext virtual memory
-
-
-    pg_sys_io_analysis_info
-
-  	- caption
-  	- name
-  	- description
-  	- avg disk bytes per read
-  	- avg disk bytes per transfer
-  	- avg disk bytes per_write
-  	- avg disk queue length
-  	- avg disk read queue length
-  	- avg disk sec per read
-  	- avg disk sec per transfer
-  	- avg disk sec per write
-  	- avg disk write queue length
-  	- current disk queue length
-  	- disk bytes per sec
-  	- disk read bytes per sec
-  	- disk reads per sec
-  	- disk transfers per sec
-  	- disk write bytes per sec
-  	- disk writes per sec
-  	- disk freq perf time
-  	- disk freq sys 100 ns
-  	- percent disk read time
-  	- percent disk time
-  	- percent disk write time
-  	- percent disk idle time
-  	- disk split io per sec
-  	- disk timestamp obj
-  	- disk timestamp perf time
-  	- disk timestamp sys 100 ns
-
-
-    pg_sys_disk_info
-
-	- device id
-	- caption
-	- description
-	- name
-	- max file name length
-	- block size
-	- no of blocks
-	- drive type
-	- file system
-	- free space
-	- total space
-	- used space
-	- drive letter
-	- last error code
-
-
-    pg_sys_network_info
-
-	- Name of the interface_name
-	- ipv4 address of the interface
-	- interface speed in mbps
-	- Number of total bytes transmitted
-	- Number of total packets transmitted
-	- Number of transmit errors by this network device
-	- Number of packets dropped during transmission
-	- Number of total bytes received
-	- Number of total packets received
-	- Number of receive errors by this network device
-	- Number of packets dropped by this network device
-
-
-    pg_sys_process_info
-
-	- No. of total processes
-	- No. of running processes
-	- No. of stopped_processes
-
-    pg_sys_cpu_memory_by_process
-
-	- pid of the process
-	- process name
-	- Process running since
-	- thread count
-	- handle count
-	- percent processor time
-	- percent user time
-	- Memory usage in bytes
+    - Total memory used by process ( In bytes )

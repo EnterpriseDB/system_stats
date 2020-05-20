@@ -49,8 +49,8 @@ CREATE FUNCTION pg_sys_cpu_info(
     OUT cpu_type text,
     OUT cpu_family text,
     OUT byte_order text,
-    OUT l1dache_size int,
-    OUT l1iache_size int,
+    OUT l1dcache_size int,
+    OUT l1icache_size int,
     OUT l2cache_size int,
     OUT l3cache_size int
 )
