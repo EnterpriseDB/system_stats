@@ -49,8 +49,8 @@ This interface allows user to get the cpu information ( e.g. hardware ).
 
 3. pg_sys_cpu_usage_info
 ------------------------
-This interface allows user to get the cpu usage information of all CPUs. Values
-are in milliseconds spent by CPUs for all operations.
+This interface allows user to get the cpu usage information of the CPU. Values
+are in percentage spent by CPUs for all operations.
 
 4. pg_sys_memory_info
 ---------------------
@@ -67,8 +67,8 @@ This interface allows users to get the disk information.
 
 7. pg_sys_load_avg_info
 -----------------------
-This interface allows users to get the average load of the system by 1, 5 and
-10 minutes.
+This interface allows users to get the average load of the system by 1, 5, 10 and
+15 minutes.
 
 8. pg_sys_process_info
 ----------------------
@@ -82,6 +82,7 @@ This interface allows users to get network interface information.
 --------------------------------
 This interface allows users to get the CPU and memory information for each
 process ID.
+
 
 Detailed output of each functions in all platforms
 --------------------------------------------------
