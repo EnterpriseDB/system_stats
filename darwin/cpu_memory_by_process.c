@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------
  * cpu_memory_by_process.c
- *              CPU and memory usage by process id or name
+ *              CPU and memory usage of all processes
  *
  * Copyright (c) 2020, EnterpriseDB Corporation. All Rights Reserved.
  *
@@ -46,46 +46,6 @@ node_t *head = NULL;
 node_t *prev = NULL;
 node_t *iter = NULL;
 
-void findProcess()
-{
-    pid_t * pids = calloc(0x1000, 1);
-    int count = proc_listallpids(pids, 0x1000);
-
-    elog(WARNING, "count=%u\n", count) ;
-
-    for( int index=0; index < count; ++index)
-    {
-        pid_t pid = pids[ index ] ;
-
-        struct proc_taskinfo taskInfo ;
-        int result = proc_pidinfo( pid, PROC_PIDTASKINFO, 0,  & taskInfo, sizeof( taskInfo ) ) ;
-        if (result <= 0)
-            elog(WARNING, "Error reading proc info");
-
-        // fields of taskInfo:
-//          uint64_t        pti_virtual_size;   /* virtual memory size (bytes) */
-//          uint64_t        pti_resident_size;  /* resident memory size (bytes) */
-//          uint64_t        pti_total_user;     /* total time */
-//          uint64_t        pti_total_system;
-//          uint64_t        pti_threads_user;   /* existing threads only */
-//          uint64_t        pti_threads_system;
-//          int32_t         pti_policy;     /* default policy for new threads */
-//          int32_t         pti_faults;     /* number of page faults */
-//          int32_t         pti_pageins;        /* number of actual pageins */
-//          int32_t         pti_cow_faults;     /* number of copy-on-write faults */
-//          int32_t         pti_messages_sent;  /* number of messages sent */
-//          int32_t         pti_messages_received;  /* number of messages received */
-//          int32_t         pti_syscalls_mach;  /* number of mach system calls */
-//          int32_t         pti_syscalls_unix;  /* number of unix system calls */
-//          int32_t         pti_csw;            /* number of context switches */
-//          int32_t         pti_threadnum;      /* number of threads in the task */
-//          int32_t         pti_numrunning;     /* number of running threads */
-//          int32_t         pti_priority;       /* task priority*/
-
-        elog(WARNING, "PID %u: -->total_user: [%lld] --> total_system: [%lld] --> rss [%lld]\n", pid, taskInfo.pti_total_user, taskInfo.pti_total_system, taskInfo.pti_resident_size);
-    }
-}
-
 /* Function used to create the data structure for each process CPU and memory usage information */
 void CreateCPUMemoryList(int sample)
 {
@@ -103,10 +63,13 @@ void CreateCPUMemoryList(int sample)
     {
         pid_t pid;
         struct proc_taskinfo pti;
+	int ret_val = 0;
  
         pid = (pid_t)proclist->kp_proc.p_pid;
-        if (proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &pti, sizeof(pti)) <= 0)
+        ret_val = proc_pidinfo(proclist->kp_proc.p_pid, PROC_PIDTASKINFO, 0, &pti, sizeof(pti));
+        if ((ret_val <= 0) || ((unsigned long)ret_val < sizeof(pti)))
         {
+            elog(DEBUG1, "proc_pidinfo[pid: %d] return value: [%d]", (int)pid, ret_val);
             proclist++;
             continue;
         }
@@ -156,12 +119,12 @@ void CreateCPUMemoryList(int sample)
 
 void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
-	Datum      values[Natts_cpu_memory_info_by_process];
-	bool       nulls[Natts_cpu_memory_info_by_process];
-	char       command[MAXPGPATH];
-	int        process_pid = 0;
-	float4     cpu_usage = 0.0;
-	float4     memory_usage = 0.0;
+    Datum      values[Natts_cpu_memory_info_by_process];
+    bool       nulls[Natts_cpu_memory_info_by_process];
+    char       command[MAXPGPATH];
+    int        process_pid = 0;
+    float4     cpu_usage = 0.0;
+    float4     memory_usage = 0.0;
     int        desc[2];
     uint64     total_memory;
     uint64     page_size_bytes;
@@ -172,13 +135,11 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
     node_t     *del_iter = NULL;
     node_t     *current  = NULL;
 
-	memset(nulls, 0, sizeof(nulls));
-	memset(command, 0, MAXPGPATH);
+    memset(nulls, 0, sizeof(nulls));
+    memset(command, 0, MAXPGPATH);
 
     desc[0] = CTL_HW;
     desc[1] = HW_MEMSIZE;
-
-    findProcess();
 
     /* Find the total physical memory available with the system */
     if (sysctl(desc, 2, &total_memory, &p_size, NULL, 0))
@@ -192,7 +153,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
     if (sysctlbyname("hw.pagesize", &page_size_bytes, &p_size, 0, 0) == -1)
         ereport(DEBUG1, (errmsg("Error while getting page size information")));
 
-	total_cpu_usage_1 = find_cpu_times();
+    total_cpu_usage_1 = find_cpu_times();
     /* Read the first sample for cpu and memory usage by each process */
     CreateCPUMemoryList(READ_PROCESS_CPU_USAGE_FIRST_SAMPLE);
     usleep(100000);
@@ -208,9 +169,12 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
     {
         process_pid = current->pid;
         memcpy(command, current->name, MAXPGPATH);
-        cpu_usage = (num_cpus) * (current->process_cpu_sample_2 - current->process_cpu_sample_1) * 100 / (float) (total_cpu_usage_2 - total_cpu_usage_1);
-        rss_memory = current->rss_memory * page_size_bytes;
+        float diff_sample = (float)(current->process_cpu_sample_2 - current->process_cpu_sample_1) / 1000000000.0;
+        cpu_usage = (num_cpus) * (diff_sample) * 100 / (float) ((total_cpu_usage_2 - total_cpu_usage_1)/CLK_TCK);
+        cpu_usage = (float)((int)(cpu_usage * 100 + 0.5))/100;
+        rss_memory = current->rss_memory;
         memory_usage = (rss_memory/(float)total_memory)*100;
+        memory_usage = (float)((int)(memory_usage * 100 + 0.5))/100;
 
         values[Anum_process_pid] = Int32GetDatum(process_pid);
         values[Anum_process_name] = CStringGetTextDatum(command);

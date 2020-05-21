@@ -84,10 +84,10 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
     nulls[Anum_io_completion] = true;
     nulls[Anum_servicing_irq] = true;
     nulls[Anum_servicing_softirq] = true;
-	nulls[Anum_percent_user_time] = true
-	nulls[Anum_percent_processor_time] = true
-	nulls[Anum_percent_privileged_time] = true
-	nulls[Anum_percent_interrupt_time] = true
+    nulls[Anum_percent_user_time] = true;
+    nulls[Anum_percent_processor_time] = true;
+    nulls[Anum_percent_privileged_time] = true;
+    nulls[Anum_percent_interrupt_time] = true;
 
     tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 }

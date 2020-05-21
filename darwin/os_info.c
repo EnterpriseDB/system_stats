@@ -14,6 +14,7 @@
 #include <sys/utsname.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#include <time.h>
 
 #include <libproc.h>
 #include <sys/proc_info.h>
@@ -34,8 +35,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	size_t     num_processes = 0;
 	struct     kinfo_proc *proc_list = NULL;
 	int        os_process_count = 0;
-	struct     timeval time_val;
-	size_t     size_time = sizeof(time_val);
+	struct     timespec uptime;
 
 	memset(nulls, 0, sizeof(nulls));
 	memset(host_name, 0, MAXPGPATH);
@@ -44,8 +44,8 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	memset(architecture, 0, MAXPGPATH);
 	memset(os_version_level, 0, MAXPGPATH);
 
-	if (sysctlbyname("kern.boottime", &time_val, &size_time, 0, 0) == -1)
-		nulls[Anum_cpu_byte_order] = true;
+	if (0 != clock_gettime(CLOCK_MONOTONIC_RAW, &uptime))
+		nulls[Anum_os_up_since_seconds] = true;
 
 	if (get_process_list(&proc_list, &num_processes) != 0)
 	{
@@ -94,7 +94,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	values[Anum_os_version]          = CStringGetTextDatum(os_version_level);
 	values[Anum_os_architecture]     = CStringGetTextDatum(architecture);
 	values[Anum_os_process_count]    = Int32GetDatum(os_process_count);
-	values[Anum_os_up_since_seconds] = Int32GetDatum((int)time_val.tv_sec);
+	values[Anum_os_up_since_seconds] = Int32GetDatum((int)uptime.tv_sec);
 
 	nulls[Anum_number_of_users] = true;
 	nulls[Anum_number_of_licensed_users] = true;
