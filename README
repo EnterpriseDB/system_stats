@@ -83,6 +83,10 @@ This interface allows users to get network interface information.
 This interface allows users to get the CPU and memory information for each
 process ID.
 
+NOTE: Due to security reason, Mac OSX operating system is not allowing to fetch the process information running as another user than program.
+      e.g. If database server is running as postgres user, this function will fetch the processes which are running as
+           postgres user only in Mac OSX, Other processes will be listed and return only process id and name other column will be set as NULL
+
 
 Detailed output of each functions in all platforms
 --------------------------------------------------

@@ -136,7 +136,6 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				        nulls[Anum_net_ipv4_address] = true;
                     }
                     memcpy(ipv4_address, host, MAXPGPATH);
-                    elog(WARNING, "[%s][%lld][%lld][%lld][%lld][%lld][%lld][%lld]\n", interface_name, if2m->ifm_data.ifi_obytes, if2m->ifm_data.ifi_ibytes, if2m->ifm_data.ifi_opackets, if2m->ifm_data.ifi_ipackets, if2m->ifm_data.ifi_ierrors, if2m->ifm_data.ifi_oerrors, if2m->ifm_data.ifi_iqdrops);
 
                     // Assign the values
                     tx_bytes = (uint64)if2m->ifm_data.ifi_obytes;

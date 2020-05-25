@@ -39,6 +39,7 @@ typedef struct node
     long long unsigned int process_cpu_sample_2;
     long long unsigned int rss_memory;
     char name[MAXPGPATH];
+    int  process_owned_by_user;
     struct node * next;
 } node_t;
 
@@ -68,52 +69,55 @@ void CreateCPUMemoryList(int sample)
         pid = (pid_t)proclist->kp_proc.p_pid;
         ret_val = proc_pidinfo(proclist->kp_proc.p_pid, PROC_PIDTASKINFO, 0, &pti, sizeof(pti));
         if ((ret_val <= 0) || ((unsigned long)ret_val < sizeof(pti)))
-        {
             elog(DEBUG1, "proc_pidinfo[pid: %d] return value: [%d]", (int)pid, ret_val);
-            proclist++;
-            continue;
+
+        if (sample == READ_PROCESS_CPU_USAGE_FIRST_SAMPLE)
+        {
+            iter = (node_t *) malloc(sizeof(node_t));
+            if (iter == NULL)
+            {
+                proclist++;
+                continue;
+            }
+
+            memset(iter, 0x00, sizeof(node_t));
+            iter->pid = proclist->kp_proc.p_pid;
+            memcpy(iter->name, proclist->kp_proc.p_comm, MAXPGPATH);
+            if ((ret_val <= 0) || ((unsigned long)ret_val < sizeof(pti)))
+		iter->process_owned_by_user = 0;
+            else
+            {
+                iter->process_cpu_sample_1 = pti.pti_total_user + pti.pti_total_system;
+                iter->rss_memory = pti.pti_resident_size;
+                iter->process_owned_by_user = 1;
+            }
+
+            iter->next = NULL;
+            if (head == NULL)
+                head = iter;
+            else
+                prev->next = iter;
+            prev = iter;
         }
         else
         {
-            if (sample == READ_PROCESS_CPU_USAGE_FIRST_SAMPLE)
+            node_t * current = head;
+            while (current != NULL)
             {
-                iter = (node_t *) malloc(sizeof(node_t));
-                if (iter == NULL)
+                if (current->pid == (int)pid)
                 {
-                    proclist++;
-                    continue;
+		    if (!(ret_val <= 0) || ((unsigned long)ret_val < sizeof(pti)))
+			current->process_cpu_sample_2 = pti.pti_total_user + pti.pti_total_system;
+                    break;
                 }
-
-                iter->pid = proclist->kp_proc.p_pid;
-                memcpy(iter->name, proclist->kp_proc.p_comm, MAXPGPATH);
-                iter->process_cpu_sample_1 = pti.pti_total_user + pti.pti_total_system;
-                iter->rss_memory = pti.pti_resident_size;
-                iter->next = NULL;
-                if (head == NULL)
-                    head = iter;
                 else
-                    prev->next = iter;
-                prev = iter;
-            }
-            else
-            {
-                node_t * current = head;
-                while (current != NULL)
-                {
-                    if (current->pid == (int)pid)
-                    {
-                        current->process_cpu_sample_2 = pti.pti_total_user + pti.pti_total_system;
-                        break;
-                    }
-                    else
-                         current = current->next;
-                }
+                     current = current->next;
             }
         }
- 
+
         proclist++;
     }
- 
+
     free(org_proc_addr);
 }
 
@@ -169,18 +173,27 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
     {
         process_pid = current->pid;
         memcpy(command, current->name, MAXPGPATH);
-        float diff_sample = (float)(current->process_cpu_sample_2 - current->process_cpu_sample_1) / 1000000000.0;
-        cpu_usage = (num_cpus) * (diff_sample) * 100 / (float) ((total_cpu_usage_2 - total_cpu_usage_1)/CLK_TCK);
-        cpu_usage = (float)((int)(cpu_usage * 100 + 0.5))/100;
-        rss_memory = current->rss_memory;
-        memory_usage = (rss_memory/(float)total_memory)*100;
-        memory_usage = (float)((int)(memory_usage * 100 + 0.5))/100;
+	if (current->process_owned_by_user)
+	{
+		float diff_sample = (float)(current->process_cpu_sample_2 - current->process_cpu_sample_1) / 1000000000.0;
+		cpu_usage = (num_cpus) * (diff_sample) * 100 / (float) ((total_cpu_usage_2 - total_cpu_usage_1)/CLK_TCK);
+		cpu_usage = (float)((int)(cpu_usage * 100 + 0.5))/100;
+		rss_memory = current->rss_memory;
+		memory_usage = (rss_memory/(float)total_memory)*100;
+		memory_usage = (float)((int)(memory_usage * 100 + 0.5))/100;
+		values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage);
+		values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage);
+		values[Anum_process_memory_bytes] = Int64GetDatumFast((uint64)rss_memory);
+	}
+	else
+	{
+		nulls[Anum_percent_cpu_usage] = true;
+		nulls[Anum_percent_memory_usage] = true;
+		nulls[Anum_process_memory_bytes] = true;
+	}
 
-        values[Anum_process_pid] = Int32GetDatum(process_pid);
-        values[Anum_process_name] = CStringGetTextDatum(command);
-        values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage);
-        values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage);
-        values[Anum_process_memory_bytes] = Int64GetDatumFast((uint64)rss_memory);
+	values[Anum_process_pid] = Int32GetDatum(process_pid);
+	values[Anum_process_name] = CStringGetTextDatum(command);
 
 	nulls[Anum_process_running_since] = true;
 
