@@ -180,10 +180,10 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	values[Anum_servicing_irq] = Float4GetDatum(f_servicing_irq);
 	values[Anum_servicing_softirq] = Float4GetDatum(f_servicing_softirq);
 
-	nulls[Anum_percent_user_time] = true
-	nulls[Anum_percent_processor_time] = true
-	nulls[Anum_percent_privileged_time] = true
-	nulls[Anum_percent_interrupt_time] = true
+	nulls[Anum_percent_user_time] = true;
+	nulls[Anum_percent_processor_time] = true;
+	nulls[Anum_percent_privileged_time] = true;
+	nulls[Anum_percent_interrupt_time] = true;
 
 	tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 }
