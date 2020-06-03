@@ -31,7 +31,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	char       os_name[MAXPGPATH];
 	char       os_version_level[MAXPGPATH];
 	char       architecture[MAXPGPATH];
-        int        ret_val;
+	int        ret_val;
 	size_t     num_processes = 0;
 	struct     kinfo_proc *proc_list = NULL;
 	int        os_process_count = 0;
@@ -96,8 +96,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	values[Anum_os_process_count]    = Int32GetDatum(os_process_count);
 	values[Anum_os_up_since_seconds] = Int32GetDatum((int)uptime.tv_sec);
 
-	nulls[Anum_number_of_users] = true;
-	nulls[Anum_number_of_licensed_users] = true;
 	nulls[Anum_os_handle_count] = true;
 	nulls[Anum_os_thread_count] = true;
 	nulls[Anum_os_boot_time] = true;

@@ -112,6 +112,7 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	if (if_table == NULL)
 	{
 		ereport(DEBUG1, (errmsg("[ReadNetworkInformations]: Failed to allocate the memory")));
+		free(ip_rows);
 		return;
 	}
 
@@ -123,6 +124,7 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		if (if_table == NULL)
 		{
 			ereport(DEBUG1, (errmsg("[ReadNetworkInformations]: Failed to allocate the memory")));
+			free(ip_rows);
 			return;
 		}
 	}
@@ -132,6 +134,7 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	{
 		ereport(DEBUG1, (errmsg("[ReadNetworkInformations]: GetIfTable: Failed to get information")));
 		free(if_table);
+		free(ip_rows);
 		return;
 	}
 
@@ -195,6 +198,15 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		}
 	}
 
-	free(if_table);
-	if_table = NULL;
+	if (if_table != NULL)
+	{
+		free(if_table);
+		if_table = NULL;
+	}
+
+	if (ip_rows != NULL)
+	{
+		free(ip_rows);
+		ip_rows = NULL;
+	}
 }

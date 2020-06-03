@@ -129,8 +129,8 @@ char*  trimStr( char* s)
 /* Round the value by 2 decimal points */
 float fl_round(float val)
 {
-    float value = (int)(val * 100 + 0.5);
-    return (float)value / 100;
+	float value = (int)(val * 100 + 0.5);
+	return (float)value / 100;
 }
 
 bool read_process_status(int *active_processes, int *running_processes,

@@ -14,10 +14,7 @@
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
-#define USER_INFO_FILE "/etc/passwd"
-
 bool total_opened_handle(int *total_handles);
-int get_total_users(void);
 void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 bool total_opened_handle(int *total_handles)
@@ -59,54 +56,6 @@ bool total_opened_handle(int *total_handles)
 	return true;
 }
 
-int get_total_users(void)
-{
-	FILE     *fp = NULL;
-	int      number_of_users = 0;
-	char     *line_buf = NULL;
-	size_t   line_buf_size = 0;
-	ssize_t  line_size;
-
-	fp = fopen(USER_INFO_FILE, "r");
-
-	if (fp == NULL)
-	{
-		ereport(DEBUG1, (errmsg("[get_total_users]: error while opening file")));
-		return 0;
-	}
-
-	/* Get the first line of the file. */
-	line_size = getline(&line_buf, &line_buf_size, fp);
-
-	/* Loop through until we are done with the file. */
-	while (line_size >= 0)
-	{
-		number_of_users++;
-
-		/* Free the allocated line buffer */
-		if (line_buf != NULL)
-		{
-			free(line_buf);
-			line_buf = NULL;
-		}
-
-		/* Get the next line */
-		line_size = getline(&line_buf, &line_buf_size, fp);
-	}
-
-	/* Free the allocated line buffer */
-	if (line_buf != NULL)
-	{
-		free(line_buf);
-		line_buf = NULL;
-	}
-
-	if (fp != NULL)
-		fclose(fp);
-
-	return number_of_users;
-}
-
 void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
 	struct     utsname uts;
@@ -130,7 +79,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	int        zombie_processes = 0;
 	int        total_threads = 0;
 	int        handle_count = 0;
-	int        total_users = 0;
 
 	memset(nulls, 0, sizeof(nulls));
 	memset(host_name, 0, MAXPGPATH);
@@ -151,9 +99,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		sprintf(version, "%s %s", uts.sysname, uts.release);
 		memcpy(architecture, uts.machine, strlen(uts.machine));
 	}
-
-	/* Get total number of OS users */
-	total_users = get_total_users();
 
 	/* Function used to get the host name of the system */
 	if (gethostname(host_name, sizeof(host_name)) != 0)
@@ -234,7 +179,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	}
 
 	/* licenced user is not applicable to linux so return NULL */
-	nulls[Anum_number_of_licensed_users] = true;
 	nulls[Anum_os_boot_time] = true;
 
 	/* count the total number of opended file descriptor */
@@ -250,7 +194,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	values[Anum_os_version]          = CStringGetTextDatum(version);
 	values[Anum_host_name]           = CStringGetTextDatum(host_name);
 	values[Anum_domain_name]         = CStringGetTextDatum(domain_name);
-	values[Anum_number_of_users]     = Int32GetDatum(total_users);
 	values[Anum_os_handle_count]     = Int32GetDatum(handle_count);
 	values[Anum_os_architecture]     = CStringGetTextDatum(architecture);
 

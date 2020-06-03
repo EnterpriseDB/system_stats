@@ -89,10 +89,10 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	int        ret_val;
 	int        physical_processor = 0;
 	int        logical_processor = 0;
-	int        l1dcache_size = 0;
-	int        l1icache_size = 0;
-	int        l2cache_size = 0;
-	int        l3cache_size = 0;
+	int        l1dcache_size_kb = 0;
+	int        l1icache_size_kb = 0;
+	int        l2cache_size_kb = 0;
+	int        l3cache_size_kb = 0;
 	int        cpu_cores = 0;
 	float      cpu_hz;
 	uint64_t   cpu_freq;
@@ -106,10 +106,10 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	memset(architecture, 0, MAXPGPATH);
 	memset(cpu_desc, 0, MAXPGPATH);
 
-	l1dcache_size = read_cpu_cache_size(L1D_CACHE_FILE_PATH);
-	l1icache_size = read_cpu_cache_size(L1I_CACHE_FILE_PATH);
-	l2cache_size = read_cpu_cache_size(L2_CACHE_FILE_PATH);
-	l3cache_size = read_cpu_cache_size(L3_CACHE_FILE_PATH);
+	l1dcache_size_kb = read_cpu_cache_size(L1D_CACHE_FILE_PATH);
+	l1icache_size_kb = read_cpu_cache_size(L1I_CACHE_FILE_PATH);
+	l2cache_size_kb = read_cpu_cache_size(L2_CACHE_FILE_PATH);
+	l3cache_size_kb = read_cpu_cache_size(L3_CACHE_FILE_PATH);
 
 	ret_val = uname(&uts);
 	/* if it returns not zero means it fails so set null values */
@@ -208,10 +208,10 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			values[Anum_no_of_cores] = Int32GetDatum(cpu_cores);
 			values[Anum_architecture] = CStringGetTextDatum(architecture);
 			values[Anum_cpu_clock_speed] = Int64GetDatumFast(cpu_freq);
-			values[Anum_l1dcache_size] = Int32GetDatum(l1dcache_size);
-			values[Anum_l1icache_size] = Int32GetDatum(l1icache_size);
-			values[Anum_l2cache_size] = Int32GetDatum(l2cache_size);
-			values[Anum_l3cache_size] = Int32GetDatum(l3cache_size);
+			values[Anum_l1dcache_size] = Int32GetDatum(l1dcache_size_kb);
+			values[Anum_l1icache_size] = Int32GetDatum(l1icache_size_kb);
+			values[Anum_l2cache_size] = Int32GetDatum(l2cache_size_kb);
+			values[Anum_l3cache_size] = Int32GetDatum(l3cache_size_kb);
 
 			nulls[Anum_processor_type] = true;
 			nulls[Anum_cpu_type] = true;

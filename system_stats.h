@@ -155,7 +155,7 @@ int is_process_running(int pid);
 #define Anum_load_avg_fifteen_minutes            3
 
 /* Macros for operating system information */
-#define Natts_os_info                            12
+#define Natts_os_info                            10
 #define OS_INFO_FILE_NAME                        "/etc/os-release"
 #define OS_DESC_SEARCH_TEXT                      "PRETTY_NAME="
 #define OS_HANDLE_READ_FILE_PATH                 "/proc/sys/fs/file-nr"
@@ -164,14 +164,12 @@ int is_process_running(int pid);
 #define Anum_os_version                          1
 #define Anum_host_name                           2
 #define Anum_domain_name                         3
-#define Anum_number_of_users                     4
-#define Anum_number_of_licensed_users            5
-#define Anum_os_handle_count                     6
-#define Anum_os_process_count                    7
-#define Anum_os_thread_count                     8
-#define Anum_os_architecture                     9
-#define Anum_os_boot_time                        10
-#define Anum_os_up_since_seconds                 11
+#define Anum_os_handle_count                     4
+#define Anum_os_process_count                    5
+#define Anum_os_thread_count                     6
+#define Anum_os_architecture                     7
+#define Anum_os_boot_time                        8
+#define Anum_os_up_since_seconds                 9
 
 /* Macros for system CPU usage information */
 #define Natts_cpu_usage_stats                    11

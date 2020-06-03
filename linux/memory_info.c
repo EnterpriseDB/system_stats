@@ -20,13 +20,13 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	size_t     line_buf_size = 0;
 	int        line_count = 0;
 	ssize_t    line_size;
-	uint64     total_memory = 0;
-	uint64     free_memory = 0;
-	uint64     used_memory = 0;
-	uint64     cached = 0;
-	uint64     swap_total = 0;
-	uint64     swap_free = 0;
-	uint64     swap_used = 0;
+	uint64     total_memory_bytes = 0;
+	uint64     free_memory_bytes = 0;
+	uint64     used_memory_bytes = 0;
+	uint64     cached_bytes = 0;
+	uint64     swap_total_bytes = 0;
+	uint64     swap_free_bytes = 0;
+	uint64     swap_used_bytes = 0;
 
 	memset(nulls, 0, sizeof(nulls));
 
@@ -60,7 +60,7 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		if (mem_total != NULL && mem_total == line_buf)
 		{
 			line_count++;
-			total_memory = ConvertToBytes(line_buf);
+			total_memory_bytes = ConvertToBytes(line_buf);
 		}
 
 		/* Read the free memory of the system */
@@ -68,7 +68,7 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		if (mem_free != NULL && mem_free == line_buf)
 		{
 			line_count++;
-			free_memory = ConvertToBytes(line_buf);
+			free_memory_bytes = ConvertToBytes(line_buf);
 		}
 
 		/* Read the cached memory of the system */
@@ -76,7 +76,7 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		if (cached_mem != NULL && cached_mem == line_buf)
 		{
 			line_count++;
-			cached = ConvertToBytes(line_buf);
+			cached_bytes = ConvertToBytes(line_buf);
 		}
 
 		/* Read the total swap memory of the system */
@@ -84,7 +84,7 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		if (c_swap_total != NULL && c_swap_total == line_buf)
 		{
 			line_count++;
-			swap_total = ConvertToBytes(line_buf);
+			swap_total_bytes = ConvertToBytes(line_buf);
 		}
 
 		/* Read the free swap memory of the system */
@@ -92,22 +92,22 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		if (c_swap_free != NULL && c_swap_free == line_buf)
 		{
 			line_count++;
-			swap_free = ConvertToBytes(line_buf);
+			swap_free_bytes = ConvertToBytes(line_buf);
 		}
 
-		used_memory = total_memory - free_memory;
-		swap_used = swap_total - swap_free;
+		used_memory_bytes = total_memory_bytes - free_memory_bytes;
+		swap_used_bytes = swap_total_bytes - swap_free_bytes;
 
 		// Check if we get all lines, add as row
 		if (line_count == MEMORY_READ_COUNT)
 		{
-			values[Anum_total_memory] = Int64GetDatumFast(total_memory);
-			values[Anum_free_memory] = Int64GetDatumFast(free_memory);
-			values[Anum_used_memory] = Int64GetDatumFast(used_memory);
-			values[Anum_total_cache_memory] = Int64GetDatumFast(cached);
-			values[Anum_swap_total_memory] = Int64GetDatumFast(swap_total);
-			values[Anum_swap_free_memory] = Int64GetDatumFast(swap_free);
-			values[Anum_swap_used_memory] = Int64GetDatumFast(swap_used);
+			values[Anum_total_memory] = Int64GetDatumFast(total_memory_bytes);
+			values[Anum_free_memory] = Int64GetDatumFast(free_memory_bytes);
+			values[Anum_used_memory] = Int64GetDatumFast(used_memory_bytes);
+			values[Anum_total_cache_memory] = Int64GetDatumFast(cached_bytes);
+			values[Anum_swap_total_memory] = Int64GetDatumFast(swap_total_bytes);
+			values[Anum_swap_free_memory] = Int64GetDatumFast(swap_free_bytes);
+			values[Anum_swap_used_memory] = Int64GetDatumFast(swap_used_bytes);
 
 			/* set the NULL value as it is not for this platform */
 			nulls[Anum_kernel_total_memory] = true;

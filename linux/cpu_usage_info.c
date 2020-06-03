@@ -29,10 +29,10 @@ void cpu_stat_information(struct cpu_stat* cpu_stat);
 /* Function used to get CPU state information for each mode of operation */
 void cpu_stat_information(struct cpu_stat* cpu_stat)
 {
-	FILE       *cpu_stats_file;
-	char       *line_buf = NULL;
-	size_t     line_buf_size = 0;
-	ssize_t    line_size;
+	FILE              *cpu_stats_file;
+	char              *line_buf = NULL;
+	size_t            line_buf_size = 0;
+	ssize_t           line_size;
 	long long int     usermode_normal_process = 0;
 	long long int     usermode_niced_process = 0;
 	long long int     kernelmode_process = 0;

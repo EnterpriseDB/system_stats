@@ -208,7 +208,7 @@ void ReadCPUMemoryUsage(int sample)
 	long       tlk = -1;
 	struct     sysinfo s_info;
 	long       sys_uptime = 0;
-	DIR 	   *dirp = NULL;
+	DIR        *dirp = NULL;
 
 	/* First get the HZ value from system as it may vary from system to system */
 	tlk = sysconf(_SC_CLK_TCK);

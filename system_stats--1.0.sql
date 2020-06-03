@@ -19,8 +19,6 @@ CREATE FUNCTION pg_sys_os_info(
     OUT version text,
     OUT host_name text,
     OUT domain_name text,
-    OUT num_of_users int,
-    OUT num_of_licensed_users int,
     OUT handle_count int,
     OUT process_count int,
     OUT thread_count int,

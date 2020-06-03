@@ -125,18 +125,6 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				}
 			}
 
-			hres = result->lpVtbl->Get(result, L"NumberOfUsers", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_number_of_users] = true;
-			else
-				values[Anum_number_of_users] = Int32GetDatum(query_result.intVal);
-
-			hres = result->lpVtbl->Get(result, L"NumberOfLicensedUsers", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_number_of_licensed_users] = true;
-			else
-				values[Anum_number_of_licensed_users] = Int32GetDatum(query_result.intVal);
-
 			hres = result->lpVtbl->Get(result, L"OSArchitecture", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_os_architecture] = true;

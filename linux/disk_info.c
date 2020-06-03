@@ -97,9 +97,9 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	char       mount_point[MAXPGPATH];
 	char       file_system_type[MAXPGPATH];
 	FILE       *fp = NULL;
-	uint64     used_space = 0;
-	uint64     total_space = 0;
-	uint64     available_space = 0;
+	uint64     used_space_bytes = 0;
+	uint64     total_space_bytes = 0;
+	uint64     available_space_bytes = 0;
 	uint64     total_inodes = 0;
 	uint64     used_inodes = 0;
 	uint64     free_inodes = 0;
@@ -146,14 +146,14 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			if (ignoreFileSystemTypes(ent->mnt_fsname) || ignoreMountPoints(ent->mnt_dir))
 				continue;
 
-			total_space = (uint64_t)(buf.f_blocks  * buf.f_bsize);
+			total_space_bytes = (uint64_t)(buf.f_blocks  * buf.f_bsize);
 
 			/* If total space of file system is zero, ignore that from list */
-			if (total_space == 0)
+			if (total_space_bytes == 0)
 				continue;
 
-			used_space = (uint64_t)((buf.f_blocks - buf.f_bfree) * buf.f_bsize);
-			available_space = (uint64_t)(buf.f_bavail * buf.f_bsize);
+			used_space_bytes = (uint64_t)((buf.f_blocks - buf.f_bfree) * buf.f_bsize);
+			available_space_bytes = (uint64_t)(buf.f_bavail * buf.f_bsize);
 			total_inodes = (uint64_t)buf.f_files;
 			free_inodes = (uint64_t)buf.f_ffree;
 			used_inodes = (uint64_t)(total_inodes - free_inodes);
@@ -164,9 +164,9 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			values[Anum_disk_file_system] = CStringGetTextDatum(file_system);
 			values[Anum_disk_file_system_type] = CStringGetTextDatum(file_system_type);
 			values[Anum_disk_mount_point] = CStringGetTextDatum(mount_point);
-			values[Anum_disk_total_space] = Int64GetDatumFast(total_space);
-			values[Anum_disk_used_space] = Int64GetDatumFast(used_space);
-			values[Anum_disk_free_space] = Int64GetDatumFast(available_space);
+			values[Anum_disk_total_space] = Int64GetDatumFast(total_space_bytes);
+			values[Anum_disk_used_space] = Int64GetDatumFast(used_space_bytes);
+			values[Anum_disk_free_space] = Int64GetDatumFast(available_space_bytes);
 			values[Anum_disk_total_inodes] = Int64GetDatumFast(total_inodes);
 			values[Anum_disk_used_inodes] = Int64GetDatumFast(used_inodes);
 			values[Anum_disk_free_inodes] = Int64GetDatumFast(free_inodes);
@@ -180,9 +180,9 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			memset(file_system, 0, MAXPGPATH);
 			memset(mount_point, 0, MAXPGPATH);
 			memset(file_system_type, 0, MAXPGPATH);
-			used_space = 0;
-			total_space = 0;
-			available_space = 0;
+			used_space_bytes = 0;
+			total_space_bytes = 0;
+			available_space_bytes = 0;
 			total_inodes = 0;
 			used_inodes = 0;
 			free_inodes = 0;

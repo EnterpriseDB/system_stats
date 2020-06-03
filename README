@@ -97,8 +97,6 @@ Detailed output of each functions in all platforms
     - version
     - host name
     - domain name
-    - number of users
-    - number of licensed_users
     - handle count
     - process count
     - thread count
