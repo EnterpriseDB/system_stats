@@ -172,7 +172,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	while (current != NULL)
 	{
 		process_pid = current->pid;
-		memcpy(command, current->name, MAXPGPATH)if (current->process_owned_by_user)
+		memcpy(command, current->name, MAXPGPATH);
 		if (current->process_owned_by_user)
 		{
 			float diff_sample = (float)(current->process_cpu_sample_2 - current->process_cpu_sample_1) / 1000000000.0;
