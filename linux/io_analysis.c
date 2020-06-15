@@ -58,7 +58,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	line_size = getline(&line_buf, &line_buf_size, diskstats_file);
 
 	/* Loop through until we are done with the file. */
-	if (line_size >= 0)
+	while (line_size >= 0)
 	{
 		sscanf(line_buf, scan_fmt, device_name, &read_completed, &sector_read, &time_spent_reading_ms,
 		  &write_completed, &sector_written, &time_spent_writing_ms);
@@ -72,6 +72,16 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		values[Anum_write_time_ms] = Int64GetDatumFast((uint64)time_spent_writing_ms);
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+
+                /* Free the allocated line buffer */
+                if (line_buf != NULL)
+                {
+                        free(line_buf);
+                        line_buf = NULL;
+                }
+
+                /* Get the next line */
+                line_size = getline(&line_buf, &line_buf_size, diskstats_file);
 	}
 
 	if (line_buf != NULL)
