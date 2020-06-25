@@ -7,22 +7,22 @@ OS_PLATFORM := $(shell echo $(UNAME) | tr '[:upper:]' '[:lower:]')
 
 $(info "Platform is: $(OS_PLATFORM)")
 
-# FreeBSD platform is not supported so do not build it
+# FreeBSD is not supported so do not build it
 ifneq (,$(findstring freebsd, $(OS_PLATFORM)))
-    $(error FreeBSD platform is not supported by this plugin)
+    $(error FreeBSD is not supported by this extension)
 endif
 
-# Solaris platform is not supported so do not build it
+# Solaris is not supported so do not build it
 ifneq (,$(findstring solaris, $(OS_PLATFORM)))
-    $(error Solaris platform is not supported by this plugin)
+    $(error Solaris is not supported by this extension)
 endif
 ifneq (,$(findstring sparc, $(OS_PLATFORM)))
-    $(error Solaris platform is not supported by this plugin)
+    $(error Solaris is not supported by this extension)
 endif
 
-# HP Unix platform is not supported so do not build it
+# HP-UX is not supported so do not build it
 ifneq (,$(findstring hp-ux, $(OS_PLATFORM)))
-    $(error HP Unix platform is not supported by this plugin)
+    $(error HP-UX is not supported by this extension)
 endif
 
 ifeq ($(UNAME), Linux)
