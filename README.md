@@ -99,7 +99,7 @@ NOTE: macOS does not allow access to to process information for other users.
       other columns will be NULL.
 
 
-## Detailed output of each functions in all platforms
+## Detailed output of each function
 
 ### pg_sys_os_info
 - Name
