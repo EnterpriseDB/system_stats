@@ -4,14 +4,22 @@
 \echo Use "CREATE EXTENSION system_stats" to load this file. \quit
 
 -- role to be assigned while executing functions of system stats
-CREATE ROLE monitor_system_stats WITH
-    NOLOGIN
-    NOSUPERUSER
-    NOCREATEDB
-    NOCREATEROLE
-    INHERIT
-    NOREPLICATION
-    CONNECTION LIMIT -1;
+-- before creating role, check the role exists or not. It may possible
+-- that user want to create extension in multiple database of same server
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'monitor_system_stats') THEN
+        CREATE ROLE monitor_system_stats WITH
+            NOLOGIN
+            NOSUPERUSER
+            NOCREATEDB
+            NOCREATEROLE
+            INHERIT
+            NOREPLICATION
+            CONNECTION LIMIT -1;
+    END IF;
+END
+$$;
 
 -- Operating system information function
 CREATE FUNCTION pg_sys_os_info(
