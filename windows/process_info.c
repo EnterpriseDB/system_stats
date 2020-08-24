@@ -72,11 +72,12 @@ void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		nulls[Anum_no_of_zombie_processes] = true;
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+
+		/* release results set */
+		results->lpVtbl->Release(results);
 	}
 	else
 		ereport(DEBUG1, (errmsg("[ReadProcessInformations]: Failed to get query result")));
 
-	/* release WMI COM interfaces */
-	results->lpVtbl->Release(results);
 	SysFreeString(query);
 }

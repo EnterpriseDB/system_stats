@@ -174,11 +174,12 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		nulls[Anum_cpu_byte_order] = true;
 		values[Anum_physical_processor] = Int32GetDatum(no_physical_cpus);
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+
+		/* release results set */
+		results->lpVtbl->Release(results);
 	}
 	else
 		ereport(DEBUG1, (errmsg("[ReadCPUInformation]: Failed to get query result")));
 
-	/* release WMI COM interfaces */
-	results->lpVtbl->Release(results);
 	SysFreeString(query);
 }

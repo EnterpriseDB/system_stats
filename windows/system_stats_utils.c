@@ -85,12 +85,12 @@ int is_process_running(int pid)
 			/* release the current result object */
 			result->lpVtbl->Release(result);
 		}
+
+		/* release results set */
+		results->lpVtbl->Release(results);
 	}
 	else
 		ereport(DEBUG1, (errmsg("[is_process_running]: Failed to get query result")));
-
-	/* release WMI COM interfaces */
-	results->lpVtbl->Release(results);
 
 	SysFreeString(query);
 

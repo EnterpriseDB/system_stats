@@ -157,11 +157,12 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			/* release the current result object */
 			result->lpVtbl->Release(result);
 		}
+
+		/* release results set */
+		results->lpVtbl->Release(results);
 	}
 	else
 		ereport(DEBUG1, (errmsg("[ReadCPUMemoryByProcess]: Failed to get query result")));
 
-	/* release result sets */
-	results->lpVtbl->Release(results);
 	SysFreeString(query);
 }

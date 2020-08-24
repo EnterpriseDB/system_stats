@@ -161,11 +161,12 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			result->lpVtbl->Release(result);
 			break;
 		}
+
+		/* release results set */
+		results->lpVtbl->Release(results);
 	}
 	else
 		ereport(DEBUG1, (errmsg("[ReadCPUUsageStatistics]: Failed to get query result")));
 
-	/* release WMI COM interfaces */
-	results->lpVtbl->Release(results);
 	SysFreeString(query);
 }

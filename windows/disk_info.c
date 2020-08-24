@@ -146,11 +146,12 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			/* release the current result object */
 			result->lpVtbl->Release(result);
 		}
+
+		/* release results set */
+		results->lpVtbl->Release(results);
 	}
 	else
 		ereport(DEBUG1, (errmsg("[ReadDiskInformation]: Failed to get query result")));
 
-	/* release WMI COM interfaces */
-	results->lpVtbl->Release(results);
 	SysFreeString(query);
 }
