@@ -94,7 +94,7 @@
       <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <AdditionalIncludeDirectories>.\;$(PG_INCLUDE_DIR)\server\port\win32_msvc;$(PG_INCLUDE_DIR)\server\port\win32;$(PG_INCLUDE_DIR)\server;$(PG_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(PG_INCLUDE_DIR)\server\port\win32_msvc;$(PG_INCLUDE_DIR)\server\port\win32;$(PG_INCLUDE_DIR)\server;$(PG_INCLUDE_DIR);$(PG_INCLUDE_DIR)\port\win32_msvc;$(PG_INCLUDE_DIR)\port\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,7 +127,7 @@
       <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>false</ExceptionHandling>
       <CompileAs>CompileAsC</CompileAs>
-      <AdditionalIncludeDirectories>.\;$(PG_INCLUDE_DIR)\server\port\win32_msvc;$(PG_INCLUDE_DIR)\server\port\win32;$(PG_INCLUDE_DIR)\server;$(PG_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;$(PG_INCLUDE_DIR)\server\port\win32_msvc;$(PG_INCLUDE_DIR)\server\port\win32;$(PG_INCLUDE_DIR)\server;$(PG_INCLUDE_DIR);$(PG_INCLUDE_DIR)\port\win32_msvc;$(PG_INCLUDE_DIR)\port\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
