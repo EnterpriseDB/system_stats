@@ -130,6 +130,9 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 		while ((ent = getmntent(fp)) != NULL)
 		{
+			if (ignoreFileSystemTypes(ent->mnt_fsname) || ignoreMountPoints(ent->mnt_dir))
+				continue;
+
 			memset(&buf, 0, sizeof(buf));
 			/*
 			 * If statvfs() fails, just report zeroes.  It's better to still
@@ -142,9 +145,6 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					(errcode_for_file_access(),
 						errmsg("statvfs failed: %s", ent->mnt_dir)));
 			}
-
-			if (ignoreFileSystemTypes(ent->mnt_fsname) || ignoreMountPoints(ent->mnt_dir))
-				continue;
 
 			total_space_bytes = (uint64_t)(buf.f_blocks  * buf.f_bsize);
 
