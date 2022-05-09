@@ -12,6 +12,7 @@
 
 #include <windows.h>
 #include <wbemidl.h>
+#include <winioctl.h>
 
 #define MAX_DRIVE_COUNT  32
 #define MAX_DEVICE_PATH  1024
