@@ -49,7 +49,7 @@ a database using the following SQL command:
 Due to the nature of the information returned by these functions, access is
 restricted to superusers and members of the monitor_system_stats role which
 will be created when the extension is installed. monitor_system_stats role
-will not be removed during drop extension. To allow users to access
+will not be removed during dropping the extension. To allow users to access
 the functions without granting them superuser access, add them to the
 monitor_system_stats role. For example:
 
