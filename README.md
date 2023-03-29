@@ -48,7 +48,10 @@ a database using the following SQL command:
 ### Security
 Due to the nature of the information returned by these functions, access is
 restricted to superusers and members of the monitor_system_stats role which
-will be created when the extension is installed. monitor_system_stats role will not be removed when you run DROP EXTENSION. This means that any users or roles that were granted permissions to the monitor_system_stats role will still have those permissions even after the extension has been dropped. 
+will be created when the extension is installed. monitor_system_stats role
+will not be removed when you run DROP EXTENSION. This means that any users 
+or roles that were granted permissions to the monitor_system_stats role 
+will still have those permissions even after the extension has been dropped.
 To allow users to access the functions without granting them superuser access, add them to the
 monitor_system_stats role. For example:
 
