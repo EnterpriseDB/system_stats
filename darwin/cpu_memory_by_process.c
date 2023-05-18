@@ -183,7 +183,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			memory_usage = (float)((int)(memory_usage * 100 + 0.5))/100;
 			values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage);
 			values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage);
-			values[Anum_process_memory_bytes] = Int64GetDatumFast((uint64)rss_memory);
+			values[Anum_process_memory_bytes] = UInt64GetDatum((uint64)rss_memory);
 		}
 		else
 		{

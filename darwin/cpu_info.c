@@ -111,7 +111,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	values[Anum_cpu_type] = CStringGetTextDatum(s_cpu_type);
 	values[Anum_logical_processor] = Int32GetDatum(logical_cpu);
 	values[Anum_physical_processor] = Int32GetDatum(physical_cpu);
-	values[Anum_cpu_clock_speed] = Int64GetDatumFast(cpu_frequency);
+	values[Anum_cpu_clock_speed] = UInt64GetDatum(cpu_frequency);
 	values[Anum_l1dcache_size] = Int32GetDatum((int)(l1d_cache_bytes/1024));
 	values[Anum_l1icache_size] = Int32GetDatum((int)(l1i_cache_bytes/1024));
 	values[Anum_l2cache_size] = Int32GetDatum((int)(l2_cache_bytes/1024));

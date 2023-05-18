@@ -52,6 +52,7 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	Datum      values[Natts_cpu_usage_stats];
 	bool       nulls[Natts_cpu_usage_stats];
 	struct     cpu_stat first_sample, second_sample;
+        float4     total, user, system, idle, nice;
 
 	memset(nulls, 0, sizeof(nulls));
 
@@ -71,11 +72,11 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		return;
 	}
 
-	float4 total = (float4)(second_sample.total - first_sample.total);
-	float4 user = (float4)(second_sample.user - first_sample.user) / total * 100;
-	float4 system = (float4)(second_sample.system - first_sample.system) / total * 100;
-	float4 idle = (float4)(second_sample.idle - first_sample.idle) / total * 100;
-	float4 nice = (float4)(second_sample.nice - first_sample.nice) / total * 100;
+	total = (float4)(second_sample.total - first_sample.total);
+	user = (float4)(second_sample.user - first_sample.user) / total * 100;
+	system = (float4)(second_sample.system - first_sample.system) / total * 100;
+	idle = (float4)(second_sample.idle - first_sample.idle) / total * 100;
+	nice = (float4)(second_sample.nice - first_sample.nice) / total * 100;
 
 	values[Anum_usermode_normal_process] = Float4GetDatum(user);
 	values[Anum_usermode_niced_process] = Float4GetDatum(nice);
