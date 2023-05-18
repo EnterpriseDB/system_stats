@@ -22,6 +22,10 @@
 #include <IOKit/ps/IOPSKeys.h>
 #undef Size
 
+#if (MAC_OS_X_VERSION_MAX_ALLOWED < 120000) // Before macOS 12 Monterey
+  #define kIOMainPortDefault kIOMasterPortDefault
+#endif
+
 /* Function used to get IO statistics of block devices */
 void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 {
@@ -37,7 +41,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	memset(nulls, 0, sizeof(nulls));
 
 	// Get list of disks
-	if (IOServiceGetMatchingServices(kIOMasterPortDefault,
+	if (IOServiceGetMatchingServices(kIOMainPortDefault,
 		IOServiceMatching(kIOMediaClass),
 		&disk_list_iter) != kIOReturnSuccess)
 	{
@@ -63,6 +67,17 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 		if (IOObjectConformsTo(parent_reg_ent, "IOBlockStorageDriver"))
 		{
+			const int kMaxDiskNameSize = 64;
+			char device_name[kMaxDiskNameSize];
+			CFStringRef disk_name_ref;
+			CFNumberRef number;
+                        int64_t reads = 0;
+                        int64_t writes = 0;
+                        int64_t read_bytes = 0;
+                        int64_t write_bytes = 0;
+                        int64_t read_time_ns = 0;
+                        int64_t write_time_ns = 0;
+
 			if (IORegistryEntryCreateCFProperties(
 				disk_reg_ent,
 				(CFMutableDictionaryRef *) &disk_parent_dict,
@@ -89,9 +104,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				return;
 			}
 
-			const int kMaxDiskNameSize = 64;
-			CFStringRef disk_name_ref = (CFStringRef)CFDictionaryGetValue(disk_parent_dict, CFSTR(kIOBSDNameKey));
-			char device_name[kMaxDiskNameSize];
+			disk_name_ref = (CFStringRef)CFDictionaryGetValue(disk_parent_dict, CFSTR(kIOBSDNameKey));
 
 			CFStringGetCString(disk_name_ref,
 				device_name,
@@ -111,14 +124,6 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				IOObjectRelease (disk_list_iter);
 				return;
 			}
-
-			CFNumberRef number;
-			int64_t reads = 0;
-			int64_t writes = 0;
-			int64_t read_bytes = 0;
-			int64_t write_bytes = 0;
-			int64_t read_time_ns = 0;
-			int64_t write_time_ns = 0;
 
 			// Get disk reads/writes
 			if ((number = (CFNumberRef)CFDictionaryGetValue(
@@ -167,12 +172,12 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			write_time_ns = (int64_t)round(write_time_ns/1000000);
 
 			values[Anum_device_name] = CStringGetTextDatum(device_name);
-			values[Anum_total_read] = Int64GetDatumFast(reads);
-			values[Anum_total_write] = Int64GetDatumFast(writes);
-			values[Anum_read_bytes] = Int64GetDatumFast(read_bytes);
-			values[Anum_write_bytes] = Int64GetDatumFast(write_bytes);
-			values[Anum_read_time_ms] = Int64GetDatumFast(read_time_ns);
-			values[Anum_write_time_ms] = Int64GetDatumFast(write_time_ns);
+			values[Anum_total_read] = UInt64GetDatum(reads);
+			values[Anum_total_write] = UInt64GetDatum(writes);
+			values[Anum_read_bytes] = UInt64GetDatum(read_bytes);
+			values[Anum_write_bytes] = UInt64GetDatum(write_bytes);
+			values[Anum_read_time_ms] = UInt64GetDatum(read_time_ns);
+			values[Anum_write_time_ms] = UInt64GetDatum(write_time_ns);
 
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 

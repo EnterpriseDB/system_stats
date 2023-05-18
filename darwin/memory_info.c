@@ -32,6 +32,7 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	uint64_t  total;
 	size_t    len = sizeof(total);
 	int       pagesize = getpagesize();
+	mach_port_t mport;
       
 	memset(nulls, 0, sizeof(nulls));
 
@@ -45,7 +46,7 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		return;
 	}
       
-	mach_port_t mport = mach_host_self();
+	mport = mach_host_self();
 
 	/* Read the host memory statistics */
 	ret = host_statistics(mport, HOST_VM_INFO, (host_info_t)&vm_stat, &count);
@@ -69,12 +70,12 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		ereport(DEBUG1, (errmsg("Error while getting swap memory information")));
 	}
 
-	values[Anum_total_memory] = Int64GetDatumFast(total_memory_bytes);
-	values[Anum_used_memory] = Int64GetDatumFast(used_memory_bytes);
-	values[Anum_free_memory] = Int64GetDatumFast(free_memory_bytes);
-	values[Anum_swap_total_memory] = Int64GetDatumFast(swap_mem.xsu_total);
-	values[Anum_swap_used_memory] = Int64GetDatumFast(swap_mem.xsu_used);
-	values[Anum_swap_free_memory] = Int64GetDatumFast(swap_mem.xsu_avail);
+	values[Anum_total_memory] = UInt64GetDatum(total_memory_bytes);
+	values[Anum_used_memory] = UInt64GetDatum(used_memory_bytes);
+	values[Anum_free_memory] = UInt64GetDatum(free_memory_bytes);
+	values[Anum_swap_total_memory] = UInt64GetDatum(swap_mem.xsu_total);
+	values[Anum_swap_used_memory] = UInt64GetDatum(swap_mem.xsu_used);
+	values[Anum_swap_free_memory] = UInt64GetDatum(swap_mem.xsu_avail);
 	nulls[Anum_total_cache_memory] = true;
 	nulls[Anum_kernel_total_memory] = true;
 	nulls[Anum_kernel_paged_memory] = true;
