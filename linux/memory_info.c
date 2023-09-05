@@ -101,13 +101,13 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		// Check if we get all lines, add as row
 		if (line_count == MEMORY_READ_COUNT)
 		{
-			values[Anum_total_memory] = Int64GetDatumFast(total_memory_bytes);
-			values[Anum_free_memory] = Int64GetDatumFast(free_memory_bytes);
-			values[Anum_used_memory] = Int64GetDatumFast(used_memory_bytes);
-			values[Anum_total_cache_memory] = Int64GetDatumFast(cached_bytes);
-			values[Anum_swap_total_memory] = Int64GetDatumFast(swap_total_bytes);
-			values[Anum_swap_free_memory] = Int64GetDatumFast(swap_free_bytes);
-			values[Anum_swap_used_memory] = Int64GetDatumFast(swap_used_bytes);
+			values[Anum_total_memory] = UInt64GetDatum(total_memory_bytes);
+			values[Anum_free_memory] = UInt64GetDatum(free_memory_bytes);
+			values[Anum_used_memory] = UInt64GetDatum(used_memory_bytes);
+			values[Anum_total_cache_memory] = UInt64GetDatum(cached_bytes);
+			values[Anum_swap_total_memory] = UInt64GetDatum(swap_total_bytes);
+			values[Anum_swap_free_memory] = UInt64GetDatum(swap_free_bytes);
+			values[Anum_swap_used_memory] = UInt64GetDatum(swap_used_bytes);
 
 			/* set the NULL value as it is not for this platform */
 			nulls[Anum_kernel_total_memory] = true;

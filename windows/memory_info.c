@@ -71,15 +71,15 @@ void ReadMemoryInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		kernel_non_paged = ((uint64)(per_statex.KernelNonpaged)) * page_size;
 	}
 
-	values[Anum_total_memory]           = Int64GetDatumFast(total_physical_memory);
-	values[Anum_used_memory]            = Int64GetDatumFast((total_physical_memory - avail_physical_memory));
-	values[Anum_free_memory]            = Int64GetDatumFast(avail_physical_memory);
-	values[Anum_total_cache_memory]     = Int64GetDatumFast(total_system_cache);
-	values[Anum_kernel_total_memory]    = Int64GetDatumFast(kernel_total);
-	values[Anum_kernel_paged_memory]    = Int64GetDatumFast(kernel_paged);
-	values[Anum_kernel_nonpaged_memory] = Int64GetDatumFast(kernel_non_paged);
-	values[Anum_total_page_file]        = Int64GetDatumFast(total_page_file);
-	values[Anum_avail_page_file]        = Int64GetDatumFast(avail_page_file);
+	values[Anum_total_memory]           = UInt64GetDatum(total_physical_memory);
+	values[Anum_used_memory]            = UInt64GetDatum((total_physical_memory - avail_physical_memory));
+	values[Anum_free_memory]            = UInt64GetDatum(avail_physical_memory);
+	values[Anum_total_cache_memory]     = UInt64GetDatum(total_system_cache);
+	values[Anum_kernel_total_memory]    = UInt64GetDatum(kernel_total);
+	values[Anum_kernel_paged_memory]    = UInt64GetDatum(kernel_paged);
+	values[Anum_kernel_nonpaged_memory] = UInt64GetDatum(kernel_non_paged);
+	values[Anum_total_page_file]        = UInt64GetDatum(total_page_file);
+	values[Anum_avail_page_file]        = UInt64GetDatum(avail_page_file);
 
 	/* NULL the value which is not required for this platform */
 	nulls[Anum_swap_total_memory] = true;

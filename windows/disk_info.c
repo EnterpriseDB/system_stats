@@ -106,7 +106,7 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					free_space = strtoll(dst, NULL, 10);
-					values[Anum_disk_free_space] = Int64GetDatumFast(free_space);
+					values[Anum_disk_free_space] = UInt64GetDatum(free_space);
 					free(dst);
 				}
 			}
@@ -127,13 +127,13 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					total_space = strtoll(dst, NULL, 10);
-					values[Anum_disk_total_space] = Int64GetDatumFast(total_space);
+					values[Anum_disk_total_space] = UInt64GetDatum(total_space);
 					free(dst);
 				}
 			}
 
 			used_space = (total_space - free_space);
-			values[Anum_disk_used_space] = Int64GetDatumFast(used_space);
+			values[Anum_disk_used_space] = UInt64GetDatum(used_space);
 
 			nulls[Anum_disk_mount_point] = true;
 			nulls[Anum_disk_file_system_type] = true;

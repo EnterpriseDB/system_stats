@@ -64,12 +64,12 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		  &write_completed, &sector_written, &time_spent_writing_ms);
 
 		values[Anum_device_name] = CStringGetTextDatum(device_name);
-		values[Anum_total_read] = Int64GetDatumFast(read_completed);
-		values[Anum_total_write] = Int64GetDatumFast(write_completed);
-		values[Anum_read_bytes] = Int64GetDatumFast((uint64)(sector_read * sector_size));
-		values[Anum_write_bytes] = Int64GetDatumFast((uint64)(sector_written * sector_size));
-		values[Anum_read_time_ms] = Int64GetDatumFast((uint64)time_spent_reading_ms);
-		values[Anum_write_time_ms] = Int64GetDatumFast((uint64)time_spent_writing_ms);
+		values[Anum_total_read] = UInt64GetDatum(read_completed);
+		values[Anum_total_write] = UInt64GetDatum(write_completed);
+		values[Anum_read_bytes] = UInt64GetDatum((uint64)(sector_read * sector_size));
+		values[Anum_write_bytes] = UInt64GetDatum((uint64)(sector_written * sector_size));
+		values[Anum_read_time_ms] = UInt64GetDatum((uint64)time_spent_reading_ms);
+		values[Anum_write_time_ms] = UInt64GetDatum((uint64)time_spent_writing_ms);
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 

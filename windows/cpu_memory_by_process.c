@@ -102,7 +102,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					long long val = strtoll(dst, NULL, 10);
-					values[Anum_process_running_since] = Int64GetDatumFast(val);
+					values[Anum_process_running_since] = UInt64GetDatum(val);
 					free(dst);
 				}
 			}
@@ -145,7 +145,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					memset(dst, 0x00, (wstr_length + 10));
 					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 					long long val = strtoll(dst, NULL, 10);
-					values[Anum_process_memory_bytes] = Int64GetDatumFast(val);
+					values[Anum_process_memory_bytes] = UInt64GetDatum(val);
 					float4 memory_usage_per = (float4)(val / total_physical_memory) * 100;
 					values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage_per);
 					free(dst);
