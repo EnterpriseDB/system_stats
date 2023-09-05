@@ -164,12 +164,12 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			values[Anum_disk_file_system] = CStringGetTextDatum(file_system);
 			values[Anum_disk_file_system_type] = CStringGetTextDatum(file_system_type);
 			values[Anum_disk_mount_point] = CStringGetTextDatum(mount_point);
-			values[Anum_disk_total_space] = Int64GetDatumFast(total_space_bytes);
-			values[Anum_disk_used_space] = Int64GetDatumFast(used_space_bytes);
-			values[Anum_disk_free_space] = Int64GetDatumFast(available_space_bytes);
-			values[Anum_disk_total_inodes] = Int64GetDatumFast(total_inodes);
-			values[Anum_disk_used_inodes] = Int64GetDatumFast(used_inodes);
-			values[Anum_disk_free_inodes] = Int64GetDatumFast(free_inodes);
+			values[Anum_disk_total_space] = UInt64GetDatum(total_space_bytes);
+			values[Anum_disk_used_space] = UInt64GetDatum(used_space_bytes);
+			values[Anum_disk_free_space] = UInt64GetDatum(available_space_bytes);
+			values[Anum_disk_total_inodes] = UInt64GetDatum(total_inodes);
+			values[Anum_disk_used_inodes] = UInt64GetDatum(used_inodes);
+			values[Anum_disk_free_inodes] = UInt64GetDatum(free_inodes);
 
 			nulls[Anum_disk_drive_letter] = true;
 			nulls[Anum_disk_drive_type] = true;

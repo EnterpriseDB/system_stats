@@ -90,12 +90,12 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		sprintf_s(szDeviceDisplay, MAX_DEVICE_PATH, "PhysicalDrive%i", deviceId);
 
 		values[Anum_device_name] = CStringGetTextDatum(szDeviceDisplay);
-		values[Anum_total_read] = Int64GetDatumFast((uint64)diskPerformance.ReadCount);
-		values[Anum_total_write] = Int64GetDatumFast((uint64)diskPerformance.WriteCount);
-		values[Anum_read_bytes] = Int64GetDatumFast((uint64)(diskPerformance.BytesRead.QuadPart));
-		values[Anum_write_bytes] = Int64GetDatumFast((uint64)(diskPerformance.BytesWritten.QuadPart));
-		values[Anum_read_time_ms] = Int64GetDatumFast((uint64)(diskPerformance.ReadTime.QuadPart) / 10000000);
-		values[Anum_write_time_ms] = Int64GetDatumFast((uint64)(diskPerformance.WriteTime.QuadPart) / 10000000);
+		values[Anum_total_read] = UInt64GetDatum((uint64)diskPerformance.ReadCount);
+		values[Anum_total_write] = UInt64GetDatum((uint64)diskPerformance.WriteCount);
+		values[Anum_read_bytes] = UInt64GetDatum((uint64)(diskPerformance.BytesRead.QuadPart));
+		values[Anum_write_bytes] = UInt64GetDatum((uint64)(diskPerformance.BytesWritten.QuadPart));
+		values[Anum_read_time_ms] = UInt64GetDatum((uint64)(diskPerformance.ReadTime.QuadPart) / 10000000);
+		values[Anum_write_time_ms] = UInt64GetDatum((uint64)(diskPerformance.WriteTime.QuadPart) / 10000000);
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 

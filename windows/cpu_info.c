@@ -118,7 +118,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			{
 				/* convert MHz to Hz */
 				uint64 max_clock_speed = (uint64)((uint64)(query_result.intVal) * (uint64)1000000);
-				values[Anum_cpu_clock_speed] = Int64GetDatumFast(max_clock_speed);
+				values[Anum_cpu_clock_speed] = UInt64GetDatum(max_clock_speed);
 			}
 
 			hres = result->lpVtbl->Get(result, L"Architecture", 0, &query_result, 0, 0);

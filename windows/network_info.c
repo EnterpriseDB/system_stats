@@ -182,14 +182,14 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					}
 
 					values[Anum_net_ipv4_address] = CStringGetTextDatum((char *)(ip_rows + ip_index));
-					values[Anum_net_tx_packets] = Int64GetDatumFast((uint64)(if_row->dwOutUcastPkts + if_row->dwOutNUcastPkts));
-					values[Anum_net_rx_packets] = Int64GetDatumFast((uint64)(if_row->dwInUcastPkts + if_row->dwInNUcastPkts));
-					values[Anum_net_tx_bytes] = Int64GetDatumFast((uint64)if_row->dwOutOctets);
-					values[Anum_net_rx_bytes] = Int64GetDatumFast((uint64)if_row->dwInOctets);
-					values[Anum_net_tx_dropped] = Int64GetDatumFast((uint64)if_row->dwOutDiscards);
-					values[Anum_net_rx_dropped] = Int64GetDatumFast((uint64)if_row->dwInDiscards);
-					values[Anum_net_tx_errors] = Int64GetDatumFast((uint64)if_row->dwOutErrors);
-					values[Anum_net_rx_errors] = Int64GetDatumFast((uint64)if_row->dwInErrors);
+					values[Anum_net_tx_packets] = UInt64GetDatum((uint64)(if_row->dwOutUcastPkts + if_row->dwOutNUcastPkts));
+					values[Anum_net_rx_packets] = UInt64GetDatum((uint64)(if_row->dwInUcastPkts + if_row->dwInNUcastPkts));
+					values[Anum_net_tx_bytes] = UInt64GetDatum((uint64)if_row->dwOutOctets);
+					values[Anum_net_rx_bytes] = UInt64GetDatum((uint64)if_row->dwInOctets);
+					values[Anum_net_tx_dropped] = UInt64GetDatum((uint64)if_row->dwOutDiscards);
+					values[Anum_net_rx_dropped] = UInt64GetDatum((uint64)if_row->dwInDiscards);
+					values[Anum_net_tx_errors] = UInt64GetDatum((uint64)if_row->dwOutErrors);
+					values[Anum_net_rx_errors] = UInt64GetDatum((uint64)if_row->dwInErrors);
 					values[Anum_net_speed_mbps] = Int32GetDatum((int)(if_row->dwSpeed / 1000000));
 
 					tuplestore_putvalues(tupstore, tupdesc, values, nulls);
