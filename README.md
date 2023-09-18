@@ -57,6 +57,12 @@ add them to the monitor_system_stats role. For example:
 
     GRANT monitor_system_stats to nagios;
 
+User can grant execute rights for all the below functions to `pg_monitor` role explicitly
+
+e.g.
+
+    GRANT EXECUTE ON FUNCTION pg_sys_os_info() TO pg_monitor;
+
 ## Functions
 The following functions are provided to fetch system level statistics for all
 platforms.
