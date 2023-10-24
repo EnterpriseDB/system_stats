@@ -114,16 +114,16 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		if (ignoreFileSystemTypes(buf[i].f_fstypename) || ignoreMountPoints(buf[i].f_mntonname))
 			continue;
 
-		total_space_bytes = (uint64_t)(buf->f_blocks  * buf->f_bsize);
+		total_space_bytes = (uint64_t)(buf[i].f_blocks  * buf[i].f_bsize);
 
 		/* If total space of file system is zero, ignore that from list */
 		if (total_space_bytes == 0)
 			continue;
 
-		used_space_bytes = (uint64_t)((buf->f_blocks - buf->f_bfree) * buf->f_bsize);
-		available_space_bytes = (uint64_t)(buf->f_bavail * buf->f_bsize);
-		total_inodes = (uint64_t)buf->f_files;
-		free_inodes = (uint64_t)buf->f_ffree;
+		used_space_bytes = (uint64_t)((buf[i].f_blocks - buf[i].f_bfree) * buf[i].f_bsize);
+		available_space_bytes = (uint64_t)(buf[i].f_bavail * buf[i].f_bsize);
+		total_inodes = (uint64_t)buf[i].f_files;
+		free_inodes = (uint64_t)buf[i].f_ffree;
 		used_inodes = (uint64_t)(total_inodes - free_inodes);
 
 		memcpy(file_system, buf[i].f_fstypename, strlen(buf[i].f_fstypename));
