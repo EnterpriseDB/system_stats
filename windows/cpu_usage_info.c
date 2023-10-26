@@ -62,6 +62,7 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_idle_mode] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentInterruptTime", 0, &query_result, 0, 0);
@@ -83,6 +84,7 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_percent_interrupt_time] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentPrivilegedTime", 0, &query_result, 0, 0);
@@ -104,6 +106,7 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_percent_privileged_time] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentProcessorTime", 0, &query_result, 0, 0);
@@ -125,6 +128,7 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_percent_processor_time] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentUserTime", 0, &query_result, 0, 0);
@@ -146,6 +150,7 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_percent_user_time] = Float4GetDatum((float)percent_time);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			nulls[Anum_usermode_normal_process] = true;

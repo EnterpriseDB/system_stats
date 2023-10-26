@@ -79,6 +79,7 @@ int is_process_running(int pid)
 						ret_val = 1;
 						break;
 					}
+					VariantClear(&query_result);
 				}
 			}
 

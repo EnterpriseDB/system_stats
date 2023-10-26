@@ -63,6 +63,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_cpu_description] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"Manufacturer", 0, &query_result, 0, 0);
@@ -83,6 +84,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_cpu_vendor] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"Name", 0, &query_result, 0, 0);
@@ -103,13 +105,16 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_model_name] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"ProcessorType", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_processor_type] = true;
-			else
+			else {
 				values[Anum_processor_type] = Int32GetDatum(query_result.intVal);
+				VariantClear(&query_result);
+			}
 
 			hres = result->lpVtbl->Get(result, L"MaxClockSpeed", 0, &query_result, 0, 0);
 			if (FAILED(hres))
@@ -119,6 +124,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				/* convert MHz to Hz */
 				uint64 max_clock_speed = (uint64)((uint64)(query_result.intVal) * (uint64)1000000);
 				values[Anum_cpu_clock_speed] = UInt64GetDatum(max_clock_speed);
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"Architecture", 0, &query_result, 0, 0);
@@ -131,6 +137,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				memset(arch, 0x00, MAXPGPATH);
 				sprintf(arch, "%d", val);
 				values[Anum_architecture] = CStringGetTextDatum(arch);
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"MaxClockSpeed", 0, &query_result, 0, 0);
@@ -142,26 +149,34 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			hres = result->lpVtbl->Get(result, L"L2CacheSize", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_l2cache_size] = true;
-			else
+			else {
 				values[Anum_l2cache_size] = Int32GetDatum(query_result.intVal);
+				VariantClear(&query_result);
+			}
 
 			hres = result->lpVtbl->Get(result, L"L3CacheSize", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_l3cache_size] = true;
-			else
+			else {
 				values[Anum_l3cache_size] = Int32GetDatum(query_result.intVal);
+				VariantClear(&query_result);
+			}
 
 			hres = result->lpVtbl->Get(result, L"NumberOfCores", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_no_of_cores] = true;
-			else
+			else {
 				values[Anum_no_of_cores] = Int32GetDatum(query_result.intVal);
+				VariantClear(&query_result);
+			}
 
 			hres = result->lpVtbl->Get(result, L"NumberOfLogicalProcessors", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_logical_processor] = true;
-			else
+			else {
 				values[Anum_logical_processor] = Int32GetDatum(query_result.intVal);
+				VariantClear(&query_result);
+			}
 
 			/* release the current result object */
 			result->lpVtbl->Release(result);

@@ -62,13 +62,16 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_disk_drive_letter] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"DriveType", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_disk_drive_type] = true;
-			else
+			else {
 				values[Anum_disk_drive_type] = Int32GetDatum(query_result.intVal);
+				VariantClear(&query_result);
+			}
 
 			hres = result->lpVtbl->Get(result, L"FileSystem", 0, &query_result, 0, 0);
 			if (FAILED(hres))
@@ -88,6 +91,7 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_disk_file_system] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"FreeSpace", 0, &query_result, 0, 0);
@@ -109,6 +113,7 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_disk_free_space] = UInt64GetDatum(free_space);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"Capacity", 0, &query_result, 0, 0);
@@ -130,6 +135,7 @@ void ReadDiskInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_disk_total_space] = UInt64GetDatum(total_space);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			used_space = (total_space - free_space);

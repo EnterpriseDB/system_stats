@@ -83,6 +83,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_os_name] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"Version", 0, &query_result, 0, 0);
@@ -103,6 +104,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_os_version] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"CSName", 0, &query_result, 0, 0);
@@ -123,6 +125,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_host_name] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"OSArchitecture", 0, &query_result, 0, 0);
@@ -143,6 +146,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_os_architecture] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"LastBootUpTime", 0, &query_result, 0, 0);
@@ -163,6 +167,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_os_boot_time] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			values[Anum_os_handle_count] = handle_count;
