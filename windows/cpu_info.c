@@ -140,12 +140,6 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				VariantClear(&query_result);
 			}
 
-			hres = result->lpVtbl->Get(result, L"MaxClockSpeed", 0, &query_result, 0, 0);
-			if (FAILED(hres))
-				nulls[Anum_l2cache_size] = true;
-			else
-				values[Anum_l2cache_size] = Int32GetDatum(query_result.intVal);
-
 			hres = result->lpVtbl->Get(result, L"L2CacheSize", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_l2cache_size] = true;
