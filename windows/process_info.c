@@ -57,6 +57,8 @@ void ReadProcessInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					no_of_running_processes++;
 				else
 					no_of_stopped_processes++;
+
+				VariantClear(&query_result);
 			}
 
 			/* release the current result object */

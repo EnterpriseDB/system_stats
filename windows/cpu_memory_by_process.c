@@ -63,8 +63,10 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			hres = result->lpVtbl->Get(result, L"IDProcess", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_process_pid] = true;
-			else
+			else {
 				values[Anum_process_pid] = Int32GetDatum(query_result.intVal);
+				VariantClear(&query_result);
+			}
 
 			hres = result->lpVtbl->Get(result, L"Name", 0, &query_result, 0, 0);
 			if (FAILED(hres))
@@ -84,6 +86,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_process_name] = CStringGetTextDatum(dst);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"ElapsedTime", 0, &query_result, 0, 0);
@@ -105,6 +108,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_process_running_since] = UInt64GetDatum(val);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"PercentProcessorTime", 0, &query_result, 0, 0);
@@ -127,6 +131,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage_per);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"WorkingSetPrivate", 0, &query_result, 0, 0);
@@ -150,6 +155,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage_per);
 					free(dst);
 				}
+				VariantClear(&query_result);
 			}
 
 			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
