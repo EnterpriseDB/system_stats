@@ -170,7 +170,7 @@ bool read_process_status(int *active_processes, int *running_processes,
 
 		active_pro++;
 
-		sprintf(file_name,"/proc/%s/stat", ent->d_name);
+		snprintf(file_name, MIN_BUFFER_SIZE, "/proc/%s/stat", ent->d_name);
 
 		fpstat = fopen(file_name, "r");
 		if (fpstat == NULL)

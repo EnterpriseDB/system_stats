@@ -37,7 +37,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the sector size in bytes */
-	sprintf(file_name, "/sys/block/sda/queue/hw_sector_size");
+	snprintf(file_name, MAXPGPATH, "/sys/block/sda/queue/hw_sector_size");
 	ReadFileContent(file_name, &sector_size);
 
 	diskstats_file = fopen(DISK_IO_STATS_FILE_NAME, "r");

@@ -97,9 +97,9 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	if (sysctlbyname("hw.machine", machine, &char_size, 0, 0) == -1)
 		nulls[Anum_architecture] = true;
 
-	sprintf(s_byte_order, "%d", byte_order);
-	sprintf(s_cpu_family, "%d", cpu_family);
-	sprintf(s_cpu_type, "%d", cpu_type);
+	snprintf(s_byte_order, MAXPGPATH, "%d", byte_order);
+	snprintf(s_cpu_family, MAXPGPATH, "%d", cpu_family);
+	snprintf(s_cpu_type, MAXPGPATH, "%d", cpu_type);
 
 	nulls[Anum_cpu_vendor] = true;
 	nulls[Anum_cpu_description] = true;

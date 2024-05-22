@@ -32,8 +32,8 @@ int is_process_running(int pid)
 	wchar_t  w_query[512];
 	size_t outSize;
 	char pid_str[20] = { 0 };
-	sprintf(pid_str, "%d", pid);
-	sprintf(ptr, "SELECT ThreadState, ThreadWaitReason FROM Win32_Thread WHERE ProcessHandle = %s", pid_str);
+	sinprintf(pid_str, sizeof(pid_str), "%d", pid);
+	snprintf(ptr, sizeof(ptr), "SELECT ThreadState, ThreadWaitReason FROM Win32_Thread WHERE ProcessHandle = %s", pid_str);
 	mbstowcs_s(&outSize, w_query, sizeof(ptr), ptr, sizeof(ptr));
 
 	IEnumWbemClassObject *results = NULL;

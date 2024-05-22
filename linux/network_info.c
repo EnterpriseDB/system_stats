@@ -34,7 +34,7 @@ void ReadReceiveBytes(const char *interface, uint64 *rx_bytes)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the number of bytes received */
-	sprintf(file_name, "/sys/class/net/%s/statistics/rx_bytes", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/statistics/rx_bytes", interface);
 	ReadFileContent(file_name, rx_bytes);
 }
 
@@ -45,7 +45,7 @@ void ReadTransmitBytes(const char *interface, uint64 *tx_bytes)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the number of bytes transmitted */
-	sprintf(file_name, "/sys/class/net/%s/statistics/tx_bytes", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/statistics/tx_bytes", interface);
 	ReadFileContent(file_name, tx_bytes);
 }
 
@@ -56,7 +56,7 @@ void ReadReceivePackets(const char *interface, uint64 *rx_packets)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the number of packets received */
-	sprintf(file_name, "/sys/class/net/%s/statistics/rx_packets", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/statistics/rx_packets", interface);
 	ReadFileContent(file_name, rx_packets);
 }
 
@@ -67,7 +67,7 @@ void ReadTransmitPackets(const char *interface, uint64 *tx_packets)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the number of packets transmitted */
-	sprintf(file_name, "/sys/class/net/%s/statistics/tx_packets", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/statistics/tx_packets", interface);
 	ReadFileContent(file_name, tx_packets);
 }
 
@@ -78,7 +78,7 @@ void ReadReceiveErrors(const char *interface, uint64 *rx_errors)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the number of errors during receiver */
-	sprintf(file_name, "/sys/class/net/%s/statistics/rx_errors", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/statistics/rx_errors", interface);
 	ReadFileContent(file_name, rx_errors);
 }
 
@@ -89,7 +89,7 @@ void ReadTransmitErrors(const char *interface, uint64 *tx_errors)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the number of errors during transmission */
-	sprintf(file_name, "/sys/class/net/%s/statistics/tx_errors", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/statistics/tx_errors", interface);
 	ReadFileContent(file_name, tx_errors);
 }
 
@@ -100,7 +100,7 @@ void ReadReceiveDropped(const char *interface, uint64 *rx_dropped)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the number of packets dropped during receiver */
-	sprintf(file_name, "/sys/class/net/%s/statistics/rx_dropped", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/statistics/rx_dropped", interface);
 	ReadFileContent(file_name, rx_dropped);
 }
 
@@ -111,7 +111,7 @@ void ReadTransmitDropped(const char *interface, uint64 *tx_dropped)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the number of packets dropped during transmission */
-	sprintf(file_name, "/sys/class/net/%s/statistics/tx_dropped", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/statistics/tx_dropped", interface);
 	ReadFileContent(file_name, tx_dropped);
 }
 
@@ -122,7 +122,7 @@ void ReadSpeedMbps(const char *interface, uint64 *speed)
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the speed of interface in Mbps */
-	sprintf(file_name, "/sys/class/net/%s/speed", interface);
+	snprintf(file_name, MAXPGPATH, "/sys/class/net/%s/speed", interface);
 	ReadFileContent(file_name, speed);
 }
 
