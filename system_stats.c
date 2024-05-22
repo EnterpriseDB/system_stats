@@ -128,8 +128,6 @@ pg_sys_os_info(PG_FUNCTION_ARGS)
 	/* Fetch the Operating system information and put in tuple store */
 	ReadOSInformations(tupstore, tupdesc);
 
-	tuplestore_donestoring(tupstore);
-
 	return (Datum) 0;
 }
 
@@ -183,8 +181,6 @@ pg_sys_cpu_info(PG_FUNCTION_ARGS)
 	/* Fetch the system CPU information and put in tuple store */
 	ReadCPUInformation(tupstore, tupdesc);
 
-	tuplestore_donestoring(tupstore);
-
 	return (Datum) 0;
 }
 
@@ -236,8 +232,6 @@ pg_sys_memory_info(PG_FUNCTION_ARGS)
 
 	/* Fetch the system memory information and put in tuple store */
 	ReadMemoryInformation(tupstore, tupdesc);
-
-	tuplestore_donestoring(tupstore);
 
 	return (Datum) 0;
 }
@@ -291,8 +285,6 @@ pg_sys_io_analysis_info(PG_FUNCTION_ARGS)
 	/* Fetch the system io analysis information and put in tuple store */
 	ReadIOAnalysisInformation(tupstore, tupdesc);
 
-	tuplestore_donestoring(tupstore);
-
 	return (Datum) 0;
 }
 
@@ -345,8 +337,6 @@ pg_sys_disk_info(PG_FUNCTION_ARGS)
 	/* Fetch the system disk information and put in tuple store */
 	ReadDiskInformation(tupstore, tupdesc);
 
-	tuplestore_donestoring(tupstore);
-
 	return (Datum) 0;
 }
 
@@ -398,8 +388,6 @@ pg_sys_load_avg_info(PG_FUNCTION_ARGS)
 
 	/* Fetch the system load average information and put in tuple store */
 	ReadLoadAvgInformations(tupstore, tupdesc);
-
-	tuplestore_donestoring(tupstore);
 
 	return (Datum) 0;
 }
@@ -454,8 +442,6 @@ pg_sys_cpu_usage_info(PG_FUNCTION_ARGS)
 	/* Fetch the system CPU usage information and put in tuple store */
 	ReadCPUUsageStatistics(tupstore, tupdesc);
 
-	tuplestore_donestoring(tupstore);
-
 	return (Datum) 0;
 }
 
@@ -507,8 +493,6 @@ pg_sys_process_info(PG_FUNCTION_ARGS)
 
 	/* Fetch the system process information and put in tuple store */
 	ReadProcessInformations(tupstore, tupdesc);
-
-	tuplestore_donestoring(tupstore);
 
 	return (Datum) 0;
 }
@@ -562,8 +546,6 @@ pg_sys_network_info(PG_FUNCTION_ARGS)
 	/* Fetch the system network information and put in tuple store */
 	ReadNetworkInformations(tupstore, tupdesc);
 
-	tuplestore_donestoring(tupstore);
-
 	return (Datum) 0;
 }
 
@@ -615,8 +597,6 @@ pg_sys_cpu_memory_by_process(PG_FUNCTION_ARGS)
 
 	/* Fetch the system cpu and memory usage by process */
 	ReadCPUMemoryByProcess(tupstore, tupdesc);
-
-	tuplestore_donestoring(tupstore);
 
 	return (Datum) 0;
 }
