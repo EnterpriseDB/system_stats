@@ -237,7 +237,7 @@ void ReadCPUMemoryUsage(int sample)
 		if (!isdigit(*ent->d_name))
 			continue;
 
-		sprintf(file_name,"/proc/%s/stat", ent->d_name);
+		snprintf(file_name, MAXPGPATH, "/proc/%s/stat", ent->d_name);
 
 		fpstat = fopen(file_name, "r");
 		if (fpstat == NULL)

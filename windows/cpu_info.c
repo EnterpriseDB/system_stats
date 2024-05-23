@@ -135,7 +135,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				int val = query_result.intVal;
 				char arch[MAXPGPATH];
 				memset(arch, 0x00, MAXPGPATH);
-				sprintf(arch, "%d", val);
+				snprintf(arch, MAXPGPATH, "%d", val);
 				values[Anum_architecture] = CStringGetTextDatum(arch);
 				VariantClear(&query_result);
 			}

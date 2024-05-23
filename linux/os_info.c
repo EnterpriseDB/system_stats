@@ -96,7 +96,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	}
 	else
 	{
-		sprintf(version, "%s %s", uts.sysname, uts.release);
+		snprintf(version, MAXPGPATH, "%s %s", uts.sysname, uts.release);
 		memcpy(architecture, uts.machine, strlen(uts.machine));
 	}
 

@@ -195,7 +195,7 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 		if (physical_processor)
 		{
-			sprintf(cpu_desc, "%s model %s family %s", vendor_id, model, cpu_family);
+			snprintf(cpu_desc, MAXPGPATH, "%s model %s family %s", vendor_id, model, cpu_family);
 			/* convert CPU frequency from MHz to Hz */
 			cpu_hz = atof(cpu_mhz);
 			cpu_freq = (cpu_hz * 1000000);

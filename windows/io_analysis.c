@@ -38,7 +38,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 	for (deviceId = 0; deviceId <= MAX_DRIVE_COUNT; ++deviceId)
 	{
-		sprintf_s(szDevice, MAX_DEVICE_PATH, "\\\\.\\PhysicalDrive%d", deviceId);
+		snprintf(szDevice, MAX_DEVICE_PATH, "\\\\.\\PhysicalDrive%d", deviceId);
 
 		hDevice = CreateFile(szDevice, 0, FILE_SHARE_READ | FILE_SHARE_WRITE,
 			NULL, OPEN_EXISTING, 0, NULL);
@@ -87,7 +87,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			return;
 		}
 
-		sprintf_s(szDeviceDisplay, MAX_DEVICE_PATH, "PhysicalDrive%i", deviceId);
+		snprintf(szDeviceDisplay, MAX_DEVICE_PATH, "PhysicalDrive%i", deviceId);
 
 		values[Anum_device_name] = CStringGetTextDatum(szDeviceDisplay);
 		values[Anum_total_read] = UInt64GetDatum((uint64)diskPerformance.ReadCount);
