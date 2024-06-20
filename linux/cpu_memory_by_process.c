@@ -197,7 +197,7 @@ uint64 ReadTotalCPUUsage()
 void ReadCPUMemoryUsage(int sample)
 {
 	FILE *fpstat;
-	struct dirent *ent, dbuf;
+	struct dirent *ent;
 	char  file_name[MAXPGPATH];
 	long utime_ticks, stime_ticks;
 	char process_name[MAXPGPATH] = {0};
@@ -227,7 +227,7 @@ void ReadCPUMemoryUsage(int sample)
 		return;
 	}
 
-	while (readdir_r(dirp, &dbuf, &ent) == 0)
+	while ((ent = readdir(dirp)) != NULL)
 	{
 		memset(file_name, 0x00, MAXPGPATH);
 
