@@ -138,7 +138,7 @@ bool read_process_status(int *active_processes, int *running_processes,
 {
 	FILE          *fpstat;
 	DIR           *dirp;
-	struct dirent *ent, dbuf;
+	struct dirent *ent;
 	char          file_name[MIN_BUFFER_SIZE];
 	char          process_type;
 	unsigned int  running_threads;
@@ -156,13 +156,10 @@ bool read_process_status(int *active_processes, int *running_processes,
 	}
 
 	/* Read the proc directory for process status */
-	while (readdir_r(dirp, &dbuf, &ent) == 0)
+	while ((ent = readdir(dirp)) != NULL)
 	{
 		memset(file_name, 0x00, MIN_BUFFER_SIZE);
 		process_type = '\0';
-
-		if (!ent)
-			break;
 
 		/* Iterate only digit as name because it is process id */
 		if (!isdigit(*ent->d_name))
@@ -182,7 +179,7 @@ bool read_process_status(int *active_processes, int *running_processes,
 
 		if (process_type == 'R')
 			running_pro++;
-		else if(process_type == 'S' || process_type == 'D')
+		else if (process_type == 'S' || process_type == 'D')
 			sleeping_pro++;
 		else if (process_type == 'T')
 			stopped_pro++;
@@ -208,6 +205,7 @@ bool read_process_status(int *active_processes, int *running_processes,
 
 	return true;
 }
+
 
 void ReadFileContent(const char *file_name, uint64 *data)
 {
