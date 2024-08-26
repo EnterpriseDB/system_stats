@@ -22,9 +22,9 @@
 #include <IOKit/ps/IOPSKeys.h>
 #undef Size
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED < 120000) // Before macOS 12 Monterey
-  #define kIOMainPortDefault kIOMasterPortDefault
-#endif
+// Both kIOMasterPortDefault or kIOMainPortDefault are synonyms for 0
+// so no dependency of specific mac os version.
+static const mach_port_t darwin_default_master_port = 0;
 
 /* Function used to get IO statistics of block devices */
 void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
@@ -41,7 +41,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	memset(nulls, 0, sizeof(nulls));
 
 	// Get list of disks
-	if (IOServiceGetMatchingServices(kIOMainPortDefault,
+	if (IOServiceGetMatchingServices(darwin_default_master_port,
 		IOServiceMatching(kIOMediaClass),
 		&disk_list_iter) != kIOReturnSuccess)
 	{
