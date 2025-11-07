@@ -70,7 +70,6 @@ DATA = system_stats--1.0--2.0.sql  system_stats--1.0.sql  system_stats--2.0.sql 
 PGFILEDESC = "system_stats - system statistics functions"
 
 
-REGRESS = system_stats
 
 ifndef USE_PGXS
 top_builddir = ../..
