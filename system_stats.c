@@ -25,7 +25,11 @@
 #include "storage/fd.h"
 #include "utils/timestamp.h"
 
+#ifdef PG_MODULE_MAGIC_EXT
+PG_MODULE_MAGIC_EXT(.name = "system_stats", .version = "3.2.0");
+#else
 PG_MODULE_MAGIC;
+#endif
 
 /* called when extension is loaded */
 void _PG_init(void);
