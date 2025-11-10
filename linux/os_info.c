@@ -9,6 +9,7 @@
 
 #include "postgres.h"
 #include "system_stats.h"
+#include "misc.h"
 
 #include <unistd.h>
 #include <sys/utsname.h>
@@ -142,7 +143,7 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		{
 			int len = strlen(line_buf);
 			if (strstr(line_buf, OS_DESC_SEARCH_TEXT) != NULL)
-				memcpy(os_name, (line_buf + strlen(OS_DESC_SEARCH_TEXT)), (len - strlen(OS_DESC_SEARCH_TEXT)));
+				memcpy(os_name, remove_quotes(str_trim(line_buf + strlen(OS_DESC_SEARCH_TEXT))), (len - strlen(OS_DESC_SEARCH_TEXT)));
 
 			/* Free the allocated line buffer */
 			if (line_buf != NULL)

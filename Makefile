@@ -28,6 +28,7 @@ endif
 ifeq ($(UNAME), Linux)
 OBJS = \
         system_stats.o \
+        misc.o \
         linux/system_stats_utils.o \
         linux/disk_info.o \
         linux/io_analysis.o \
