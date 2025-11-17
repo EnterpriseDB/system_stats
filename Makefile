@@ -41,7 +41,7 @@ OBJS = \
         linux/network_info.o \
         linux/cpu_memory_by_process.o
 
-HEADERS = system_stats.h
+HEADERS = system_stats.h misc.h
 
 endif
 
