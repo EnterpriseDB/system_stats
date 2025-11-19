@@ -14,8 +14,13 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <string.h>
 
 bool total_opened_handle(int *total_handles);
+static bool get_dns_domain_name(const char *hostname, char *domain_name, size_t domain_size);
 void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
 bool total_opened_handle(int *total_handles)
@@ -55,6 +60,120 @@ bool total_opened_handle(int *total_handles)
 	*total_handles = allocated_handle_count;
 
 	return true;
+}
+
+/*
+ * get_dns_domain_name
+ *
+ * Attempts to retrieve the DNS domain name using multiple fallback strategies:
+ * 1. Try DNS resolution to get FQDN, then extract domain
+ * 2. Read from /etc/resolv.conf (domain or search directive)
+ * 3. Fallback to getdomainname() with validation
+ *
+ * Returns true if domain name was found, false otherwise
+ */
+static bool get_dns_domain_name(const char *hostname, char *domain_name, size_t domain_size)
+{
+	struct addrinfo hints, *info = NULL;
+	bool found = false;
+	char *dot_pos = NULL;
+
+	memset(domain_name, 0, domain_size);
+
+	/* Strategy 1: Try DNS resolution to get FQDN */
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_CANONNAME;
+
+	if (getaddrinfo(hostname, NULL, &hints, &info) == 0 && info != NULL)
+	{
+		if (info->ai_canonname != NULL)
+		{
+			/* Look for first dot to extract domain from FQDN */
+			dot_pos = strchr(info->ai_canonname, '.');
+			if (dot_pos != NULL && strlen(dot_pos + 1) > 0)
+			{
+				/* Copy domain part (after first dot) */
+				snprintf(domain_name, domain_size, "%s", dot_pos + 1);
+				found = true;
+				ereport(DEBUG1, (errmsg("domain name extracted from FQDN: %s", domain_name)));
+			}
+		}
+		freeaddrinfo(info);
+	}
+
+	/* Strategy 2: If DNS failed, try reading from /etc/resolv.conf */
+	if (!found)
+	{
+		FILE *resolv_file = fopen("/etc/resolv.conf", "r");
+		if (resolv_file != NULL)
+		{
+			char *line_buf = NULL;
+			size_t line_buf_size = 0;
+			ssize_t line_size;
+
+			while ((line_size = getline(&line_buf, &line_buf_size, resolv_file)) >= 0)
+			{
+				char *trimmed = str_trim(line_buf);
+
+				/* Check for "domain" directive (preferred) */
+				if (strncmp(trimmed, "domain", 6) == 0)
+				{
+					char *domain_val = str_trim(trimmed + 6);
+					if (strlen(domain_val) > 0)
+					{
+						snprintf(domain_name, domain_size, "%s", domain_val);
+						found = true;
+						ereport(DEBUG1, (errmsg("domain name from /etc/resolv.conf (domain): %s", domain_name)));
+						break;
+					}
+				}
+				/* Check for "search" directive (fallback) */
+				else if (!found && strncmp(trimmed, "search", 6) == 0)
+				{
+					char *search_val = str_trim(trimmed + 6);
+					/* Take first domain from search list */
+					char *space = strchr(search_val, ' ');
+					if (space != NULL)
+						*space = '\0';
+
+					if (strlen(search_val) > 0)
+					{
+						snprintf(domain_name, domain_size, "%s", search_val);
+						found = true;
+						ereport(DEBUG1, (errmsg("domain name from /etc/resolv.conf (search): %s", domain_name)));
+					}
+				}
+			}
+
+			if (line_buf != NULL)
+				free(line_buf);
+			fclose(resolv_file);
+		}
+	}
+
+	/* Strategy 3: Last resort - try getdomainname() with validation */
+	if (!found)
+	{
+		char nis_domain[256];
+		memset(nis_domain, 0, sizeof(nis_domain));
+
+		if (getdomainname(nis_domain, sizeof(nis_domain)) == 0)
+		{
+			/* Validate that it's not empty or "(none)" */
+			if (strlen(nis_domain) > 0 &&
+				strcmp(nis_domain, "(none)") != 0 &&
+				strcmp(nis_domain, "localdomain") != 0)
+			{
+				snprintf(domain_name, domain_size, "%s", nis_domain);
+				found = true;
+				ereport(DEBUG1, (errmsg("domain name from getdomainname(): %s", domain_name)));
+			}
+		}
+	}
+
+	return found;
 }
 
 void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
@@ -103,21 +222,25 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 	/* Function used to get the host name of the system */
 	if (gethostname(host_name, sizeof(host_name)) != 0)
+	{
 		ereport(DEBUG1,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 					errmsg("error while getting host name")));
-
-	/* Function used to get the domain name of the system */
-	if (getdomainname(domain_name, sizeof(domain_name)) != 0)
-		ereport(DEBUG1,
-				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-					errmsg("error while getting domain name")));
-
-	/*If hostname or domain name is empty, set the value to NULL */
-	if (strlen(host_name) == 0)
 		nulls[Anum_host_name] = true;
-	if (strlen(domain_name) == 0)
+	}
+	else if (strlen(host_name) == 0)
+	{
+		nulls[Anum_host_name] = true;
+	}
+
+	/* Get DNS domain name using multiple fallback strategies */
+	if (!get_dns_domain_name(host_name, domain_name, sizeof(domain_name)))
+	{
+		/* All strategies failed, set to NULL */
 		nulls[Anum_domain_name] = true;
+		ereport(DEBUG1,
+				(errmsg("unable to determine domain name from any source")));
+	}
 
 	os_info_file = fopen(OS_INFO_FILE_NAME, "r");
 
