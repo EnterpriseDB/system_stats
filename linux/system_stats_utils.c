@@ -30,12 +30,13 @@ uint64_t ConvertToBytes(char *line_buf)
 		char result[MAXPGPATH];
 		char suffix[MAXPGPATH];
 		char *token = NULL;
+		char *saveptr = NULL;
 		int icount = 0;
 		memset(result, 0x00, MAXPGPATH);
 		memset(suffix, 0x00, MAXPGPATH);
 		found = trimStr((found+1));
 
-		token = strtok(found, " ");
+		token = strtok_r(found, " ", &saveptr);
 		while( token != NULL )
 		{
 			if (icount == 0)
@@ -46,7 +47,7 @@ uint64_t ConvertToBytes(char *line_buf)
 				break;
 			}
 
-			token = strtok(NULL, " ");icount++;
+			token = strtok_r(NULL, " ", &saveptr);icount++;
 			icount++;
 		}
 
