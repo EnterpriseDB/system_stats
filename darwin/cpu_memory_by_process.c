@@ -43,9 +43,9 @@ typedef struct node
 	struct node * next;
 } node_t;
 
-node_t *head = NULL;
-node_t *prev = NULL;
-node_t *iter = NULL;
+static node_t *head = NULL;
+static node_t *prev = NULL;
+static node_t *iter = NULL;
 
 /* Function used to create the data structure for each process CPU and memory usage information */
 void CreateCPUMemoryList(int sample)
