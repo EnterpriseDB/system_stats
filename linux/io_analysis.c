@@ -21,7 +21,7 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	char       *line_buf = NULL;
 	size_t     line_buf_size = 0;
 	ssize_t    line_size;
-	char       device_name[MAXPGPATH];
+	char       device_name[MAXPGPATH + 1];
 	char       file_name[MAXPGPATH];
 	uint64     read_completed = 0;
 	uint64     sector_read = 0;
@@ -30,10 +30,10 @@ void ReadIOAnalysisInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	uint64     sector_written = 0;
 	uint64     time_spent_writing_ms = 0;
 	uint64     sector_size = 512;
-	const char *scan_fmt = "%*d %*d %s %lld %*lld %lld %lld %lld %*lld %lld %lld";
+	const char *scan_fmt = "%*d %*d %" CppAsString2(MAXPGPATH) "s %lld %*lld %lld %lld %lld %*lld %lld %lld";
 
 	memset(nulls, 0, sizeof(nulls));
-	memset(device_name, 0, MAXPGPATH);
+	memset(device_name, 0, MAXPGPATH + 1);
 	memset(file_name, 0, MAXPGPATH);
 
 	/* file name used to read the sector size in bytes */

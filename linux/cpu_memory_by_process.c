@@ -126,16 +126,16 @@ uint64 ReadTotalCPUUsage()
 	char       *line_buf = NULL;
 	size_t     line_buf_size = 0;
 	ssize_t    line_size;
-	char       cpu_name[MAXPGPATH];
+	char       cpu_name[MAXPGPATH + 1];
 	uint64     total_cpu_time = 0;
 	uint64     usermode_normal_process = 0;
 	uint64     usermode_niced_process = 0;
 	uint64     kernelmode_process = 0;
 	uint64     idle_mode = 0;
 	uint64     io_completion = 0;
-	const char *scan_fmt = "%s %llu %llu %llu %llu %llu";
+	const char *scan_fmt = "%" CppAsString2(MAXPGPATH) "s %llu %llu %llu %llu %llu";
 
-	memset(cpu_name, 0, MAXPGPATH);
+	memset(cpu_name, 0, MAXPGPATH + 1);
 
 	cpu_stats_file = fopen(CPU_USAGE_STATS_FILENAME, "r");
 
@@ -200,7 +200,7 @@ void ReadCPUMemoryUsage(int sample)
 	struct dirent *ent;
 	char  file_name[MAXPGPATH];
 	long utime_ticks, stime_ticks;
-	char process_name[MAXPGPATH] = {0};
+	char process_name[MAXPGPATH + 1] = {0};
 	int pid = 0;
 	long unsigned int mem_rss = 0;
 	unsigned  long long  process_up_since = 0;
@@ -243,7 +243,7 @@ void ReadCPUMemoryUsage(int sample)
 		if (fpstat == NULL)
 			continue;
 
-		if (fscanf(fpstat, "%d %s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
+		if (fscanf(fpstat, "%d %" CppAsString2(MAXPGPATH) "s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
 					"%lu %*d %*d %*d %*d %*d %*d %llu %*u %ld",
 					&pid, process_name, &utime_ticks, &stime_ticks, &process_up_since, &mem_rss) == EOF)
 		{
@@ -263,7 +263,7 @@ void ReadCPUMemoryUsage(int sample)
 			}
 
 			iter->pid = pid;
-			memcpy(iter->name, process_name, MAXPGPATH);
+			strncpy(iter->name, process_name, MAXPGPATH);
 			iter->process_cpu_sample_1 = utime_ticks + stime_ticks;
 			iter->rss_memory = mem_rss;
 			process_up_since = (unsigned long long)((unsigned long long)sys_uptime - (process_up_since/HZ));
