@@ -218,6 +218,6 @@ NOTE: macOS does not allow access to to process information for other users.
 ### pg_sys_cpu_memory_by_process
 - PID of the process
 - Process name
-- CPU usage in bytes
+- CPU usage in percent time spent on CPU
 - Memory usage in bytes
 - Total memory used in bytes
