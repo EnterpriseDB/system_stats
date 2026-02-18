@@ -69,6 +69,9 @@ EXTENSION = system_stats
 DATA = system_stats--1.0--2.0.sql  system_stats--1.0.sql  system_stats--2.0.sql  system_stats--2.0--3.0.sql  system_stats--3.0.sql  uninstall_system_stats.sql
 PGFILEDESC = "system_stats - system statistics functions"
 
+# Regression tests
+REGRESS = smoke_test system_stats
+
 
 
 ifndef USE_PGXS
