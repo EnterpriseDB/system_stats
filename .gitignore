@@ -39,7 +39,7 @@ lib*.pc
 
 log/
 results/
-src/*.bc
+*.bc
 
 regression.diffs
 regression.out
