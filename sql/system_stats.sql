@@ -194,7 +194,29 @@ SELECT
 FROM pg_sys_cpu_memory_by_process();
 
 -- ============================================================================
--- Test 11: Multiple calls (test caching and performance)
+-- Test 11: pg_sys_cpu_memory_by_process new columns
+-- ============================================================================
+\echo '### Testing pg_sys_cpu_memory_by_process new columns ###'
+
+-- Verify new columns exist and have correct types
+SELECT
+    pg_typeof(virtual_memory_bytes) = 'bigint'::regtype AS virtual_memory_type_ok,
+    pg_typeof(swap_usage_bytes) = 'bigint'::regtype AS swap_type_ok,
+    pg_typeof(io_read_bytes) = 'bigint'::regtype AS io_read_type_ok,
+    pg_typeof(io_write_bytes) = 'bigint'::regtype AS io_write_type_ok
+FROM pg_sys_cpu_memory_by_process()
+LIMIT 1;
+
+-- Verify at least one process has virtual memory > 0 and no negative values exist
+SELECT
+    count(*) FILTER (WHERE virtual_memory_bytes > 0) > 0 AS has_virtual_memory,
+    count(*) FILTER (WHERE virtual_memory_bytes < 0) = 0 AS no_negative_virtual_memory,
+    count(*) FILTER (WHERE io_read_bytes < 0) = 0 AS no_negative_io_read,
+    count(*) FILTER (WHERE io_write_bytes < 0) = 0 AS no_negative_io_write
+FROM pg_sys_cpu_memory_by_process();
+
+-- ============================================================================
+-- Test 12: Multiple calls (test caching and performance)
 -- ============================================================================
 \echo '### Testing multiple calls (caching) ###'
 
@@ -211,7 +233,7 @@ SELECT
 ;
 
 -- ============================================================================
--- Test 12: Data type verification
+-- Test 13: Data type verification
 -- ============================================================================
 \echo '### Testing data types ###'
 
@@ -230,7 +252,7 @@ SELECT
 FROM pg_sys_cpu_info();
 
 -- ============================================================================
--- Test 13: NULL handling
+-- Test 14: NULL handling
 -- ============================================================================
 \echo '### Testing NULL handling ###'
 

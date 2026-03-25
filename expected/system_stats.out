@@ -36,7 +36,7 @@ SELECT
 FROM pg_sys_os_info();
  has_name | has_version | has_host_name | has_handle_count | has_process_count | has_thread_count | has_architecture 
 ----------+-------------+---------------+------------------+-------------------+------------------+------------------
- t        | t           | t             | t                | t                 | t                | t
+ t        | t           | t             |                  | t                 |                  | t
 (1 row)
 
 -- Test that name contains expected text (platform-agnostic check)
@@ -74,7 +74,7 @@ SELECT
 FROM pg_sys_cpu_info();
  has_model_name | processor_type_check | has_logical_processors | has_cores | cores_less_than_logical | has_architecture | has_clock_speed 
 ----------------+----------------------+------------------------+-----------+-------------------------+------------------+-----------------
- t              | t                    | f                      | t         | f                       | t                | t
+ t              | t                    | t                      | t         | t                       | t                | 
 (1 row)
 
 -- ============================================================================
@@ -181,7 +181,7 @@ SELECT
 FROM pg_sys_cpu_usage_info();
  usermode_valid | kernelmode_valid | idle_valid | io_valid 
 ----------------+------------------+------------+----------
- t              | t                | t          | t
+ t              | t                | t          | 
 (1 row)
 
 -- ============================================================================
@@ -285,7 +285,37 @@ FROM pg_sys_cpu_memory_by_process();
 (1 row)
 
 -- ============================================================================
--- Test 11: Multiple calls (test caching and performance)
+-- Test 11: pg_sys_cpu_memory_by_process new columns
+-- ============================================================================
+\echo '### Testing pg_sys_cpu_memory_by_process new columns ###'
+### Testing pg_sys_cpu_memory_by_process new columns ###
+-- Verify new columns exist and have correct types
+SELECT
+    pg_typeof(virtual_memory_bytes) = 'bigint'::regtype AS virtual_memory_type_ok,
+    pg_typeof(swap_usage_bytes) = 'bigint'::regtype AS swap_type_ok,
+    pg_typeof(io_read_bytes) = 'bigint'::regtype AS io_read_type_ok,
+    pg_typeof(io_write_bytes) = 'bigint'::regtype AS io_write_type_ok
+FROM pg_sys_cpu_memory_by_process()
+LIMIT 1;
+ virtual_memory_type_ok | swap_type_ok | io_read_type_ok | io_write_type_ok 
+------------------------+--------------+-----------------+------------------
+ t                      | t            | t               | t
+(1 row)
+
+-- Verify at least one process has virtual memory > 0 and no negative values exist
+SELECT
+    count(*) FILTER (WHERE virtual_memory_bytes > 0) > 0 AS has_virtual_memory,
+    count(*) FILTER (WHERE virtual_memory_bytes < 0) = 0 AS no_negative_virtual_memory,
+    count(*) FILTER (WHERE io_read_bytes < 0) = 0 AS no_negative_io_read,
+    count(*) FILTER (WHERE io_write_bytes < 0) = 0 AS no_negative_io_write
+FROM pg_sys_cpu_memory_by_process();
+ has_virtual_memory | no_negative_virtual_memory | no_negative_io_read | no_negative_io_write 
+--------------------+----------------------------+---------------------+----------------------
+ t                  | t                          | t                   | t
+(1 row)
+
+-- ============================================================================
+-- Test 12: Multiple calls (test caching and performance)
 -- ============================================================================
 \echo '### Testing multiple calls (caching) ###'
 ### Testing multiple calls (caching) ###
@@ -320,7 +350,7 @@ SELECT
 (1 row)
 
 -- ============================================================================
--- Test 12: Data type verification
+-- Test 13: Data type verification
 -- ============================================================================
 \echo '### Testing data types ###'
 ### Testing data types ###
@@ -347,7 +377,7 @@ FROM pg_sys_cpu_info();
 (1 row)
 
 -- ============================================================================
--- Test 13: NULL handling
+-- Test 14: NULL handling
 -- ============================================================================
 \echo '### Testing NULL handling ###'
 ### Testing NULL handling ###

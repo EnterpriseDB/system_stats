@@ -19,6 +19,7 @@
 
 #include <libproc.h>
 #include <sys/proc_info.h>
+#include <sys/resource.h>
 
 extern int get_process_list(struct kinfo_proc **proc_list, size_t *proc_count);
 extern uint64 find_cpu_times(void);
@@ -38,6 +39,10 @@ typedef struct node
 	long long unsigned int process_cpu_sample_1;
 	long long unsigned int process_cpu_sample_2;
 	long long unsigned int rss_memory;
+	long long unsigned int virtual_memory;
+	long long unsigned int io_read_bytes;
+	long long unsigned int io_write_bytes;
+	bool                   has_io;
 	char name[MAXPGPATH];
 	int  process_owned_by_user;
 	struct node * next;
@@ -89,7 +94,23 @@ void CreateCPUMemoryList(int sample)
 			{
 				iter->process_cpu_sample_1 = pti.pti_total_user + pti.pti_total_system;
 				iter->rss_memory = pti.pti_resident_size;
+				iter->virtual_memory = pti.pti_virtual_size;
 				iter->process_owned_by_user = 1;
+			}
+
+			{
+				struct rusage_info_v2 rusage;
+				if (proc_pid_rusage(
+						(pid_t)iter->pid,
+						RUSAGE_INFO_V2,
+						(rusage_info_t *)&rusage) == 0)
+				{
+					iter->io_read_bytes = rusage.ri_diskio_bytesread;
+					iter->io_write_bytes = rusage.ri_diskio_byteswritten;
+					iter->has_io = 1;
+				}
+				else
+					iter->has_io = 0;
 			}
 
 			iter->next = NULL;
@@ -184,18 +205,38 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage);
 			values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage);
 			values[Anum_process_memory_bytes] = UInt64GetDatum((uint64)rss_memory);
+			values[Anum_process_virtual_memory_bytes] =
+				UInt64GetDatum((uint64)current->virtual_memory);
 		}
 		else
 		{
 			nulls[Anum_percent_cpu_usage] = true;
 			nulls[Anum_percent_memory_usage] = true;
 			nulls[Anum_process_memory_bytes] = true;
+			nulls[Anum_process_virtual_memory_bytes] = true;
 		}
 
 		values[Anum_process_pid] = Int32GetDatum(process_pid);
 		values[Anum_process_name] = CStringGetTextDatum(command);
 
 		nulls[Anum_process_running_since] = true;
+
+		/* swap is not available per-process on macOS */
+		nulls[Anum_process_swap_usage_bytes] = true;
+
+		/* IO read/write */
+		if (current->has_io)
+		{
+			values[Anum_process_io_read_bytes] =
+				UInt64GetDatum((uint64)current->io_read_bytes);
+			values[Anum_process_io_write_bytes] =
+				UInt64GetDatum((uint64)current->io_write_bytes);
+		}
+		else
+		{
+			nulls[Anum_process_io_read_bytes] = true;
+			nulls[Anum_process_io_write_bytes] = true;
+		}
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
@@ -204,6 +245,16 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		process_pid = 0;
 		cpu_usage = 0.0;
 		memory_usage = 0.0;
+
+		/* Reset all null flags for next iteration */
+		nulls[Anum_percent_cpu_usage] = false;
+		nulls[Anum_percent_memory_usage] = false;
+		nulls[Anum_process_memory_bytes] = false;
+		nulls[Anum_process_running_since] = false;
+		nulls[Anum_process_virtual_memory_bytes] = false;
+		nulls[Anum_process_swap_usage_bytes] = false;
+		nulls[Anum_process_io_read_bytes] = false;
+		nulls[Anum_process_io_write_bytes] = false;
 
 		del_iter = current;
 		current = current->next;
