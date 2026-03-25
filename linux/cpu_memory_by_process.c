@@ -30,14 +30,14 @@ typedef struct node
 	long long unsigned int process_cpu_sample_1;
 	long long unsigned int process_cpu_sample_2;
 	long long unsigned int rss_memory;
+	unsigned long long process_up_since_seconds;
+	char name[MAXPGPATH];
 	unsigned long long     vsize;
 	long long unsigned int swap_bytes;
 	long long unsigned int io_read_bytes;
 	long long unsigned int io_write_bytes;
 	bool                   has_swap;
 	bool                   has_io;
-	unsigned long long process_up_since_seconds;
-	char name[MAXPGPATH];
 	struct node * next;
 } node_t;
 
@@ -53,8 +53,9 @@ uint64 ReadTotalPhysicalMemory(void);
 uint64 ReadTotalCPUUsage(void);
 /* Function used to read total memory usage for each process */
 void ReadCPUMemoryUsage(int sample);
-/* Forward declarations for process swap and IO reading */
+/* Function used to read swap usage from /proc/<pid>/status */
 static bool ReadProcessSwap(int pid, long long unsigned int *swap_bytes);
+/* Function used to read IO stats from /proc/<pid>/io */
 static bool ReadProcessIO(int pid,
 		long long unsigned int *read_bytes,
 		long long unsigned int *write_bytes);
@@ -214,8 +215,8 @@ void ReadCPUMemoryUsage(int sample)
 	char process_name[MAXPGPATH + 1] = {0};
 	int pid = 0;
 	long unsigned int mem_rss = 0;
-	unsigned  long long  process_up_since = 0;
 	unsigned long long vsize = 0;
+	unsigned  long long  process_up_since = 0;
 	int        HZ = 100;
 	long       tlk = -1;
 	struct     sysinfo s_info;
@@ -243,9 +244,6 @@ void ReadCPUMemoryUsage(int sample)
 	{
 		memset(file_name, 0x00, MAXPGPATH);
 
-		if (!ent)
-			break;
-
 		if (!isdigit(*ent->d_name))
 			continue;
 
@@ -256,8 +254,8 @@ void ReadCPUMemoryUsage(int sample)
 			continue;
 
 		if (fscanf(fpstat, "%d %" CppAsString2(MAXPGPATH) "s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
-					"%lu %*d %*d %*d %*d %*d %*d %llu %llu %ld",
-					&pid, process_name, &utime_ticks, &stime_ticks, &process_up_since, &vsize, &mem_rss) == EOF)
+					"%lu %*d %*d %*d %*d %*d %*d %llu %llu %lu",
+					&pid, process_name, &utime_ticks, &stime_ticks, &process_up_since, &vsize, &mem_rss) != 7)
 		{
 			ereport(DEBUG1,
 				(errmsg("Error in parsing file '/proc/%d/stat'", pid)));
@@ -273,17 +271,22 @@ void ReadCPUMemoryUsage(int sample)
 				fclose(fpstat);
 				continue;
 			}
+			/* Zero-initialize so process_cpu_sample_2 is 0
+			 * for processes that disappear between samples */
+			memset(iter, 0, sizeof(node_t));
 
 			iter->pid = pid;
 			strncpy(iter->name, process_name, MAXPGPATH);
+			iter->name[MAXPGPATH - 1] = '\0';
 			iter->process_cpu_sample_1 = utime_ticks + stime_ticks;
 			iter->rss_memory = mem_rss;
 			iter->vsize = vsize;
-			iter->has_swap = ReadProcessSwap(pid, &iter->swap_bytes);
-tttiter->has_io = ReadProcessIO(pid,
-ttttt&iter->io_read_bytes,
-ttttt&iter->io_write_bytes);			process_up_since = (unsigned long long)((unsigned long long)sys_uptime - (process_up_since/HZ));
+			process_up_since = (unsigned long long)((unsigned long long)sys_uptime - (process_up_since/HZ));
 			iter->process_up_since_seconds = process_up_since;
+			iter->has_swap = ReadProcessSwap(pid, &iter->swap_bytes);
+			iter->has_io = ReadProcessIO(pid,
+					&iter->io_read_bytes,
+					&iter->io_write_bytes);
 			iter->next = NULL;
 			if (head == NULL)
 				head = iter;
@@ -378,13 +381,15 @@ static bool ReadProcessIO(int pid,
 	line_size = getline(&line_buf, &line_buf_size, fp);
 	while (line_size >= 0)
 	{
-ttif (strstr(line_buf, "read_bytes:") != NULL &&
-tttstrstr(line_buf, "cancelled") == NULL)		{
+		if (strstr(line_buf, "read_bytes:") != NULL &&
+			strstr(line_buf, "cancelled") == NULL)
+		{
 			if (sscanf(line_buf, "read_bytes: %llu", read_bytes) == 1)
 				found_read = true;
 		}
-ttelse if (strstr(line_buf, "write_bytes:") != NULL &&
-tttstrstr(line_buf, "cancelled") == NULL)		{
+		else if (strstr(line_buf, "write_bytes:") != NULL &&
+			strstr(line_buf, "cancelled") == NULL)
+		{
 			if (sscanf(line_buf, "write_bytes: %llu", write_bytes) == 1)
 				found_write = true;
 		}
@@ -431,7 +436,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	total_cpu_usage_1 = ReadTotalCPUUsage();
 	/* Read the first sample for cpu and memory usage by each process */
 	ReadCPUMemoryUsage(READ_PROCESS_CPU_USAGE_FIRST_SAMPLE);
-	usleep(100000);
+	pg_usleep(100000);
 	/* Read the second sample for cpu and memory usage by each process */
 	total_cpu_usage_2 = ReadTotalCPUUsage();
 	ReadCPUMemoryUsage(READ_PROCESS_CPU_USAGE_SECOND_SAMPLE);
@@ -446,9 +451,27 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	{
 		process_pid = current->pid;
 		memcpy(command, current->name, MAXPGPATH);
-		cpu_usage = (no_processor) * (current->process_cpu_sample_2 - current->process_cpu_sample_1) * 100 / (float) (total_cpu_usage_2 - total_cpu_usage_1);
+
+		/* Skip if second sample < first (process died/PID reused) */
+		if (current->process_cpu_sample_2 <
+			current->process_cpu_sample_1)
+			cpu_usage = 0.0;
+		/* Guard against div-by-zero or underflow in total CPU */
+		else if (total_cpu_usage_2 <= total_cpu_usage_1)
+			cpu_usage = 0.0;
+		else
+			cpu_usage = (no_processor) *
+				(current->process_cpu_sample_2 -
+				 current->process_cpu_sample_1) *
+				100 / (float)(total_cpu_usage_2 -
+				 total_cpu_usage_1);
+
 		rss_memory = current->rss_memory * page_size_bytes;
-		memory_usage = (rss_memory/(float)total_memory)*100;
+		/* Guard against division by zero when total memory is unavailable */
+		if (total_memory == 0)
+			memory_usage = 0.0;
+		else
+			memory_usage = (rss_memory/(float)total_memory)*100;
 		running_since = current->process_up_since_seconds;
 		memory_usage = fl_round(memory_usage);
 		cpu_usage = fl_round(cpu_usage);

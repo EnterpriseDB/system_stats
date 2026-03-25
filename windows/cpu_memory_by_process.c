@@ -53,14 +53,14 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		// enumerate the retrieved objects
 		while ((hres = results->lpVtbl->Next(results, WBEM_INFINITE, 1, &result, &returnedCount)) == S_OK)
 		{
-			/* Reset null flags for each process to prevent NULL propagation */
-			memset(nulls, 0, sizeof(nulls));
-
 			VARIANT query_result;
 
 			int     wstr_length = 0;
 			char    *dst = NULL;
 			size_t  charsConverted = 0;
+
+			/* Reset null flags for each process to prevent NULL propagation from previous rows */
+			memset(nulls, 0, sizeof(nulls));
 
 			/* Get the value from query output */
 			hres = result->lpVtbl->Get(result, L"IDProcess", 0, &query_result, 0, 0);
@@ -84,10 +84,19 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					values[Anum_process_name] = CStringGetTextDatum(dst);
-					free(dst);
+					if (dst == NULL)
+					{
+						nulls[Anum_process_name] = true;
+						VariantClear(&query_result);
+					}
+					else
+					{
+						memset(dst, 0x00, (wstr_length + 10));
+						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+						values[Anum_process_name] = CStringGetTextDatum(dst);
+						free(dst);
+						VariantClear(&query_result);
+					}
 				}
 				VariantClear(&query_result);
 			}
@@ -105,11 +114,20 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					long long val = strtoll(dst, NULL, 10);
-					values[Anum_process_running_since] = UInt64GetDatum(val);
-					free(dst);
+					if (dst == NULL)
+					{
+						nulls[Anum_process_running_since] = true;
+						VariantClear(&query_result);
+					}
+					else
+					{
+						memset(dst, 0x00, (wstr_length + 10));
+						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+						long long val = strtoll(dst, NULL, 10);
+						values[Anum_process_running_since] = UInt64GetDatum(val);
+						free(dst);
+						VariantClear(&query_result);
+					}
 				}
 				VariantClear(&query_result);
 			}
@@ -127,45 +145,70 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					long long val = strtoll(dst, NULL, 10);
-					float4 cpu_usage_per = (float4)val;
-					values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage_per);
-					free(dst);
+					if (dst == NULL)
+					{
+						nulls[Anum_percent_cpu_usage] = true;
+						VariantClear(&query_result);
+					}
+					else
+					{
+						memset(dst, 0x00, (wstr_length + 10));
+						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+						long long val = strtoll(dst, NULL, 10);
+						float4 cpu_usage_per = (float4)val;
+						values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage_per);
+						free(dst);
+						VariantClear(&query_result);
+					}
 				}
 				VariantClear(&query_result);
 			}
 
 			hres = result->lpVtbl->Get(result, L"WorkingSetPrivate", 0, &query_result, 0, 0);
 			if (FAILED(hres))
+			{
 				nulls[Anum_percent_memory_usage] = true;
+				nulls[Anum_process_memory_bytes] = true;
+			}
 			else
 			{
 				wstr_length = 0;
 				charsConverted = 0;
 				wstr_length = SysStringLen(query_result.bstrVal);
 				if (wstr_length == 0)
+				{
 					nulls[Anum_percent_memory_usage] = true;
+					nulls[Anum_process_memory_bytes] = true;
+				}
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					long long val = strtoll(dst, NULL, 10);
-					values[Anum_process_memory_bytes] = UInt64GetDatum(val);
-					float4 memory_usage_per = (float4)(val / total_physical_memory) * 100;
-					values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage_per);
-					free(dst);
+					if (dst == NULL)
+					{
+						nulls[Anum_percent_memory_usage] = true;
+						nulls[Anum_process_memory_bytes] = true;
+						VariantClear(&query_result);
+					}
+					else
+					{
+						memset(dst, 0x00, (wstr_length + 10));
+						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+						long long val = strtoll(dst, NULL, 10);
+						values[Anum_process_memory_bytes] = UInt64GetDatum(val);
+						/* Cast to float before division to avoid integer truncation */
+						float4 memory_usage_per;
+						if (total_physical_memory == 0)
+							memory_usage_per = 0.0;
+						else
+							memory_usage_per = ((float4)val / (float4)total_physical_memory) * 100;
+						values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage_per);
+						free(dst);
+						VariantClear(&query_result);
+					}
 				}
 				VariantClear(&query_result);
 			}
 
-			/*
-			 * NOTE: On Windows, PageFileBytes represents committed memory backed
-			 * by the page file, not just memory actively swapped out to disk.
-			 * This differs from Linux VmSwap which only counts memory on swap.
-			 */
 			hres = result->lpVtbl->Get(result, L"VirtualBytes", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_process_virtual_memory_bytes] = true;
@@ -179,15 +222,29 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					long long val = strtoll(dst, NULL, 10);
-					values[Anum_process_virtual_memory_bytes] = UInt64GetDatum(val);
-					free(dst);
+					if (dst == NULL)
+					{
+						nulls[Anum_process_virtual_memory_bytes] = true;
+						VariantClear(&query_result);
+					}
+					else
+					{
+						memset(dst, 0x00, (wstr_length + 10));
+						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+						long long val = strtoll(dst, NULL, 10);
+						values[Anum_process_virtual_memory_bytes] = UInt64GetDatum(val);
+						free(dst);
+						VariantClear(&query_result);
+					}
 				}
 				VariantClear(&query_result);
 			}
 
+			/*
+			 * NOTE: PageFileBytes represents committed memory backed by the page file,
+			 * not just memory actively swapped out. This differs from Linux VmSwap
+			 * which only counts memory actually on swap disk.
+			 */
 			hres = result->lpVtbl->Get(result, L"PageFileBytes", 0, &query_result, 0, 0);
 			if (FAILED(hres))
 				nulls[Anum_process_swap_usage_bytes] = true;
@@ -201,21 +258,31 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					long long val = strtoll(dst, NULL, 10);
-					values[Anum_process_swap_usage_bytes] = UInt64GetDatum(val);
-					free(dst);
+					if (dst == NULL)
+					{
+						nulls[Anum_process_swap_usage_bytes] = true;
+						VariantClear(&query_result);
+					}
+					else
+					{
+						memset(dst, 0x00, (wstr_length + 10));
+						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+						long long val = strtoll(dst, NULL, 10);
+						values[Anum_process_swap_usage_bytes] = UInt64GetDatum(val);
+						free(dst);
+						VariantClear(&query_result);
+					}
 				}
 				VariantClear(&query_result);
 			}
 
 			/*
-			 * NOTE: IOReadBytesPerSec and IOWriteBytesPerSec from
+			 * NOTE: On Windows, IOReadBytesPerSec and IOWriteBytesPerSec from
 			 * Win32_PerfFormattedData_PerfProc_Process are per-second rates,
 			 * while Linux (/proc/<pid>/io) and macOS (proc_pid_rusage) return
-			 * cumulative byte totals. This cross-platform semantic difference
-			 * is a known limitation.
+			 * cumulative totals. This semantic difference is a known limitation.
+			 * To get cumulative totals, a separate WMI query to Win32_Process
+			 * for ReadTransferCount/WriteTransferCount would be needed.
 			 */
 			hres = result->lpVtbl->Get(result, L"IOReadBytesPerSec", 0, &query_result, 0, 0);
 			if (FAILED(hres))
@@ -230,11 +297,20 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					long long val = strtoll(dst, NULL, 10);
-					values[Anum_process_io_read_bytes] = UInt64GetDatum(val);
-					free(dst);
+					if (dst == NULL)
+					{
+						nulls[Anum_process_io_read_bytes] = true;
+						VariantClear(&query_result);
+					}
+					else
+					{
+						memset(dst, 0x00, (wstr_length + 10));
+						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+						long long val = strtoll(dst, NULL, 10);
+						values[Anum_process_io_read_bytes] = UInt64GetDatum(val);
+						free(dst);
+						VariantClear(&query_result);
+					}
 				}
 				VariantClear(&query_result);
 			}
@@ -252,11 +328,20 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				else
 				{
 					dst = (char *)malloc(wstr_length + 10);
-					memset(dst, 0x00, (wstr_length + 10));
-					wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-					long long val = strtoll(dst, NULL, 10);
-					values[Anum_process_io_write_bytes] = UInt64GetDatum(val);
-					free(dst);
+					if (dst == NULL)
+					{
+						nulls[Anum_process_io_write_bytes] = true;
+						VariantClear(&query_result);
+					}
+					else
+					{
+						memset(dst, 0x00, (wstr_length + 10));
+						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
+						long long val = strtoll(dst, NULL, 10);
+						values[Anum_process_io_write_bytes] = UInt64GetDatum(val);
+						free(dst);
+						VariantClear(&query_result);
+					}
 				}
 				VariantClear(&query_result);
 			}
