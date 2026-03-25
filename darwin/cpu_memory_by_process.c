@@ -70,7 +70,7 @@ void CreateCPUMemoryList(int sample)
 		pid_t pid;
 		struct proc_taskinfo pti;
 		int ret_val = 0;
- 
+
 		pid = (pid_t)proclist->kp_proc.p_pid;
 		ret_val = proc_pidinfo(proclist->kp_proc.p_pid, PROC_PIDTASKINFO, 0, &pti, sizeof(pti));
 		if ((ret_val <= 0) || ((unsigned long)ret_val < sizeof(pti)))
@@ -87,7 +87,8 @@ void CreateCPUMemoryList(int sample)
 
 			memset(iter, 0x00, sizeof(node_t));
 			iter->pid = proclist->kp_proc.p_pid;
-			memcpy(iter->name, proclist->kp_proc.p_comm, MAXPGPATH);
+			/* p_comm is only MAXCOMLEN+1 (17) bytes; strlcpy avoids over-read */
+			strlcpy(iter->name, proclist->kp_proc.p_comm, MAXPGPATH);
 			if ((ret_val <= 0) || ((unsigned long)ret_val < sizeof(pti)))
 				iter->process_owned_by_user = 0;
 			else
@@ -100,8 +101,7 @@ void CreateCPUMemoryList(int sample)
 
 			{
 				struct rusage_info_v2 rusage;
-				if (proc_pid_rusage(
-						(pid_t)iter->pid,
+				if (proc_pid_rusage((pid_t)iter->pid,
 						RUSAGE_INFO_V2,
 						(rusage_info_t *)&rusage) == 0)
 				{
@@ -127,7 +127,8 @@ void CreateCPUMemoryList(int sample)
 			{
 				if (current->pid == (int)pid)
 				{
-					if (!(ret_val <= 0) || ((unsigned long)ret_val < sizeof(pti)))
+					/* Check that proc_pidinfo succeeded */
+					if ((ret_val > 0) && ((unsigned long)ret_val >= sizeof(pti)))
 						current->process_cpu_sample_2 = pti.pti_total_user + pti.pti_total_system;
 					break;
 				}
@@ -151,11 +152,10 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	float4     cpu_usage = 0.0;
 	float4     memory_usage = 0.0;
 	int        desc[2];
-	uint64     total_memory;
-	uint64     page_size_bytes;
+	uint64     total_memory = 0;
 	int        num_cpus = 0;
 	size_t     size_cpus = sizeof(num_cpus);
-	size_t     p_size = sizeof(page_size_bytes);
+	size_t     p_size = sizeof(total_memory);
 	long long unsigned int     rss_memory;
 	node_t     *del_iter = NULL;
 	node_t     *current  = NULL;
@@ -174,14 +174,10 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	if (sysctlbyname("hw.ncpu", &num_cpus, &size_cpus, 0, 0) == -1)
 		ereport(DEBUG1, (errmsg("Error while getting total CPU cores")));
 
-	/* Get the page size */
-	if (sysctlbyname("hw.pagesize", &page_size_bytes, &p_size, 0, 0) == -1)
-		ereport(DEBUG1, (errmsg("Error while getting page size information")));
-
 	total_cpu_usage_1 = find_cpu_times();
 	/* Read the first sample for cpu and memory usage by each process */
 	CreateCPUMemoryList(READ_PROCESS_CPU_USAGE_FIRST_SAMPLE);
-	usleep(100000);
+	pg_usleep(100000);
 	/* Read the second sample for cpu and memory usage by each process */
 	total_cpu_usage_2 = find_cpu_times();
 	CreateCPUMemoryList(READ_PROCESS_CPU_USAGE_SECOND_SAMPLE);
@@ -192,15 +188,40 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	// Process the CPU and memory information from linked list and free it once processed */
 	while (current != NULL)
 	{
+		/* Reset all null flags for this iteration */
+		memset(nulls, 0, sizeof(nulls));
+
 		process_pid = current->pid;
 		memcpy(command, current->name, MAXPGPATH);
 		if (current->process_owned_by_user)
 		{
-			float diff_sample = (float)(current->process_cpu_sample_2 - current->process_cpu_sample_1) / 1000000000.0;
-			cpu_usage = (num_cpus) * (diff_sample) * 100 / (float) ((total_cpu_usage_2 - total_cpu_usage_1)/CLK_TCK);
+			/*
+			 * Cast to float before dividing by CLK_TCK to avoid integer
+			 * truncation (the tick delta can be smaller than CLK_TCK for
+			 * short sample windows, which would truncate to zero).
+			 */
+			float diff_total =
+				(float)(total_cpu_usage_2 - total_cpu_usage_1) /
+				(float)CLK_TCK;
+			/* Guard against division by zero or unsigned underflow */
+			if (diff_total <= 0.0 || total_cpu_usage_2 < total_cpu_usage_1
+				|| current->process_cpu_sample_2 < current->process_cpu_sample_1)
+				cpu_usage = 0.0;
+			else
+			{
+				float diff_sample =
+					(float)(current->process_cpu_sample_2 -
+					current->process_cpu_sample_1) /
+					1000000000.0;
+				cpu_usage = (num_cpus) * (diff_sample) * 100 / diff_total;
+			}
 			cpu_usage = (float)((int)(cpu_usage * 100 + 0.5))/100;
 			rss_memory = current->rss_memory;
-			memory_usage = (rss_memory/(float)total_memory)*100;
+			/* Guard against division by zero when total memory is unavailable */
+			if (total_memory == 0)
+				memory_usage = 0.0;
+			else
+				memory_usage = (rss_memory/(float)total_memory)*100;
 			memory_usage = (float)((int)(memory_usage * 100 + 0.5))/100;
 			values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage);
 			values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage);
@@ -215,11 +236,6 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			nulls[Anum_process_memory_bytes] = true;
 			nulls[Anum_process_virtual_memory_bytes] = true;
 		}
-
-		values[Anum_process_pid] = Int32GetDatum(process_pid);
-		values[Anum_process_name] = CStringGetTextDatum(command);
-
-		nulls[Anum_process_running_since] = true;
 
 		/* swap is not available per-process on macOS */
 		nulls[Anum_process_swap_usage_bytes] = true;
@@ -238,6 +254,11 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			nulls[Anum_process_io_write_bytes] = true;
 		}
 
+		values[Anum_process_pid] = Int32GetDatum(process_pid);
+		values[Anum_process_name] = CStringGetTextDatum(command);
+
+		nulls[Anum_process_running_since] = true;
+
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
 		//reset the value again
@@ -245,16 +266,6 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		process_pid = 0;
 		cpu_usage = 0.0;
 		memory_usage = 0.0;
-
-		/* Reset all null flags for next iteration */
-		nulls[Anum_percent_cpu_usage] = false;
-		nulls[Anum_percent_memory_usage] = false;
-		nulls[Anum_process_memory_bytes] = false;
-		nulls[Anum_process_running_since] = false;
-		nulls[Anum_process_virtual_memory_bytes] = false;
-		nulls[Anum_process_swap_usage_bytes] = false;
-		nulls[Anum_process_io_read_bytes] = false;
-		nulls[Anum_process_io_write_bytes] = false;
 
 		del_iter = current;
 		current = current->next;
