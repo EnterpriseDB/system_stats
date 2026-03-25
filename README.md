@@ -216,11 +216,16 @@ NOTE: macOS does not allow access to to process information for other users.
 - Interface speed in mbps
 
 ### pg_sys_cpu_memory_by_process
-- PID of the process
-- Process name
-- CPU usage in percent time spent on CPU
-- Memory usage in bytes
-- Total memory used in bytes
+- PID of the process (pid)
+- Process name (name)
+- Running time in seconds (running_since_seconds)
+- CPU usage in percent time spent on CPU (cpu_usage)
+- Memory usage as percentage (memory_usage)
+- Total memory used in bytes (memory_bytes)
+- Virtual memory (VSZ) in bytes (virtual_memory_bytes)
+- Swap usage in bytes (swap_usage_bytes) - NULL on macOS
+- Total bytes read from disk (io_read_bytes)
+- Total bytes written to disk (io_write_bytes)
 
 ## Test Suites
 

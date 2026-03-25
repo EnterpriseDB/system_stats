@@ -210,12 +210,16 @@ int is_process_running(int pid);
 
 /* Macros for cpu and memory information
  * by process*/
-#define Natts_cpu_memory_info_by_process         6
+#define Natts_cpu_memory_info_by_process         10
 #define Anum_process_pid                         0
 #define Anum_process_name                        1
 #define Anum_process_running_since               2
 #define Anum_percent_cpu_usage                   3
 #define Anum_percent_memory_usage                4
 #define Anum_process_memory_bytes                5
+#define Anum_process_virtual_memory_bytes         6
+#define Anum_process_swap_usage_bytes             7
+#define Anum_process_io_read_bytes                8
+#define Anum_process_io_write_bytes               9
 
 #endif // SYSTEM_STATS_H

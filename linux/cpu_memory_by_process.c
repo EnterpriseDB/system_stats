@@ -30,6 +30,12 @@ typedef struct node
 	long long unsigned int process_cpu_sample_1;
 	long long unsigned int process_cpu_sample_2;
 	long long unsigned int rss_memory;
+	unsigned long long     vsize;
+	long long unsigned int swap_bytes;
+	long long unsigned int io_read_bytes;
+	long long unsigned int io_write_bytes;
+	bool                   has_swap;
+	bool                   has_io;
 	unsigned long long process_up_since_seconds;
 	char name[MAXPGPATH];
 	struct node * next;
@@ -47,6 +53,11 @@ uint64 ReadTotalPhysicalMemory(void);
 uint64 ReadTotalCPUUsage(void);
 /* Function used to read total memory usage for each process */
 void ReadCPUMemoryUsage(int sample);
+/* Forward declarations for process swap and IO reading */
+static bool ReadProcessSwap(int pid, long long unsigned int *swap_bytes);
+static bool ReadProcessIO(int pid,
+		long long unsigned int *read_bytes,
+		long long unsigned int *write_bytes);
 
 void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc);
 
@@ -204,6 +215,7 @@ void ReadCPUMemoryUsage(int sample)
 	int pid = 0;
 	long unsigned int mem_rss = 0;
 	unsigned  long long  process_up_since = 0;
+	unsigned long long vsize = 0;
 	int        HZ = 100;
 	long       tlk = -1;
 	struct     sysinfo s_info;
@@ -244,8 +256,8 @@ void ReadCPUMemoryUsage(int sample)
 			continue;
 
 		if (fscanf(fpstat, "%d %" CppAsString2(MAXPGPATH) "s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
-					"%lu %*d %*d %*d %*d %*d %*d %llu %*u %ld",
-					&pid, process_name, &utime_ticks, &stime_ticks, &process_up_since, &mem_rss) == EOF)
+					"%lu %*d %*d %*d %*d %*d %*d %llu %llu %ld",
+					&pid, process_name, &utime_ticks, &stime_ticks, &process_up_since, &vsize, &mem_rss) == EOF)
 		{
 			ereport(DEBUG1,
 				(errmsg("Error in parsing file '/proc/%d/stat'", pid)));
@@ -266,7 +278,11 @@ void ReadCPUMemoryUsage(int sample)
 			strncpy(iter->name, process_name, MAXPGPATH);
 			iter->process_cpu_sample_1 = utime_ticks + stime_ticks;
 			iter->rss_memory = mem_rss;
-			process_up_since = (unsigned long long)((unsigned long long)sys_uptime - (process_up_since/HZ));
+			iter->vsize = vsize;
+			iter->has_swap = ReadProcessSwap(pid, &iter->swap_bytes);
+tttiter->has_io = ReadProcessIO(pid,
+ttttt&iter->io_read_bytes,
+ttttt&iter->io_write_bytes);			process_up_since = (unsigned long long)((unsigned long long)sys_uptime - (process_up_since/HZ));
 			iter->process_up_since_seconds = process_up_since;
 			iter->next = NULL;
 			if (head == NULL)
@@ -295,6 +311,100 @@ void ReadCPUMemoryUsage(int sample)
 	}
 
 	closedir(dirp);
+}
+
+/* Read swap usage from /proc/<pid>/status */
+static bool ReadProcessSwap(int pid, long long unsigned int *swap_bytes)
+{
+	FILE       *fp;
+	char       file_name[MAXPGPATH];
+	char       *line_buf = NULL;
+	size_t     line_buf_size = 0;
+	ssize_t    line_size;
+	bool       found = false;
+
+	snprintf(file_name, MAXPGPATH, "/proc/%d/status", pid);
+	fp = fopen(file_name, "r");
+	if (!fp)
+		return false;
+
+	line_size = getline(&line_buf, &line_buf_size, fp);
+	while (line_size >= 0)
+	{
+		if (strstr(line_buf, "VmSwap:") != NULL)
+		{
+			long long unsigned int val = 0;
+			if (sscanf(line_buf, "VmSwap: %llu", &val) == 1)
+			{
+				*swap_bytes = val * 1024; /* convert kB to bytes */
+				found = true;
+			}
+			break;
+		}
+
+		if (line_buf != NULL)
+		{
+			free(line_buf);
+			line_buf = NULL;
+		}
+		line_size = getline(&line_buf, &line_buf_size, fp);
+	}
+
+	if (line_buf != NULL)
+		free(line_buf);
+
+	fclose(fp);
+	return found;
+}
+
+/* Read IO stats from /proc/<pid>/io */
+static bool ReadProcessIO(int pid,
+		long long unsigned int *read_bytes,
+		long long unsigned int *write_bytes)
+{
+	FILE       *fp;
+	char       file_name[MAXPGPATH];
+	char       *line_buf = NULL;
+	size_t     line_buf_size = 0;
+	ssize_t    line_size;
+	bool       found_read = false;
+	bool       found_write = false;
+
+	snprintf(file_name, MAXPGPATH, "/proc/%d/io", pid);
+	fp = fopen(file_name, "r");
+	if (!fp)
+		return false;
+
+	line_size = getline(&line_buf, &line_buf_size, fp);
+	while (line_size >= 0)
+	{
+ttif (strstr(line_buf, "read_bytes:") != NULL &&
+tttstrstr(line_buf, "cancelled") == NULL)		{
+			if (sscanf(line_buf, "read_bytes: %llu", read_bytes) == 1)
+				found_read = true;
+		}
+ttelse if (strstr(line_buf, "write_bytes:") != NULL &&
+tttstrstr(line_buf, "cancelled") == NULL)		{
+			if (sscanf(line_buf, "write_bytes: %llu", write_bytes) == 1)
+				found_write = true;
+		}
+
+		if (found_read && found_write)
+			break;
+
+		if (line_buf != NULL)
+		{
+			free(line_buf);
+			line_buf = NULL;
+		}
+		line_size = getline(&line_buf, &line_buf_size, fp);
+	}
+
+	if (line_buf != NULL)
+		free(line_buf);
+
+	fclose(fp);
+	return (found_read && found_write);
 }
 
 void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
@@ -350,6 +460,31 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		values[Anum_process_memory_bytes] = UInt64GetDatum((uint64)rss_memory);
 		values[Anum_process_running_since] = UInt64GetDatum((uint64)(running_since));
 
+		/* virtual memory bytes */
+		values[Anum_process_virtual_memory_bytes] =
+			UInt64GetDatum((uint64)(current->vsize));
+
+		/* swap usage */
+		if (current->has_swap)
+			values[Anum_process_swap_usage_bytes] =
+				UInt64GetDatum((uint64)(current->swap_bytes));
+		else
+			nulls[Anum_process_swap_usage_bytes] = true;
+
+		/* IO read/write bytes */
+		if (current->has_io)
+		{
+			values[Anum_process_io_read_bytes] =
+				UInt64GetDatum((uint64)(current->io_read_bytes));
+			values[Anum_process_io_write_bytes] =
+				UInt64GetDatum((uint64)(current->io_write_bytes));
+		}
+		else
+		{
+			nulls[Anum_process_io_read_bytes] = true;
+			nulls[Anum_process_io_write_bytes] = true;
+		}
+
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
 		//reset the value again
@@ -359,6 +494,9 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		memory_usage = 0.0;
 		running_since = 0;
 		rss_memory = 0;
+		nulls[Anum_process_swap_usage_bytes] = false;
+		nulls[Anum_process_io_read_bytes] = false;
+		nulls[Anum_process_io_write_bytes] = false;
 
 		del_iter = current;
 		current = current->next;
