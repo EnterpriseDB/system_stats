@@ -218,14 +218,14 @@ NOTE: macOS does not allow access to to process information for other users.
 ### pg_sys_cpu_memory_by_process
 - PID of the process (pid)
 - Process name (name)
-- Running time in seconds (running_since_seconds)
+- Running time in seconds (running_since_seconds) - NULL on macOS
 - CPU usage in percent time spent on CPU (cpu_usage)
 - Memory usage as percentage (memory_usage)
 - Total memory used in bytes (memory_bytes)
 - Virtual memory (VSZ) in bytes (virtual_memory_bytes)
-- Swap usage in bytes (swap_usage_bytes) - NULL on macOS
-- Total bytes read from disk (io_read_bytes)
-- Total bytes written to disk (io_write_bytes)
+- Swap usage in bytes (swap_usage_bytes) - NULL on macOS; on Windows, reports page-file-backed committed memory
+- Bytes read from disk (io_read_bytes) - cumulative on Linux/macOS; per-second rate on Windows
+- Bytes written to disk (io_write_bytes) - cumulative on Linux/macOS; per-second rate on Windows
 
 ## Test Suites
 

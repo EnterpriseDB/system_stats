@@ -107,23 +107,11 @@ uint64 ReadTotalPhysicalMemory()
 			break;
 		}
 
-		/* Free the allocated line buffer */
-		if (line_buf != NULL)
-		{
-			free(line_buf);
-			line_buf = NULL;
-		}
-
 		/* Get the next line */
 		line_size = getline(&line_buf, &line_buf_size, memory_file);
 	}
 
-	/* Free the allocated line buffer */
-	if (line_buf != NULL)
-	{
-		free(line_buf);
-		line_buf = NULL;
-	}
+	free(line_buf);
 
 	/* Close the file now that we are done with it */
 	fclose(memory_file);
@@ -181,23 +169,11 @@ uint64 ReadTotalCPUUsage()
 			break;
 		}
 
-		/* Free the allocated line buffer */
-		if (line_buf != NULL)
-		{
-			free(line_buf);
-			line_buf = NULL;
-		}
-
 		/* Get the next line */
 		line_size = getline(&line_buf, &line_buf_size, cpu_stats_file);
 	}
 
-	/* Free the allocated line buffer */
-	if (line_buf != NULL)
-	{
-		free(line_buf);
-		line_buf = NULL;
-	}
+	free(line_buf);
 
 	fclose(cpu_stats_file);
 
@@ -345,17 +321,10 @@ static bool ReadProcessSwap(int pid, long long unsigned int *swap_bytes)
 			break;
 		}
 
-		if (line_buf != NULL)
-		{
-			free(line_buf);
-			line_buf = NULL;
-		}
 		line_size = getline(&line_buf, &line_buf_size, fp);
 	}
 
-	if (line_buf != NULL)
-		free(line_buf);
-
+	free(line_buf);
 	fclose(fp);
 	return found;
 }
@@ -397,17 +366,10 @@ static bool ReadProcessIO(int pid,
 		if (found_read && found_write)
 			break;
 
-		if (line_buf != NULL)
-		{
-			free(line_buf);
-			line_buf = NULL;
-		}
 		line_size = getline(&line_buf, &line_buf_size, fp);
 	}
 
-	if (line_buf != NULL)
-		free(line_buf);
-
+	free(line_buf);
 	fclose(fp);
 	return (found_read && found_write);
 }
@@ -437,6 +399,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	/* Read the first sample for cpu and memory usage by each process */
 	ReadCPUMemoryUsage(READ_PROCESS_CPU_USAGE_FIRST_SAMPLE);
 	pg_usleep(100000);
+	CHECK_FOR_INTERRUPTS();
 	/* Read the second sample for cpu and memory usage by each process */
 	total_cpu_usage_2 = ReadTotalCPUUsage();
 	ReadCPUMemoryUsage(READ_PROCESS_CPU_USAGE_SECOND_SAMPLE);
@@ -460,10 +423,10 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		else if (total_cpu_usage_2 <= total_cpu_usage_1)
 			cpu_usage = 0.0;
 		else
-			cpu_usage = (no_processor) *
-				(current->process_cpu_sample_2 -
+			cpu_usage = (float)no_processor *
+				(float)(current->process_cpu_sample_2 -
 				 current->process_cpu_sample_1) *
-				100 / (float)(total_cpu_usage_2 -
+				100.0f / (float)(total_cpu_usage_2 -
 				 total_cpu_usage_1);
 
 		rss_memory = current->rss_memory * page_size_bytes;
