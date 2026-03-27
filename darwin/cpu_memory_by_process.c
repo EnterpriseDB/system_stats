@@ -178,6 +178,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	/* Read the first sample for cpu and memory usage by each process */
 	CreateCPUMemoryList(READ_PROCESS_CPU_USAGE_FIRST_SAMPLE);
 	pg_usleep(100000);
+	CHECK_FOR_INTERRUPTS();
 	/* Read the second sample for cpu and memory usage by each process */
 	total_cpu_usage_2 = find_cpu_times();
 	CreateCPUMemoryList(READ_PROCESS_CPU_USAGE_SECOND_SAMPLE);

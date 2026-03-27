@@ -85,17 +85,13 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					if (dst == NULL)
-					{
 						nulls[Anum_process_name] = true;
-						VariantClear(&query_result);
-					}
 					else
 					{
 						memset(dst, 0x00, (wstr_length + 10));
 						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
 						values[Anum_process_name] = CStringGetTextDatum(dst);
 						free(dst);
-						VariantClear(&query_result);
 					}
 				}
 				VariantClear(&query_result);
@@ -115,18 +111,14 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					if (dst == NULL)
-					{
 						nulls[Anum_process_running_since] = true;
-						VariantClear(&query_result);
-					}
 					else
 					{
 						memset(dst, 0x00, (wstr_length + 10));
 						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-						long long val = strtoll(dst, NULL, 10);
+						unsigned long long val = strtoull(dst, NULL, 10);
 						values[Anum_process_running_since] = UInt64GetDatum(val);
 						free(dst);
-						VariantClear(&query_result);
 					}
 				}
 				VariantClear(&query_result);
@@ -146,10 +138,7 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					if (dst == NULL)
-					{
 						nulls[Anum_percent_cpu_usage] = true;
-						VariantClear(&query_result);
-					}
 					else
 					{
 						memset(dst, 0x00, (wstr_length + 10));
@@ -158,7 +147,6 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 						float4 cpu_usage_per = (float4)val;
 						values[Anum_percent_cpu_usage] = Float4GetDatum(cpu_usage_per);
 						free(dst);
-						VariantClear(&query_result);
 					}
 				}
 				VariantClear(&query_result);
@@ -187,13 +175,12 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 					{
 						nulls[Anum_percent_memory_usage] = true;
 						nulls[Anum_process_memory_bytes] = true;
-						VariantClear(&query_result);
 					}
 					else
 					{
 						memset(dst, 0x00, (wstr_length + 10));
 						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-						long long val = strtoll(dst, NULL, 10);
+						unsigned long long val = strtoull(dst, NULL, 10);
 						values[Anum_process_memory_bytes] = UInt64GetDatum(val);
 						/* Cast to float before division to avoid integer truncation */
 						float4 memory_usage_per;
@@ -203,7 +190,6 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 							memory_usage_per = ((float4)val / (float4)total_physical_memory) * 100;
 						values[Anum_percent_memory_usage] = Float4GetDatum(memory_usage_per);
 						free(dst);
-						VariantClear(&query_result);
 					}
 				}
 				VariantClear(&query_result);
@@ -223,18 +209,14 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					if (dst == NULL)
-					{
 						nulls[Anum_process_virtual_memory_bytes] = true;
-						VariantClear(&query_result);
-					}
 					else
 					{
 						memset(dst, 0x00, (wstr_length + 10));
 						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-						long long val = strtoll(dst, NULL, 10);
+						unsigned long long val = strtoull(dst, NULL, 10);
 						values[Anum_process_virtual_memory_bytes] = UInt64GetDatum(val);
 						free(dst);
-						VariantClear(&query_result);
 					}
 				}
 				VariantClear(&query_result);
@@ -259,18 +241,14 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					if (dst == NULL)
-					{
 						nulls[Anum_process_swap_usage_bytes] = true;
-						VariantClear(&query_result);
-					}
 					else
 					{
 						memset(dst, 0x00, (wstr_length + 10));
 						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-						long long val = strtoll(dst, NULL, 10);
+						unsigned long long val = strtoull(dst, NULL, 10);
 						values[Anum_process_swap_usage_bytes] = UInt64GetDatum(val);
 						free(dst);
-						VariantClear(&query_result);
 					}
 				}
 				VariantClear(&query_result);
@@ -298,18 +276,14 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					if (dst == NULL)
-					{
 						nulls[Anum_process_io_read_bytes] = true;
-						VariantClear(&query_result);
-					}
 					else
 					{
 						memset(dst, 0x00, (wstr_length + 10));
 						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-						long long val = strtoll(dst, NULL, 10);
+						unsigned long long val = strtoull(dst, NULL, 10);
 						values[Anum_process_io_read_bytes] = UInt64GetDatum(val);
 						free(dst);
-						VariantClear(&query_result);
 					}
 				}
 				VariantClear(&query_result);
@@ -329,18 +303,14 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				{
 					dst = (char *)malloc(wstr_length + 10);
 					if (dst == NULL)
-					{
 						nulls[Anum_process_io_write_bytes] = true;
-						VariantClear(&query_result);
-					}
 					else
 					{
 						memset(dst, 0x00, (wstr_length + 10));
 						wcstombs_s(&charsConverted, dst, wstr_length + 10, query_result.bstrVal, wstr_length);
-						long long val = strtoll(dst, NULL, 10);
+						unsigned long long val = strtoull(dst, NULL, 10);
 						values[Anum_process_io_write_bytes] = UInt64GetDatum(val);
 						free(dst);
-						VariantClear(&query_result);
 					}
 				}
 				VariantClear(&query_result);

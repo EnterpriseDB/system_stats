@@ -70,7 +70,7 @@ DATA = system_stats--1.0--2.0.sql  system_stats--1.0.sql  system_stats--2.0.sql 
 PGFILEDESC = "system_stats - system statistics functions"
 
 # Regression tests
-REGRESS = smoke_test system_stats
+REGRESS = smoke_test system_stats upgrade_test
 
 
 

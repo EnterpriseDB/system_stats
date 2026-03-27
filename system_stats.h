@@ -15,6 +15,7 @@
 #include <wbemidl.h>
 #endif
 
+#include "miscadmin.h"
 #include "access/tupdesc.h"
 #include "utils/tuplestore.h"
 #include "utils/builtins.h"

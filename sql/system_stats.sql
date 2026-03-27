@@ -211,9 +211,14 @@ LIMIT 1;
 SELECT
     count(*) FILTER (WHERE virtual_memory_bytes > 0) > 0 AS has_virtual_memory,
     count(*) FILTER (WHERE virtual_memory_bytes < 0) = 0 AS no_negative_virtual_memory,
+    count(*) FILTER (WHERE swap_usage_bytes < 0) = 0 AS no_negative_swap,
     count(*) FILTER (WHERE io_read_bytes < 0) = 0 AS no_negative_io_read,
     count(*) FILTER (WHERE io_write_bytes < 0) = 0 AS no_negative_io_write
 FROM pg_sys_cpu_memory_by_process();
+
+-- Verify function returns exactly 10 output columns
+SELECT array_length(proargnames, 1) = 10 AS correct_column_count
+FROM pg_proc WHERE proname = 'pg_sys_cpu_memory_by_process';
 
 -- ============================================================================
 -- Test 12: Multiple calls (test caching and performance)
