@@ -189,6 +189,7 @@ void ReadCPUMemoryUsage(int sample)
 	char  file_name[MAXPGPATH];
 	unsigned long utime_ticks, stime_ticks;
 	char process_name[MAXPGPATH + 1] = {0};
+	char stat_line[4096];
 	int pid = 0;
 	long unsigned int mem_rss = 0;
 	unsigned long long vsize = 0;
@@ -229,14 +230,67 @@ void ReadCPUMemoryUsage(int sample)
 		if (fpstat == NULL)
 			continue;
 
-		if (fscanf(fpstat, "%d %" CppAsString2(MAXPGPATH) "s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
-					"%lu %*d %*d %*d %*d %*d %*d %llu %llu %lu",
-					&pid, process_name, &utime_ticks, &stime_ticks, &process_up_since, &vsize, &mem_rss) != 7)
+		/*
+		 * Parse /proc/<pid>/stat robustly. The comm field (field 2)
+		 * is wrapped in parentheses and may contain spaces or even
+		 * ')' chars.  The kernel guarantees the first '(' and last
+		 * ')' in the line delimit comm, so we locate those markers
+		 * and sscanf the numeric fields after ')'.
+		 */
+		if (fgets(stat_line, sizeof(stat_line), fpstat) == NULL)
 		{
-			ereport(DEBUG1,
-				(errmsg("Error in parsing file '/proc/%d/stat'", pid)));
 			fclose(fpstat);
 			continue;
+		}
+
+		{
+			char *open_paren;
+			char *close_paren;
+			char *after_comm;
+			size_t name_len;
+
+			open_paren = strchr(stat_line, '(');
+			close_paren = strrchr(stat_line, ')');
+			if (open_paren == NULL || close_paren == NULL ||
+				close_paren <= open_paren)
+			{
+				fclose(fpstat);
+				continue;
+			}
+
+			/* Extract pid from before '(' */
+			if (sscanf(stat_line, "%d", &pid) != 1)
+			{
+				fclose(fpstat);
+				continue;
+			}
+
+			/* Extract comm from between '(' and last ')' */
+			open_paren++;  /* skip '(' */
+			name_len = close_paren - open_paren;
+			if (name_len >= MAXPGPATH)
+				name_len = MAXPGPATH - 1;
+			memcpy(process_name, open_paren, name_len);
+			process_name[name_len] = '\0';
+
+			/* Parse numeric fields after ") " */
+			after_comm = close_paren + 1;
+			if (sscanf(after_comm,
+					   " %*c %*d %*d %*d %*d %*d %*u"
+					   " %*u %*u %*u %*u"
+					   " %lu %lu"
+					   " %*d %*d %*d %*d %*d %*d"
+					   " %llu %llu %lu",
+					   &utime_ticks, &stime_ticks,
+					   &process_up_since, &vsize,
+					   &mem_rss) != 5)
+			{
+				ereport(DEBUG1,
+					(errmsg("Error parsing fields in"
+							" '/proc/%d/stat'", pid)));
+				fclose(fpstat);
+				continue;
+			}
 		}
 
 		if (sample == READ_PROCESS_CPU_USAGE_FIRST_SAMPLE)
