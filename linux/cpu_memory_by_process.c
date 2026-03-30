@@ -243,6 +243,17 @@ void ReadCPUMemoryUsage(int sample)
 			continue;
 		}
 
+		/* Detect truncated lines (no newline and buffer full) */
+		if (strchr(stat_line, '\n') == NULL &&
+			strlen(stat_line) == sizeof(stat_line) - 1)
+		{
+			ereport(DEBUG1,
+				(errmsg("Truncated /proc/%s/stat line",
+						ent->d_name)));
+			fclose(fpstat);
+			continue;
+		}
+
 		{
 			char *open_paren;
 			char *close_paren;
@@ -254,6 +265,10 @@ void ReadCPUMemoryUsage(int sample)
 			if (open_paren == NULL || close_paren == NULL ||
 				close_paren <= open_paren)
 			{
+				ereport(DEBUG1,
+					(errmsg("Malformed /proc/%s/stat:"
+							" missing comm delimiters",
+							ent->d_name)));
 				fclose(fpstat);
 				continue;
 			}
@@ -261,6 +276,10 @@ void ReadCPUMemoryUsage(int sample)
 			/* Extract pid from before '(' */
 			if (sscanf(stat_line, "%d", &pid) != 1)
 			{
+				ereport(DEBUG1,
+					(errmsg("Could not parse PID from"
+							" /proc/%s/stat",
+							ent->d_name)));
 				fclose(fpstat);
 				continue;
 			}
@@ -270,7 +289,8 @@ void ReadCPUMemoryUsage(int sample)
 			name_len = close_paren - open_paren;
 			if (name_len >= MAXPGPATH)
 				name_len = MAXPGPATH - 1;
-			memcpy(process_name, open_paren, name_len);
+			if (name_len > 0)
+				memcpy(process_name, open_paren, name_len);
 			process_name[name_len] = '\0';
 
 			/* Parse numeric fields after ") " */
