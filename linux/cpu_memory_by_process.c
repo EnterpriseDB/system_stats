@@ -187,7 +187,7 @@ void ReadCPUMemoryUsage(int sample)
 	FILE *fpstat;
 	struct dirent *ent;
 	char  file_name[MAXPGPATH];
-	long utime_ticks, stime_ticks;
+	unsigned long utime_ticks, stime_ticks;
 	char process_name[MAXPGPATH + 1] = {0};
 	int pid = 0;
 	long unsigned int mem_rss = 0;
@@ -405,6 +405,8 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	ReadCPUMemoryUsage(READ_PROCESS_CPU_USAGE_SECOND_SAMPLE);
 
 	page_size_bytes = sysconf(_SC_PAGESIZE);
+	if (page_size_bytes <= 0)
+		page_size_bytes = 4096;  /* fallback to common default */
 
 	// Iterate through head and read all the informations */
 	current = head;
