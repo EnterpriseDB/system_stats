@@ -147,25 +147,25 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 				if (strlen(line_buf) > 0)
 				{
 					found = strstr(line_buf, ":");
-					if (strlen(found) > 0)
+					if (found != NULL && strlen(found) > 0)
 					{
 						found = trimStr((found+1));
 
 						if (strstr(line_buf, "vendor_id") != NULL)
-							memcpy(vendor_id, found, strlen(found));
+							strlcpy(vendor_id, found, MAXPGPATH);
 						if (strstr(line_buf, "cpu family") != NULL)
-							memcpy(cpu_family, found, strlen(found));
+							strlcpy(cpu_family, found, MAXPGPATH);
 						if (strstr(line_buf, "model") != NULL && !model_found)
 						{
-							memcpy(model, found, strlen(found));
+							strlcpy(model, found, MAXPGPATH);
 							model_found = true;
 						}
 						if (strstr(line_buf, "model name") != NULL)
-							memcpy(model_name, found, strlen(found));
+							strlcpy(model_name, found, MAXPGPATH);
 						if (strstr(line_buf, "cpu MHz") != NULL)
 						{
 							physical_processor++;
-							memcpy(cpu_mhz, found, strlen(found));
+							strlcpy(cpu_mhz, found, MAXPGPATH);
 						}
 						if (strstr(line_buf, "cpu cores") != NULL)
 							cpu_cores = atoi(found);

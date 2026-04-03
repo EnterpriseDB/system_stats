@@ -100,7 +100,7 @@ void ReadNetworkInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 			IPAddr.S_un.S_addr = (u_long)ip_addr_table->table[iter].dwAddr;
 			char *ip_val = inet_ntoa(IPAddr);
 			memcpy((ip_rows + index), (int *)&val, sizeof(int));
-			memcpy((ip_rows + ip_index), (char *)ip_val, IP_ADDR_SIZE);
+			strlcpy((char *)(ip_rows + ip_index), ip_val, IP_ADDR_SIZE);
 		}
 	}
 

@@ -264,9 +264,8 @@ void ReadOSInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		/* Loop through until we are done with the file. */
 		while (line_size >= 0)
 		{
-			int len = strlen(line_buf);
 			if (strstr(line_buf, OS_DESC_SEARCH_TEXT) != NULL)
-				memcpy(os_name, remove_quotes(str_trim(line_buf + strlen(OS_DESC_SEARCH_TEXT))), (len - strlen(OS_DESC_SEARCH_TEXT)));
+				strlcpy(os_name, remove_quotes(str_trim(line_buf + strlen(OS_DESC_SEARCH_TEXT))), MAXPGPATH);
 
 			/* Free the allocated line buffer */
 			if (line_buf != NULL)

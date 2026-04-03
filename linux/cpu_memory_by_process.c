@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include <dirent.h>
 #include <ctype.h>
 #include <sys/sysinfo.h>
@@ -263,7 +264,7 @@ void ReadCPUMemoryUsage(int sample)
 			}
 
 			iter->pid = pid;
-			strncpy(iter->name, process_name, MAXPGPATH);
+			strlcpy(iter->name, process_name, MAXPGPATH);
 			iter->process_cpu_sample_1 = utime_ticks + stime_ticks;
 			iter->rss_memory = mem_rss;
 			process_up_since = (unsigned long long)((unsigned long long)sys_uptime - (process_up_since/HZ));
@@ -321,7 +322,10 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	total_cpu_usage_1 = ReadTotalCPUUsage();
 	/* Read the first sample for cpu and memory usage by each process */
 	ReadCPUMemoryUsage(READ_PROCESS_CPU_USAGE_FIRST_SAMPLE);
-	usleep(100000);
+	{
+		struct timespec ts = {0, 100000000L};
+		nanosleep(&ts, NULL);
+	}
 	/* Read the second sample for cpu and memory usage by each process */
 	total_cpu_usage_2 = ReadTotalCPUUsage();
 	ReadCPUMemoryUsage(READ_PROCESS_CPU_USAGE_SECOND_SAMPLE);

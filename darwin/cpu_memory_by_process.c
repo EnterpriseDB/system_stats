@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <mach/mach.h>
 #include <mach/vm_page_size.h>
@@ -82,7 +83,7 @@ void CreateCPUMemoryList(int sample)
 
 			memset(iter, 0x00, sizeof(node_t));
 			iter->pid = proclist->kp_proc.p_pid;
-			memcpy(iter->name, proclist->kp_proc.p_comm, MAXPGPATH);
+			strlcpy(iter->name, proclist->kp_proc.p_comm, MAXPGPATH);
 			if ((ret_val <= 0) || ((unsigned long)ret_val < sizeof(pti)))
 				iter->process_owned_by_user = 0;
 			else
@@ -160,7 +161,10 @@ void ReadCPUMemoryByProcess(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	total_cpu_usage_1 = find_cpu_times();
 	/* Read the first sample for cpu and memory usage by each process */
 	CreateCPUMemoryList(READ_PROCESS_CPU_USAGE_FIRST_SAMPLE);
-	usleep(100000);
+	{
+		struct timespec ts = {0, 100000000L};
+		nanosleep(&ts, NULL);
+	}
 	/* Read the second sample for cpu and memory usage by each process */
 	total_cpu_usage_2 = find_cpu_times();
 	CreateCPUMemoryList(READ_PROCESS_CPU_USAGE_SECOND_SAMPLE);

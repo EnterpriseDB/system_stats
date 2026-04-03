@@ -11,6 +11,7 @@
 #include "system_stats.h"
 
 #include <unistd.h>
+#include <time.h>
 #include <sys/sysctl.h>
 #include <mach/mach_host.h>
 #include <mach/host_info.h>
@@ -63,8 +64,11 @@ void ReadCPUUsageStatistics(Tuplestorestate *tupstore, TupleDesc tupdesc)
 		return;
 	}
 
-	/* sleep for the 100ms between 2 samples tp find cpu usage statistics */
-	usleep(100000);
+	/* sleep for 100ms between 2 samples to find cpu usage statistics */
+	{
+		struct timespec ts = {0, 100000000L};
+		nanosleep(&ts, NULL);
+	}
 	/* Take the second sample regarding cpu usage statistics */
 	if (cpu_stat_information(&second_sample))
 	{
