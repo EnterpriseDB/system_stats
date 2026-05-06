@@ -10,6 +10,7 @@
 #include "postgres.h"
 #include "system_stats.h"
 #include <sys/utsname.h>
+#include <unistd.h>
 
 #define L1D_CACHE_FILE_PATH  "/sys/devices/system/cpu/cpu0/cache/index0/size"
 #define L1I_CACHE_FILE_PATH  "/sys/devices/system/cpu/cpu0/cache/index1/size"
@@ -162,11 +163,12 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 						}
 						if (strstr(line_buf, "model name") != NULL)
 							memcpy(model_name, found, strlen(found));
-						if (strstr(line_buf, "cpu MHz") != NULL)
-						{
+						if (strstr(line_buf, "processor") != NULL)
 							physical_processor++;
+						if (strstr(line_buf, "cpu MHz") != NULL)
 							memcpy(cpu_mhz, found, strlen(found));
-						}
+						else if (strstr(line_buf, "clock") != NULL && IS_EMPTY_STR(cpu_mhz))
+							memcpy(cpu_mhz, found, strlen(found));
 						if (strstr(line_buf, "cpu cores") != NULL)
 							cpu_cores = atoi(found);
 					}
@@ -193,32 +195,41 @@ void ReadCPUInformation(Tuplestorestate *tupstore, TupleDesc tupdesc)
 
 		fclose(cpu_info_file);
 
-		if (physical_processor)
+		if (physical_processor == 0)
 		{
-			snprintf(cpu_desc, MAXPGPATH, "%s model %s family %s", vendor_id, model, cpu_family);
-			/* convert CPU frequency from MHz to Hz */
+			physical_processor = sysconf(_SC_NPROCESSORS_ONLN);
+			if (physical_processor <= 0)
+				physical_processor = 1;
+		}
+
+		snprintf(cpu_desc, MAXPGPATH, "%s model %s family %s", vendor_id, model, cpu_family);
+
+		if (!IS_EMPTY_STR(cpu_mhz))
+		{
 			cpu_hz = atof(cpu_mhz);
 			cpu_freq = (cpu_hz * 1000000);
-
-			values[Anum_cpu_vendor] = CStringGetTextDatum(vendor_id);
-			values[Anum_cpu_description] = CStringGetTextDatum(cpu_desc);
-			values[Anum_model_name] = CStringGetTextDatum(model_name);
-			values[Anum_logical_processor] = Int32GetDatum(logical_processor);
-			values[Anum_physical_processor] = Int32GetDatum(physical_processor);
-			values[Anum_no_of_cores] = Int32GetDatum(cpu_cores);
-			values[Anum_architecture] = CStringGetTextDatum(architecture);
-			values[Anum_cpu_clock_speed] = UInt64GetDatum(cpu_freq);
-			values[Anum_l1dcache_size] = Int32GetDatum(l1dcache_size_kb);
-			values[Anum_l1icache_size] = Int32GetDatum(l1icache_size_kb);
-			values[Anum_l2cache_size] = Int32GetDatum(l2cache_size_kb);
-			values[Anum_l3cache_size] = Int32GetDatum(l3cache_size_kb);
-
-			nulls[Anum_processor_type] = true;
-			nulls[Anum_cpu_type] = true;
-			nulls[Anum_cpu_family] = true;
-			nulls[Anum_cpu_byte_order] = true;
-
-			tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 		}
+		else
+			cpu_freq = 0;
+
+		values[Anum_cpu_vendor] = CStringGetTextDatum(IS_EMPTY_STR(vendor_id) ? "Unknown" : vendor_id);
+		values[Anum_cpu_description] = CStringGetTextDatum(IS_EMPTY_STR(cpu_desc) ? "Unknown" : cpu_desc);
+		values[Anum_model_name] = CStringGetTextDatum(IS_EMPTY_STR(model_name) ? "Unknown" : model_name);
+		values[Anum_logical_processor] = Int32GetDatum(logical_processor);
+		values[Anum_physical_processor] = Int32GetDatum(physical_processor);
+		values[Anum_no_of_cores] = Int32GetDatum(cpu_cores > 0 ? cpu_cores : physical_processor);
+		values[Anum_architecture] = CStringGetTextDatum(architecture);
+		values[Anum_cpu_clock_speed] = UInt64GetDatum(cpu_freq);
+		values[Anum_l1dcache_size] = Int32GetDatum(l1dcache_size_kb);
+		values[Anum_l1icache_size] = Int32GetDatum(l1icache_size_kb);
+		values[Anum_l2cache_size] = Int32GetDatum(l2cache_size_kb);
+		values[Anum_l3cache_size] = Int32GetDatum(l3cache_size_kb);
+
+		nulls[Anum_processor_type] = true;
+		nulls[Anum_cpu_type] = true;
+		nulls[Anum_cpu_family] = true;
+		nulls[Anum_cpu_byte_order] = true;
+
+		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 	}
 }
