@@ -22,7 +22,7 @@ void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	bool       nulls[Natts_load_avg_info];
 	float4     load_avg_one_minute = 0;
 	float4     load_avg_five_minutes = 0;
-	float4     load_avg_ten_minutes = 0;
+	float4     load_avg_fifteen_minutes = 0;
 	const char *scan_fmt = "%f %f %f";
 
 	memset(nulls, 0, sizeof(nulls));
@@ -47,20 +47,20 @@ void ReadLoadAvgInformations(Tuplestorestate *tupstore, TupleDesc tupdesc)
 	/* Loop through until we are done with the file. */
 	if (line_size >= 0)
 	{
-		sscanf(line_buf, scan_fmt, &load_avg_one_minute, &load_avg_five_minutes, &load_avg_ten_minutes);
+		sscanf(line_buf, scan_fmt, &load_avg_one_minute, &load_avg_five_minutes, &load_avg_fifteen_minutes);
 
 		values[Anum_load_avg_one_minute]   = Float4GetDatum(load_avg_one_minute);
 		values[Anum_load_avg_five_minutes] = Float4GetDatum(load_avg_five_minutes);
-		values[Anum_load_avg_ten_minutes]  = Float4GetDatum(load_avg_ten_minutes);
+		values[Anum_load_avg_fifteen_minutes]  = Float4GetDatum(load_avg_fifteen_minutes);
 
-		nulls[Anum_load_avg_fifteen_minutes] = true;
+		nulls[Anum_load_avg_ten_minutes] = true;
 
 		tuplestore_putvalues(tupstore, tupdesc, values, nulls);
 
 		//reset the value again
 		load_avg_one_minute = 0;
 		load_avg_five_minutes = 0;
-		load_avg_ten_minutes = 0;
+		load_avg_fifteen_minutes = 0;
 	}
 
 	if (line_buf != NULL)
