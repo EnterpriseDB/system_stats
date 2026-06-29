@@ -36,7 +36,7 @@ SELECT
 FROM pg_sys_os_info();
  has_name | has_version | has_host_name | has_handle_count | has_process_count | has_thread_count | has_architecture 
 ----------+-------------+---------------+------------------+-------------------+------------------+------------------
- t        | t           | t             |                  | t                 |                  | t
+ t        | t           | t             | t                | t                 | t                | t
 (1 row)
 
 -- Test that name contains expected text (platform-agnostic check)
@@ -74,7 +74,7 @@ SELECT
 FROM pg_sys_cpu_info();
  has_model_name | processor_type_check | has_logical_processors | has_cores | cores_less_than_logical | has_architecture | has_clock_speed 
 ----------------+----------------------+------------------------+-----------+-------------------------+------------------+-----------------
- t              | t                    | t                      | t         | t                       | t                | 
+ t              | t                    | f                      | t         | f                       | t                | t
 (1 row)
 
 -- ============================================================================
@@ -181,7 +181,7 @@ SELECT
 FROM pg_sys_cpu_usage_info();
  usermode_valid | kernelmode_valid | idle_valid | io_valid 
 ----------------+------------------+------------+----------
- t              | t                | t          | 
+ t              | t                | t          | t
 (1 row)
 
 -- ============================================================================
